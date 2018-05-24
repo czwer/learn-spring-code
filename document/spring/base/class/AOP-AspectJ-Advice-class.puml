@@ -1,0 +1,64 @@
+@startuml
+
+note  as N1 #FAEBD7
+   背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+interface Advice
+interface AfterAdvice
+interface AfterReturningAdvice
+interface MethodBeforeAdvice
+interface MethodInterceptor #7FFFD4
+note right : 相当于Around Advice
+
+abstract class AbstractAspectJAdvice #7FFFD4
+class AspectJAfterAdvice
+class AspectJAfterReturningAdvice
+class AspectJAfterThrowingAdvice
+class AspectJAroundAdvice
+class AspectJMethodBeforeAdvice
+
+
+
+
+
+AbstractAspectJAdvice <|-- AspectJAfterAdvice
+AbstractAspectJAdvice <|-- AspectJAfterReturningAdvice
+AbstractAspectJAdvice <|-- AspectJAroundAdvice
+AbstractAspectJAdvice <|-- AspectJAfterThrowingAdvice
+AbstractAspectJAdvice <|-- AspectJMethodBeforeAdvice
+
+
+Advice <|.. AbstractAspectJAdvice
+Advice <|-- AfterAdvice
+
+
+AfterAdvice <|.. AspectJAfterAdvice
+AfterAdvice <|.. AspectJAfterReturningAdvice
+AfterAdvice <|.. AspectJAfterThrowingAdvice
+
+
+
+
+AfterReturningAdvice <|..  AspectJAfterReturningAdvice
+
+
+
+
+MethodBeforeAdvice <|.. AspectJMethodBeforeAdvice
+
+
+
+MethodInterceptor <|.. AspectJAfterAdvice
+MethodInterceptor <|.. AspectJAfterThrowingAdvice
+MethodInterceptor <|.. AspectJAroundAdvice
+
+
+
+
+
+@enduml

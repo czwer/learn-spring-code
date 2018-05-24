@@ -1,0 +1,96 @@
+@startuml
+
+note  as N1 #FAEBD7
+背景颜色介绍：
+    红色：非常重要
+    绿色：重点关注
+    黄色：可一般关注
+    灰色：弃用
+    ---简化版类图
+end note
+
+
+interface ApplicationContext #7FFFD4
+abstract class AbstractApplicationContext  #FF5000
+AbstractApplicationContext : #abstract void refreshBeanFactory()
+AbstractApplicationContext : +Object getBean(String name)
+AbstractApplicationContext : +void refresh()
+note top #FF5000: refresh()这个方法太重要了,准备好容器
+abstract class AbstractRefreshableApplicationContext #7FFFD4
+AbstractRefreshableApplicationContext : #void refreshBeanFactory()
+note top #7FFFD4: refreshBeanFactory方法内包含触发加载bean定义
+abstract class AbstractRefreshableConfigApplicationContext
+abstract class AbstractRefreshableWebApplicationContext
+abstract class AbstractXmlApplicationContext #7FFFD4
+AbstractXmlApplicationContext : #void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
+class AnnotationConfigApplicationContext
+class AnnotationConfigWebApplicationContext #7FFFD4
+AnnotationConfigWebApplicationContext : void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
+class ClassPathXmlApplicationContext
+interface ConfigurableApplicationContext
+ConfigurableApplicationContext : +void refresh()
+interface ConfigurableWebApplicationContext
+class FileSystemXmlApplicationContext
+class GenericApplicationContext
+class GenericXmlApplicationContext
+class GenericWebApplicationContext
+class ResourceAdapterApplicationContext
+class XmlWebApplicationContext #7FFFD4
+XmlWebApplicationContext : #void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
+interface WebApplicationContext #7FFFD4
+
+
+
+
+
+
+
+AbstractApplicationContext <|.. AbstractRefreshableApplicationContext
+AbstractApplicationContext <|-- GenericApplicationContext
+
+
+
+
+AbstractXmlApplicationContext <|-- ClassPathXmlApplicationContext
+AbstractXmlApplicationContext <|-- FileSystemXmlApplicationContext
+
+
+AbstractRefreshableConfigApplicationContext <|-- AbstractRefreshableWebApplicationContext
+AbstractRefreshableConfigApplicationContext <|-- AbstractXmlApplicationContext
+
+AbstractRefreshableApplicationContext <|-- AbstractRefreshableConfigApplicationContext
+
+AbstractRefreshableWebApplicationContext <|-- AnnotationConfigWebApplicationContext
+AbstractRefreshableWebApplicationContext <|-- XmlWebApplicationContext
+
+
+
+ApplicationContext <|-- ConfigurableApplicationContext
+ApplicationContext <|-- WebApplicationContext
+
+
+
+
+
+ConfigurableApplicationContext <.. AbstractApplicationContext
+ConfigurableApplicationContext <|-- ConfigurableWebApplicationContext
+
+
+
+ConfigurableWebApplicationContext <|.. AbstractRefreshableWebApplicationContext
+ConfigurableWebApplicationContext <|.. GenericWebApplicationContext
+
+
+
+GenericApplicationContext <|-- AnnotationConfigApplicationContext
+GenericApplicationContext <|-- GenericXmlApplicationContext
+GenericApplicationContext <|-- GenericWebApplicationContext
+GenericApplicationContext <|-- ResourceAdapterApplicationContext
+
+
+
+
+
+WebApplicationContext <|-- ConfigurableWebApplicationContext
+
+@enduml

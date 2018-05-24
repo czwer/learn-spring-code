@@ -1,0 +1,66 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    DispatcherServlet负责接收所有Web请求，进行请求分发。
+end note
+
+class DispatcherServlet #FF5000
+abstract class FrameworkServlet
+abstract class HttpServletBean
+
+
+
+interface FlashMapManager
+
+
+interface HandlerAdapter
+
+
+interface HandlerExceptionResolver
+
+interface HandlerMapping
+note bottom : Web请求的处理协调者
+
+abstract class HttpServlet
+
+interface LocaleResolver
+note bottom : 用于支持国际化
+
+interface MultipartResolver
+note bottom : 用于处理文件上传
+
+interface RequestToViewNameTranslator
+
+
+interface ThemeResolver
+note bottom : 用于支持主题相关
+
+
+interface ViewResolver
+
+
+DispatcherServlet ..> FlashMapManager
+DispatcherServlet ..> HandlerAdapter
+DispatcherServlet ..> HandlerExceptionResolver
+DispatcherServlet ..> HandlerMapping
+DispatcherServlet ..> LocaleResolver
+DispatcherServlet ..> MultipartResolver
+DispatcherServlet ..> RequestToViewNameTranslator
+DispatcherServlet ..> ThemeResolver
+DispatcherServlet ..> ViewResolver
+
+
+FrameworkServlet <|-- DispatcherServlet
+
+HttpServlet <|-- HttpServletBean
+
+HttpServletBean <|-- FrameworkServlet
+
+
+@enduml

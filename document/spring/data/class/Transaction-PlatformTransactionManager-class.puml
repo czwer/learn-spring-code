@@ -1,0 +1,56 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    PlatformTransactionManager是Spring事务抽象架构的核心接口，它主要作用是为应用
+        程序提供事务界定的统一方式。
+    Spring的事务框架设计理念的基本原则是：让事务管理的关注点和数据访问关注点相分离。
+end note
+
+interface PlatformTransactionManager
+PlatformTransactionManager : +TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+PlatformTransactionManager : +void commit(TransactionStatus status)
+PlatformTransactionManager : +void rollback(TransactionStatus status)
+abstract class AbstractPlatformTransactionManager  #FF5000
+interface CallbackPreferringPlatformTransactionManager
+class CciLocalTransactionManager
+class DataSourceTransactionManager  #FF5000
+class HibernateTransactionManager
+class JmsTransactionManager
+class JpaTransactionManager
+class JtaTransactionManager
+interface ResourceTransactionManager
+ResourceTransactionManager : +Object getResourceFactory()
+class WebLogicJtaTransactionManager
+class WebSphereUowTransactionManager
+
+AbstractPlatformTransactionManager <|-- CciLocalTransactionManager
+AbstractPlatformTransactionManager <|-- DataSourceTransactionManager
+AbstractPlatformTransactionManager <|-- HibernateTransactionManager
+AbstractPlatformTransactionManager <|-- JmsTransactionManager
+AbstractPlatformTransactionManager <|-- JpaTransactionManager
+AbstractPlatformTransactionManager <|-- JtaTransactionManager
+
+CallbackPreferringPlatformTransactionManager <|.. WebSphereUowTransactionManager
+
+
+JtaTransactionManager <|-- WebLogicJtaTransactionManager
+JtaTransactionManager <|-- WebSphereUowTransactionManager
+
+PlatformTransactionManager <|.. AbstractPlatformTransactionManager
+PlatformTransactionManager <|-- CallbackPreferringPlatformTransactionManager
+PlatformTransactionManager <|-- ResourceTransactionManager
+
+
+ResourceTransactionManager <|.. CciLocalTransactionManager
+ResourceTransactionManager <|.. DataSourceTransactionManager
+ResourceTransactionManager <|.. HibernateTransactionManager
+ResourceTransactionManager <|.. JmsTransactionManager
+ResourceTransactionManager <|.. JpaTransactionManager
+
+
+@enduml

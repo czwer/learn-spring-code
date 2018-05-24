@@ -1,0 +1,43 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+
+interface BeanDefinition
+abstract class AbstractBeanDefinition
+interface AnnotatedBeanDefinition
+class AnnotatedGenericBeanDefinition #7FFFD4
+class ChildBeanDefinition #7FFFD4
+class ConfigurationClassBeanDefinition
+class RootBeanDefinition #7FFFD4
+class ScannedGenericBeanDefinition
+
+
+
+AbstractBeanDefinition <|-- ChildBeanDefinition
+AbstractBeanDefinition <|-- GenericBeanDefinition
+AbstractBeanDefinition <|-- RootBeanDefinition
+
+
+AnnotatedBeanDefinition <|.. AnnotatedGenericBeanDefinition
+AnnotatedBeanDefinition <|.. ConfigurationClassBeanDefinition
+AnnotatedBeanDefinition <|.. ScannedGenericBeanDefinition
+
+BeanDefinition <|.. AbstractBeanDefinition
+BeanDefinition <|-- AnnotatedBeanDefinition
+
+GenericBeanDefinition <|-- AnnotatedGenericBeanDefinition
+GenericBeanDefinition <|-- ScannedGenericBeanDefinition
+
+
+RootBeanDefinition <|-- ConfigurationClassBeanDefinition
+
+
+
+@enduml

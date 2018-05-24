@@ -1,0 +1,48 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+interface ConfigurableApplicationContext
+abstract class AbstractApplicationContext
+
+interface MessageSource
+interface ApplicationContext
+abstract class AbstractMessageSource
+abstract class AbstractResourceBasedMessageSource
+class DelegatingMessageSource
+interface HierarchicalMessageSource
+class ReloadableResourceBundleMessageSource #7FFFD4
+note left #7FFFD4: 支持刷新功能
+class ResourceBundleMessageSource
+class StaticMessageSource
+
+
+AbstractApplicationContext --> MessageSource
+
+
+AbstractMessageSource <|-- AbstractResourceBasedMessageSource
+AbstractMessageSource <|-- StaticMessageSource
+
+
+AbstractResourceBasedMessageSource <|-- ReloadableResourceBundleMessageSource
+AbstractResourceBasedMessageSource <|-- ResourceBundleMessageSource
+
+
+ApplicationContext <|-- ConfigurableApplicationContext
+
+ConfigurableApplicationContext <|.. AbstractApplicationContext
+
+HierarchicalMessageSource <|.. AbstractMessageSource
+HierarchicalMessageSource <|.. DelegatingMessageSource
+
+MessageSource <|-- ApplicationContext
+MessageSource <|-- HierarchicalMessageSource
+
+
+@enduml

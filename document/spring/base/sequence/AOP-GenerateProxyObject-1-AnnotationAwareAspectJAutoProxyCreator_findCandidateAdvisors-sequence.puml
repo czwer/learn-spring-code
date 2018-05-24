@@ -1,0 +1,78 @@
+@startuml
+->AnnotationAwareAspectJAutoProxyCreator : findCandidateAdvisors()
+note left of AnnotationAwareAspectJAutoProxyCreator #FAEBD7
+    *查找所有候选Advisor用于自动代理
+        ---这里只描述了主要步骤
+     单元测试参：
+end note
+activate AnnotationAwareAspectJAutoProxyCreator #DarkSalmon
+    AnnotationAwareAspectJAutoProxyCreator -> AbstractAdvisorAutoProxyCreator : findCandidateAdvisors()
+    activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+
+        AbstractAdvisorAutoProxyCreator -> BeanFactoryAdvisorRetrievalHelper : findAdvisorBeans()
+        activate BeanFactoryAdvisorRetrievalHelper #DarkSalmon
+            note right of BeanFactoryAdvisorRetrievalHelper #aqua
+                主要逻辑：
+                    1.获取所有实现Advisor接口的beanName，如果当前容器含父BeanFactory，
+                        同时也从父BeanFactory获取,取两者的并集。
+                    2.Spring在这里给我们提供了一个扩展点:isEligibleBean()，可以对指定
+                        Advisor置为失效
+                    3.根据beanName实例化Advisor
+                        ---会跳过当前正在创建的Advisor
+            end note
+        BeanFactoryAdvisorRetrievalHelper --> AbstractAdvisorAutoProxyCreator : List<Advisor>
+        deactivate BeanFactoryAdvisorRetrievalHelper
+
+    AbstractAdvisorAutoProxyCreator --> AnnotationAwareAspectJAutoProxyCreator : List<Advisor>
+    deactivate AbstractAdvisorAutoProxyCreator
+
+    alt this.aspectJAdvisorsBuilder != null : 我们可以理解为不为null
+
+        AnnotationAwareAspectJAutoProxyCreator -> BeanFactoryAspectJAdvisorsBuilder : buildAspectJAdvisors()
+        activate BeanFactoryAspectJAdvisorsBuilder #DarkSalmon
+            note right of BeanFactoryAspectJAdvisorsBuilder #aqua
+                主要逻辑：
+                    1.获取所有实现Object类型的beanName，如果当前容器含父BeanFactory，
+                        同时也从父BeanFactory获取,取两者的并集。
+                    2.Spring在这里给我们提供了一个扩展点:isEligibleBean()，可以对指定
+                        Advisor置为失效
+                    3.获取这些beanName的Class信息，判断是否含有Aspect.class注解，
+                        且Class名称不以ajc$开头(有限责任)
+                    4.实例化Advisor：根据过滤后的beanName，由Aspect->List<Advisor>转换
+                        ---一个Aspect中可以定义多个Advisor
+                        ---相应结果缓存以便复用这次计算
+                        ---支持singleton与非singleton两种实例化Advisor
+            end note
+
+            BeanFactoryAspectJAdvisorsBuilder -> ReflectiveAspectJAdvisorFactory : getAdvisors()
+            activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+
+                note right of ReflectiveAspectJAdvisorFactory #FF5000
+                    主要逻辑：
+                        1.获取标注了以下注解的所有方法，并根据以下方式进行排序,并组装成Advisor实例
+                            Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class
+                            ---Advisor中PointCut是明确的
+                            ---Advisor中Advice用到的时候再去具体划分是哪种通知，上下文信息中包含了必要信息
+                        2.获取标注了@DeclareParents注解的字段，组装成Advisor实例
+                end note
+
+            ReflectiveAspectJAdvisorFactory --> BeanFactoryAspectJAdvisorsBuilder : List<Advisor>
+            deactivate ReflectiveAspectJAdvisorFactory
+
+        BeanFactoryAspectJAdvisorsBuilder --> AnnotationAwareAspectJAutoProxyCreator : List<Advisor>
+        deactivate BeanFactoryAspectJAdvisorsBuilder
+    end
+
+
+<-- AnnotationAwareAspectJAutoProxyCreator: List<Advisor>
+deactivate AnnotationAwareAspectJAutoProxyCreator
+
+note right of AnnotationAwareAspectJAutoProxyCreator #FAEBD7
+*总结
+    1.通过把Aspect中方法(非@Putcut标注的方法)解析为Advisor
+    2.Aspect对应的Advice都可转换成MethodInterceptor
+    3.AspectJExpressionPointcut也实现了Pointcut.matches()方法，支持了aspectj语法，融入了Spring中Point体系
+    ---以上几点是可以共享Spring中AOP基础设施的根基所在。
+end note
+
+@enduml

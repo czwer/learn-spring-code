@@ -1,0 +1,54 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+            ---简化版类图
+    Pointcut代表执行点（Joinpoint）的集合，用ClassFilter和MethodMatcher进行表达。
+end note
+
+interface Pointcut
+Pointcut : +ClassFilter getClassFilter()
+Pointcut : +MethodMatcher getMethodMatcher()
+Pointcut : +Pointcut TRUE = TruePointcut.INSTANCE
+abstract class AbstractExpressionPointcut
+abstract class AbstractRegexpMethodPointcut
+class AnnotationMatchingPointcut
+note bottom : 根据目标对象是否存在指定类型的注解来匹配
+class AspectJExpressionPointcut #FF5000
+note bottom : Spring AOP中面向AspectJ的Pointcut的具体实现
+class ComposablePointcut
+note bottom : pointcut切点逻辑运算
+class ControlFlowPointcut
+interface ExpressionPointcut
+abstract class DynamicMethodMatcherPointcut #7FFFD4
+class JdkRegexpMethodPointcut
+note left : 正则表达式相关
+class NameMatchMethodPointcut
+abstract class StaticMethodMatcherPointcut #FF5000
+class TruePointcut
+
+AbstractExpressionPointcut <|-- AspectJExpressionPointcut
+AbstractRegexpMethodPointcut <|-- JdkRegexpMethodPointcut
+
+ExpressionPointcut <|.. AbstractExpressionPointcut
+
+
+Pointcut <|.. AnnotationMatchingPointcut
+Pointcut <|.. ComposablePointcut
+Pointcut <|.. ControlFlowPointcut
+Pointcut <|.. DynamicMethodMatcherPointcut
+Pointcut <|-- ExpressionPointcut
+Pointcut <|.. StaticMethodMatcherPointcut
+Pointcut <|.. TruePointcut
+
+StaticMethodMatcherPointcut <|-- AbstractRegexpMethodPointcut
+StaticMethodMatcherPointcut <|-- NameMatchMethodPointcut
+
+
+
+
+@enduml

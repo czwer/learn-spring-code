@@ -1,0 +1,59 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    TargetSource用于包装目标对象：在调用链和目标对象之间。
+end note
+
+
+interface TargetSource
+abstract class AbstractBeanFactoryBasedTargetSource
+abstract class AbstractLazyCreationTargetSource
+abstract class AbstractPoolingTargetSource
+abstract class AbstractPrototypeBasedTargetSource
+abstract class AbstractRefreshableTargetSource
+class BeanFactoryRefreshableTargetSource
+class CommonsPool2TargetSource
+class EmptyTargetSource
+class HotSwappableTargetSource #7FFFD4
+class JndiObjectTargetSource
+class LazyInitTargetSource
+class PrototypeTargetSource
+class RefreshableScriptTargetSource
+class SimpleBeanTargetSource
+class SingletonTargetSource #7FFFD4
+note bottom : 用的最多的TargetSource
+class ThreadLocalTargetSource
+
+
+
+AbstractBeanFactoryBasedTargetSource <|-- AbstractPrototypeBasedTargetSource
+AbstractBeanFactoryBasedTargetSource <|-- LazyInitTargetSource
+AbstractBeanFactoryBasedTargetSource <|-- SimpleBeanTargetSource
+
+AbstractPrototypeBasedTargetSource <|-- AbstractPoolingTargetSource
+AbstractPrototypeBasedTargetSource <|-- PrototypeTargetSource
+AbstractPrototypeBasedTargetSource <|-- ThreadLocalTargetSource
+
+
+AbstractPoolingTargetSource <|-- CommonsPool2TargetSource
+
+AbstractRefreshableTargetSource <|-- BeanFactoryRefreshableTargetSource
+
+BeanFactoryRefreshableTargetSource <|-- RefreshableScriptTargetSource
+
+TargetSource <|.. AbstractBeanFactoryBasedTargetSource
+TargetSource <|.. AbstractLazyCreationTargetSource
+TargetSource <|.. AbstractRefreshableTargetSource
+TargetSource <|.. EmptyTargetSource
+TargetSource <|.. HotSwappableTargetSource
+TargetSource <|.. JndiObjectTargetSource
+TargetSource <|.. SingletonTargetSource
+
+
+
+@enduml

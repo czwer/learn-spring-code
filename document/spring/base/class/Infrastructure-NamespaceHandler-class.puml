@@ -1,0 +1,48 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    xml中命名空间的作用主要有两种作用：
+        1.根据Schema文件对文档格式合法性验证；
+        2.IDE可以引用Schema文件对文档编辑提供自动补全功能；
+    Spring中提供了大量的命名空间以简化开发者配置。以下是常用的命名空间支持类，
+    分别对特定的命名空间予以支持。
+    这些xxxNamespaceHandler.init()方法会在NamespaceHandlerSupport注册
+    相应xxxBeanDefinitionParser。
+end note
+
+interface NamespaceHandler
+NamespaceHandler : +void init()
+NamespaceHandler : +BeanDefinition parse(Element element, ParserContext parserContext)
+NamespaceHandler : +BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext)
+class AopNamespaceHandler #FF5000
+class CacheNamespaceHandler
+class ContextNamespaceHandler #FF5000
+class JmsNamespaceHandler
+class MvcNamespaceHandler
+abstract class NamespaceHandlerSupport
+class TaskNamespaceHandler
+class TxNamespaceHandler #FF5000
+note bottom #FF5000 : 与事务有关
+class UtilNamespaceHandler #FF5000
+class WebSocketNamespaceHandler
+
+NamespaceHandler <|.. NamespaceHandlerSupport
+
+NamespaceHandlerSupport <|-- AopNamespaceHandler
+NamespaceHandlerSupport <|-- CacheNamespaceHandler
+NamespaceHandlerSupport <|-- ContextNamespaceHandler
+NamespaceHandlerSupport <|-- JmsNamespaceHandler
+NamespaceHandlerSupport <|-- MvcNamespaceHandler
+NamespaceHandlerSupport <|-- TaskNamespaceHandler
+NamespaceHandlerSupport <|-- TxNamespaceHandler
+NamespaceHandlerSupport <|-- UtilNamespaceHandler
+NamespaceHandlerSupport <|-- WebSocketNamespaceHandler
+
+
+@enduml

@@ -1,0 +1,132 @@
+@startuml
+
+autonumber
+
+->FactoryBeanRegistrySupport : getObjectFromFactoryBean()
+activate FactoryBeanRegistrySupport #DarkSalmon
+    note right of FactoryBeanRegistrySupport #FAEBD7
+        *介绍如果我们获得的是FactoryBean的Bean，
+            再有FactoryBean获取真正Bean的过程
+        ---这里只描述了主要步骤
+    end note
+
+    note right of FactoryBeanRegistrySupport #aqua
+        分两种情况
+            1.FactoryBean是单例的
+            2.FactoryBean是非单例的
+            ---注意原程序中缓存的判断，这里略去了
+    end note
+    alt FactoryBean是单例的
+
+        FactoryBeanRegistrySupport -> FactoryBeanRegistrySupport :doGetObjectFromFactoryBean()
+        activate FactoryBeanRegistrySupport #DarkSalmon
+
+            FactoryBeanRegistrySupport -> FactoryBean : getObject()
+            activate FactoryBean #DarkSalmon
+                note right of FactoryBean #aqua
+                    返回bean,或NullBean
+                    ---这里用NullBean表示null，可以表明：
+                        未调用前的null与调用后的null
+                end note
+            FactoryBean --> FactoryBeanRegistrySupport : object
+            deactivate FactoryBean
+
+        deactivate FactoryBeanRegistrySupport
+
+        FactoryBeanRegistrySupport -> DefaultSingletonBeanRegistry :beforeSingletonCreation()
+        activate DefaultSingletonBeanRegistry #DarkSalmon
+
+            note right of DefaultSingletonBeanRegistry #aqua
+                为保证创建的是单例
+            end note
+
+        DefaultSingletonBeanRegistry --> FactoryBeanRegistrySupport
+        deactivate DefaultSingletonBeanRegistry
+
+        FactoryBeanRegistrySupport -> AbstractAutowireCapableBeanFactory :postProcessObjectFromFactoryBean()
+        activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+            AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory :applyBeanPostProcessorsAfterInitialization()
+            activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+                AbstractAutowireCapableBeanFactory -> BeanPostProcessor :postProcessAfterInitialization()
+                activate BeanPostProcessor #DarkSalmon
+                    note right of BeanPostProcessor #FF5000
+                        Spring生成代理对象的入口之一
+                            ---不常用
+                    end note
+                BeanPostProcessor --> AbstractAutowireCapableBeanFactory
+                deactivate BeanPostProcessor
+
+            deactivate AbstractAutowireCapableBeanFactory
+
+        AbstractAutowireCapableBeanFactory --> FactoryBeanRegistrySupport
+        deactivate AbstractAutowireCapableBeanFactory
+
+
+        FactoryBeanRegistrySupport -> DefaultSingletonBeanRegistry :afterSingletonCreation()
+        activate DefaultSingletonBeanRegistry #DarkSalmon
+
+            note right of DefaultSingletonBeanRegistry #aqua
+                为保证创建的是单例
+            end note
+
+        DefaultSingletonBeanRegistry --> FactoryBeanRegistrySupport
+        deactivate DefaultSingletonBeanRegistry
+
+
+
+    else
+
+        FactoryBeanRegistrySupport -> FactoryBeanRegistrySupport :doGetObjectFromFactoryBean()
+        activate FactoryBeanRegistrySupport #DarkSalmon
+
+            FactoryBeanRegistrySupport -> FactoryBean : getObject()
+            activate FactoryBean #DarkSalmon
+                note right of FactoryBean #aqua
+                    返回bean,或NullBean
+                    ---这里用NullBean表示null，可以表明：
+                        未调用前的null与调用后的null
+                end note
+            FactoryBean --> FactoryBeanRegistrySupport : object
+            deactivate FactoryBean
+
+        deactivate FactoryBeanRegistrySupport
+
+        FactoryBeanRegistrySupport -> AbstractAutowireCapableBeanFactory :postProcessObjectFromFactoryBean()
+        activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+            AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory :applyBeanPostProcessorsAfterInitialization()
+            activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+                AbstractAutowireCapableBeanFactory -> BeanPostProcessor :postProcessAfterInitialization()
+                activate BeanPostProcessor #DarkSalmon
+                    note right of BeanPostProcessor #FF5000
+                        Spring生成代理对象的入口之一
+                            ---不常用
+                    end note
+                BeanPostProcessor --> AbstractAutowireCapableBeanFactory
+                deactivate BeanPostProcessor
+
+            deactivate AbstractAutowireCapableBeanFactory
+
+        AbstractAutowireCapableBeanFactory --> FactoryBeanRegistrySupport
+        deactivate AbstractAutowireCapableBeanFactory
+
+    end
+
+
+
+
+<--FactoryBeanRegistrySupport : proxyObject
+deactivate FactoryBeanRegistrySupport
+    note right of FactoryBeanRegistrySupport #FAEBD7
+        *总结
+            1.FactoryBean在Spring基础设施生成实例中起到了重要作用。
+        *备注：
+            FactoryBeanRegistrySupport中属性字段含义：
+                factoryBeanObjectCache：<bean名称,最终生成的bean>
+                    ---最终生成的bean：可能执行过BeanPostProcess.postProcessAfterInitialization()
+    end note
+
+@enduml

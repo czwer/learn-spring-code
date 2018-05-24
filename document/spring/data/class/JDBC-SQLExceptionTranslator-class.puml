@@ -1,0 +1,28 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+interface SQLExceptionTranslator
+SQLExceptionTranslator : +DataAccessException translate(String task, @Nullable String sql, SQLException ex)
+abstract class AbstractFallbackSQLExceptionTranslator
+class SQLErrorCodeSQLExceptionTranslator
+note top : 会基于SQLException所返回的ErrorCode进行异常转译。--默认
+class SQLExceptionSubclassTranslator
+note bottom : 主要用于将JDK6发布的JDBC4版本中新定义的异常体系转化到Spring的数据访问异常。
+class SQLStateSQLExceptionTranslator
+note top : 基于SQLException返回的SQLState进行信息转译。不一定可靠
+
+
+SQLExceptionTranslator <|.. AbstractFallbackSQLExceptionTranslator
+
+AbstractFallbackSQLExceptionTranslator <|-- SQLErrorCodeSQLExceptionTranslator
+AbstractFallbackSQLExceptionTranslator <|-- SQLExceptionSubclassTranslator
+AbstractFallbackSQLExceptionTranslator <|-- SQLStateSQLExceptionTranslator
+
+@enduml

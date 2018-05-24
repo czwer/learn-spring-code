@@ -1,0 +1,71 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    View用于视图渲染,统一地抽象视图的生成策略。
+end note
+
+interface View
+View : +void render()
+abstract class AbstractFeedView
+abstract class AbstractJackson2View
+abstract class AbstractPdfStamperView
+abstract class AbstractPdfView
+abstract class AbstractTemplateView
+abstract class AbstractUrlBasedView
+abstract class AbstractView
+abstract class AbstractXlsView
+abstract class AbstractXlsxStreamingView
+abstract class AbstractXlsxView
+class FreeMarkerView
+class GroovyMarkupView
+class InternalResourceView
+class JstlView
+class MappingJackson2JsonView
+class MappingJackson2XmlView
+class RedirectView
+interface SmartView
+class TilesView
+class XsltView
+
+
+AbstractJackson2View <|-- MappingJackson2JsonView
+AbstractJackson2View <|-- MappingJackson2XmlView
+
+
+AbstractTemplateView <|-- FreeMarkerView
+AbstractTemplateView <|-- GroovyMarkupView
+
+
+AbstractView <|-- AbstractFeedView
+AbstractView <|-- AbstractJackson2View
+AbstractView <|-- AbstractPdfView
+AbstractView <|-- AbstractUrlBasedView
+AbstractView <|-- AbstractXlsView
+
+
+AbstractXlsView <|-- AbstractXlsxStreamingView
+AbstractXlsView <|-- AbstractXlsxView
+
+AbstractUrlBasedView <|-- AbstractPdfStamperView
+AbstractUrlBasedView <|-- AbstractTemplateView
+AbstractUrlBasedView <|-- InternalResourceView
+AbstractUrlBasedView <|-- RedirectView
+AbstractUrlBasedView <|-- TilesView
+AbstractUrlBasedView <|-- XsltView
+
+
+InternalResourceView <|-- JstlView
+
+SmartView <|.. RedirectView
+
+View <|.. AbstractView
+View <|-- SmartView
+
+
+@enduml

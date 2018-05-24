@@ -1,0 +1,39 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    LocaleResolver：根据用户的Locale显示不同的视图。
+end note
+
+interface LocaleResolver
+LocaleResolver : +Locale resolveLocale(HttpServletRequest request)
+LocaleResolver : +void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale)
+abstract class AbstractLocaleContextResolver
+abstract class AbstractLocaleResolver
+class AcceptHeaderLocaleResolver #7FFFD4
+class CookieLocaleResolver
+class FixedLocaleResolver
+interface LocaleContextResolver
+class SessionLocaleResolver
+
+AbstractLocaleContextResolver <|-- FixedLocaleResolver
+AbstractLocaleContextResolver <|-- SessionLocaleResolver
+
+
+AbstractLocaleResolver <|-- AbstractLocaleContextResolver
+
+
+
+LocaleContextResolver <|.. AbstractLocaleContextResolver
+LocaleContextResolver <|.. CookieLocaleResolver
+
+
+LocaleResolver <|.. AbstractLocaleResolver
+LocaleResolver <|.. AcceptHeaderLocaleResolver
+LocaleResolver <|-- LocaleContextResolver
+
+@enduml

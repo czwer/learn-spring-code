@@ -1,0 +1,96 @@
+@startuml
+autonumber
+
+-> InvocableHandlerMethod: getMethodArgumentValues()
+activate InvocableHandlerMethod #DarkSalmon
+
+    note left of InvocableHandlerMethod #FAEBD7
+        *介绍Web调用JSON数据绑定。
+            ---这里只描述了主要步骤
+    end note
+
+    InvocableHandlerMethod -> HandlerMethod : getMethodParameters():获得方法参数信息
+    activate HandlerMethod #DarkSalmon
+    HandlerMethod --> InvocableHandlerMethod : MethodParameter[]
+    deactivate HandlerMethod
+    note right of InvocableHandlerMethod #aqua
+        获取当前接口方法所有参数，从请求中键值对，对它们进行赋值
+        ---这里参数可能是个Vo，也可能是Integer类型字段，我们暂且理解为Vo
+    end note
+    loop
+        note right of InvocableHandlerMethod #aqua
+            1.HandlerMethodArgumentResolverComposite中获取支持当前参数的
+                HandlerMethodArgumentResolver进行参数解析；
+                ---用到RequestResponseBodyMethodProcessor
+            2.找到匹配的HttpMessageConverter；
+            3.委托给jackson来处理，获得Vo;
+            4.查询当前参数是否有匹配的RequestBodyAdvice用于处理Vo；
+                ---扩展点
+            5.通过DataBinderFactory构建WebDataBinder；
+                ---用到ServletRequestDataBinderFactory
+                ---用到ExtendedServletRequestDataBinder
+            6.如有必要调用验证框架进行验证
+        end note
+
+
+        InvocableHandlerMethod -> HandlerMethodArgumentResolverComposite: resolveArgument()：解析参数
+        activate HandlerMethodArgumentResolverComposite #DarkSalmon
+
+            HandlerMethodArgumentResolverComposite -> RequestResponseBodyMethodProcessor: resolveArgument()
+            activate RequestResponseBodyMethodProcessor #DarkSalmon
+
+                RequestResponseBodyMethodProcessor -> MappingJackson2HttpMessageConverter :read()
+                activate MappingJackson2HttpMessageConverter #DarkSalmon
+
+                    note right of MappingJackson2HttpMessageConverter #FF5000
+                       委托给Jackson来处理
+                    end note
+
+                    MappingJackson2HttpMessageConverter -> ObjectMapper :readValue()
+                    activate ObjectMapper #DarkSalmon
+                    MappingJackson2HttpMessageConverter --> ObjectMapper : Object
+                    deactivate ObjectMapper
+
+                MappingJackson2HttpMessageConverter --> RequestResponseBodyMethodProcessor : Object
+                deactivate MappingJackson2HttpMessageConverter
+
+                note right of RequestResponseBodyMethodProcessor #aqua
+                   如有必要调用验证框架进行验证
+                end note
+                RequestResponseBodyMethodProcessor -> RequestResponseBodyMethodProcessor : validateIfApplicable()
+                activate RequestResponseBodyMethodProcessor #DarkSalmon
+
+                    RequestResponseBodyMethodProcessor -> DataBinder :validate()
+                    activate DataBinder #DarkSalmon
+                    DataBinder --> RequestResponseBodyMethodProcessor
+                    deactivate DataBinder
+
+                deactivate RequestResponseBodyMethodProcessor
+
+            RequestResponseBodyMethodProcessor --> HandlerMethodArgumentResolverComposite : Object
+            deactivate RequestResponseBodyMethodProcessor
+
+        HandlerMethodArgumentResolverComposite --> InvocableHandlerMethod : Object
+        deactivate HandlerMethodArgumentResolverComposite
+
+
+    end
+
+   
+<-- InvocableHandlerMethod : Object[]
+deactivate InvocableHandlerMethod
+
+note right of InvocableHandlerMethod #FAEBD7
+    *总结
+        1.JSON数据相比Form表单提交这里要简单很多，更多的工作交给Jackson来处理；
+        2.由于是委托给Jackson，所以Spring给我们提供了扩展点：
+            RequestBodyAdvice：读取时用到
+            ResponseBodyAdvice：响应时用到
+        3.数据验证的部分是共用基础设施的；
+    *备注
+        1.RequestResponseBodyMethodProcessor
+            ---JSON数据提交
+
+end note
+
+@enduml

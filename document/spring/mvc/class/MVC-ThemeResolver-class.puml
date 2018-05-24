@@ -1,0 +1,26 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    ThemeResolver：解析并获取对应当前请求的主题是什么。
+end note
+
+interface ThemeResolver
+ThemeResolver : +String resolveThemeName(HttpServletRequest request)
+ThemeResolver : +void setThemeName(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable String themeName)
+abstract class AbstractThemeResolver
+class CookieThemeResolver
+class FixedThemeResolver #7FFFD4
+class SessionThemeResolver
+
+AbstractThemeResolver <|-- FixedThemeResolver
+AbstractThemeResolver <|-- SessionThemeResolver
+
+ThemeResolver <|.. AbstractThemeResolver
+ThemeResolver <|.. CookieThemeResolver
+
+@enduml

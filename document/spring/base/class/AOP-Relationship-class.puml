@@ -1,0 +1,79 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+end note
+
+interface Advice
+note top #7FFFD4 : 要织入的业务逻辑
+interface MethodInterceptor
+MethodInterceptor : +Object invoke(MethodInvocation invocation)
+
+
+interface Advisor
+note right #7FFFD4 : 可以理解为Advice和Pointcut容器
+
+
+interface AdvisorAdapter
+AdvisorAdapter : +boolean supportsAdvice(Advice advice)
+AdvisorAdapter : +MethodInterceptor getInterceptor(Advisor advisor)
+note right #7FFFD4 : 可以理解为工具类
+
+
+interface AdvisorAdapterRegistry
+AdvisorAdapterRegistry : +Advisor wrap(Object advice)
+AdvisorAdapterRegistry : +MethodInterceptor[] getInterceptors(Advisor advisor)
+AdvisorAdapterRegistry : +void registerAdvisorAdapter(AdvisorAdapter adapter)
+note right #7FFFD4 : 可以理解为工具类
+
+interface AopProxy
+AopProxy : + Object getProxy(@Nullable ClassLoader classLoader)
+
+
+interface Joinpoint
+note right #7FFFD4 : 定义了方法调用
+
+
+interface Pointcut
+note right #7FFFD4 : 定义了业务逻辑要织入到哪里
+
+
+
+Advice <|-- MethodInterceptor
+note on link : 省略了中间的接口
+
+Advisor ..> Advice
+Advisor ..> Pointcut
+
+AdvisorAdapter ..>Advice
+AdvisorAdapter ..>Advisor
+AdvisorAdapter ..>MethodInterceptor
+
+
+
+AdvisorAdapterRegistry ..>Advisor
+AdvisorAdapterRegistry -->AdvisorAdapter
+AdvisorAdapterRegistry ..>MethodInterceptor
+
+AopProxy ..> Advisor
+AopProxy ..> AdvisorAdapterRegistry
+AopProxy ..> Joinpoint
+
+
+Joinpoint <|-- MethodInvocation
+note on link : 省略了中间的接口
+
+
+MethodInterceptor ..> MethodInvocation
+
+
+Pointcut o.. Joinpoint
+note on link #7FFFD4 : Pointcut理解为Joinpoint集合
+
+
+@enduml

@@ -1,0 +1,73 @@
+@startuml
+-> ReflectiveMethodInvocation: proceed() :执行点逻辑运行
+activate ReflectiveMethodInvocation #DarkSalmon
+
+note left of ReflectiveMethodInvocation #FAEBD7
+    *介绍织入逻辑调用链调用，并最终执行目标方法调用
+        ---这里只描述了主要步骤
+end note
+    alt 检完成查织入逻辑调用链是否执行完了,执行完了，执行目标方法
+        ReflectiveMethodInvocation -> ReflectiveMethodInvocation : invokeJoinpoint()
+        activate ReflectiveMethodInvocation #DarkSalmon
+            ReflectiveMethodInvocation -> AopUtils : invokeJoinpointUsingReflection()
+            activate AopUtils #DarkSalmon
+                note right of AopUtils #FF5000
+                    最终通过method.invoke(target, args)来执行目标方法
+                end note
+            AopUtils --> ReflectiveMethodInvocation : result
+            deactivate AopUtils
+    <-- ReflectiveMethodInvocation : result
+        deactivate ReflectiveMethodInvocation
+    end
+
+    alt 检查当前织入类型是否是interceptorOrInterceptionAdvice
+        alt 检查方法参数是否满足织入条件
+            ReflectiveMethodInvocation -> MethodInterceptor :invoke()
+            activate MethodInterceptor #DarkSalmon
+                note right of MethodInterceptor #FF5000
+                    执行织入逻辑,并递归调用ReflectiveMethodInvocation.proceed()，直至调用链执行完毕
+                end note
+            MethodInterceptor --> ReflectiveMethodInvocation
+
+            MethodInterceptor -> ReflectiveMethodInvocation :proceed()
+            activate ReflectiveMethodInvocation #DarkSalmon
+            ReflectiveMethodInvocation --> MethodInterceptor
+            deactivate ReflectiveMethodInvocation
+
+            deactivate MethodInterceptor
+        else
+
+
+            ReflectiveMethodInvocation -> ReflectiveMethodInvocation :proceed()
+            activate ReflectiveMethodInvocation #DarkSalmon
+
+            deactivate ReflectiveMethodInvocation
+        end
+
+    else 转换成 MethodInterceptor并调用具体织入逻辑
+        ReflectiveMethodInvocation -> MethodInterceptor :invoke()
+        activate MethodInterceptor #DarkSalmon
+            note right of MethodInterceptor #FF5000
+                执行织入逻辑,并递归调用ReflectiveMethodInvocation.proceed()，直至调用链执行完毕
+            end note
+
+            MethodInterceptor -> ReflectiveMethodInvocation :proceed()
+            activate ReflectiveMethodInvocation #DarkSalmon
+            ReflectiveMethodInvocation --> MethodInterceptor
+            deactivate ReflectiveMethodInvocation
+
+        MethodInterceptor --> ReflectiveMethodInvocation
+        deactivate MethodInterceptor
+    end
+<-- ReflectiveMethodInvocation : result
+deactivate ReflectiveMethodInvocation
+note right of ReflectiveMethodInvocation #FAEBD7
+*总结
+    1.整个方法通过递归调用执行：织入逻辑调用链和目标方法设计的比较巧妙。
+*其它
+    MethodInterceptor: 理解为环绕通知
+    MethodInvocation: 可以理解为方法调用的上下文信息
+    MethodMatcher: 用于判断将目标方法是否匹配Pointcut
+end note
+
+@enduml

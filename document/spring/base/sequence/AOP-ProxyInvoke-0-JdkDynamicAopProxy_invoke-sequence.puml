@@ -1,0 +1,92 @@
+@startuml
+
+autonumber
+
+-> JdkDynamicAopProxy: invoke() : 代理对象方法调用
+
+note left of JdkDynamicAopProxy #FAEBD7
+    *介绍JdkDynamicAopProxy代理对象方法调用
+    ---这里只描述了主要步骤
+end note
+activate JdkDynamicAopProxy #DarkSalmon
+    note right of JdkDynamicAopProxy #aqua
+        以下判断可以理解为，先过滤那些不需要进行织入逻辑调用链的方法
+    end note
+
+    alt 如果调用的是equals方法，且目标对象没有重写
+        JdkDynamicAopProxy-> JdkDynamicAopProxy:equals()：调用Spring重写的equels方法
+        activate JdkDynamicAopProxy #DarkSalmon
+        deactivate JdkDynamicAopProxy
+
+<-- JdkDynamicAopProxy : result
+    else 如果调用的是hashCode方法，且目标对象没有重写
+        JdkDynamicAopProxy-> JdkDynamicAopProxy:hashCode()：调用Spring重写的hashCode方法
+        activate JdkDynamicAopProxy #DarkSalmon
+        deactivate JdkDynamicAopProxy
+<-- JdkDynamicAopProxy : result
+
+    else method.getDeclaringClass() == DecoratingProxy.class
+        JdkDynamicAopProxy-> AopProxyUtils:ultimateTargetClass():获取最终的目标类Class
+        activate AopProxyUtils #DarkSalmon
+        AopProxyUtils --> JdkDynamicAopProxy
+        deactivate AopProxyUtils
+<-- JdkDynamicAopProxy : result
+    else method是通过接口方式获得的，且接口是Advised或Advised父接口
+        JdkDynamicAopProxy-> AopUtils:invokeJoinpointUsingReflection():通过 method.invoke()反射直接调用
+        activate AopUtils #DarkSalmon
+        AopUtils --> JdkDynamicAopProxy
+        deactivate AopUtils
+<-- JdkDynamicAopProxy : result
+    end
+
+    JdkDynamicAopProxy-> AdvisedSupport:getInterceptorsAndDynamicInterceptionAdvice()：获得要织入的横切逻辑调用链
+    activate AdvisedSupport #DarkSalmon
+        note right of AdvisedSupport #FF5000
+           这里是AOP生效重点之一---准备织入逻辑，单独时序图说明
+        end note
+    AdvisedSupport --> JdkDynamicAopProxy
+    deactivate AdvisedSupport
+
+    alt 调用链为空
+        JdkDynamicAopProxy-> AopProxyUtils:adaptArgumentsIfNecessary()：必要时入参中的数组进行转换，以满足方法签名要求
+        activate AdvisedSupport #DarkSalmon
+        AdvisedSupport --> JdkDynamicAopProxy
+        deactivate AdvisedSupport
+
+        JdkDynamicAopProxy-> AopUtils:invokeJoinpointUsingReflection():通过 method.invoke()反射直接调用
+        activate AopUtils #DarkSalmon
+        AopUtils --> JdkDynamicAopProxy
+        deactivate AopUtils
+
+    else
+
+        JdkDynamicAopProxy-> ReflectiveMethodInvocation:proceed()：在执行点（Joinpoint）执行横切逻辑调用链
+        activate ReflectiveMethodInvocation #DarkSalmon
+            note right of ReflectiveMethodInvocation #FF5000
+                这里是AOP生效重点之一---运用织入逻辑，单独时序图说明
+            end note
+        ReflectiveMethodInvocation --> JdkDynamicAopProxy
+        deactivate ReflectiveMethodInvocation
+
+    end
+
+<-- JdkDynamicAopProxy : result
+deactivate JdkDynamicAopProxy
+
+note right of JdkDynamicAopProxy #FAEBD7
+*总结
+    1.尽可能的简单处理，不得已的时候再进行真正含织入逻辑的调用。
+    2.第一次执行JDK的动态代理要慢一些，因中间涉及获取匹配方法的织入逻辑调用链的问题。
+        ---非第一会好很多，因为可以使用缓存的结果
+        ---Cglib在生成代理对象时，就已缓存了
+
+*备注
+    1.x.class.isAssignableFrom(y.getClass())：当x是y的父类，或同类时返回true
+    2.method.getDeclaringClass():
+        1.如果method是从接口或抽象类获得的，返回定义该方法的接口或抽象类Class
+        2.如果method是从普通类中获得的，返回该普通类Class
+    3.z.class.isInstance(new w())，用来判断对象w是否是z类的实例
+
+end note
+
+@enduml

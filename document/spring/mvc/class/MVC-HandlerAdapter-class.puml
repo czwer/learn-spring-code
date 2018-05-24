@@ -1,0 +1,29 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    HandlerAdapter：作为DispatcherServlet和Handler之间的适配器。
+end note
+
+interface HandlerAdapter
+abstract class AbstractHandlerMethodAdapter
+class HttpRequestHandlerAdapter #7FFFD4
+class RequestMappingHandlerAdapter #FF5000
+class SimpleControllerHandlerAdapter #7FFFD4
+class SimpleServletHandlerAdapter
+
+
+
+AbstractHandlerMethodAdapter <|-- RequestMappingHandlerAdapter
+
+HandlerAdapter <|.. AbstractHandlerMethodAdapter
+HandlerAdapter <|.. HttpRequestHandlerAdapter
+HandlerAdapter <|.. SimpleControllerHandlerAdapter
+HandlerAdapter <|.. SimpleServletHandlerAdapter
+
+
+@enduml

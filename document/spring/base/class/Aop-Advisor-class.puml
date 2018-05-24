@@ -1,0 +1,63 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    Advisor代表Spring中的Aspect。
+end note
+
+interface Advisor
+abstract class AbstractPointcutAdvisor
+abstract class AbstractBeanFactoryPointcutAdvisor
+abstract class AbstractGenericPointcutAdvisor
+class AspectJExpressionPointcutAdvisor
+note bottom : AspectJ为xml类型的Spring AOP会用到
+class AspectJPointcutAdvisor
+note bottom : 个人理解为做标记用，标记bean为AspectJ类型
+class DefaultIntroductionAdvisor
+class DeclareParentsAdvisor #7FFFD4
+note bottom #7FFFD4: AspectJ为注解类型的Spring AOP会用到
+class DefaultBeanFactoryPointcutAdvisor
+class DefaultPointcutAdvisor #FF5000
+note bottom #FF5000: 最常用的Advisor
+interface IntroductionAdvisor
+note top : 只运用于类级别的拦截，只能用于Introduction型的Advice
+interface InstantiationModelAwarePointcutAdvisor
+class InstantiationModelAwarePointcutAdvisorImpl #7FFFD4
+note bottom #7FFFD4: AspectJ为注解类型的Spring AOP会用到
+class NameMatchMethodPointcutAdvisor
+interface PointcutAdvisor
+note top : 运用任何类型的Pointcut，差不多任何类型的Advice
+class RegexpMethodPointcutAdvisor
+
+
+
+
+AbstractGenericPointcutAdvisor <|-- AspectJExpressionPointcutAdvisor
+AbstractGenericPointcutAdvisor <|-- DefaultPointcutAdvisor
+AbstractGenericPointcutAdvisor <|-- NameMatchMethodPointcutAdvisor
+AbstractGenericPointcutAdvisor <|-- RegexpMethodPointcutAdvisor
+
+AbstractPointcutAdvisor <|-- AbstractGenericPointcutAdvisor
+AbstractPointcutAdvisor <|-- AbstractBeanFactoryPointcutAdvisor
+
+AbstractBeanFactoryPointcutAdvisor <|-- DefaultBeanFactoryPointcutAdvisor
+
+Advisor <|-- PointcutAdvisor
+Advisor <|-- IntroductionAdvisor
+
+
+IntroductionAdvisor <|-- DeclareParentsAdvisor
+IntroductionAdvisor <|-- DefaultIntroductionAdvisor
+
+InstantiationModelAwarePointcutAdvisor <|-- InstantiationModelAwarePointcutAdvisorImpl
+
+PointcutAdvisor <|.. AbstractPointcutAdvisor
+PointcutAdvisor <|.. AspectJPointcutAdvisor
+PointcutAdvisor <|-- InstantiationModelAwarePointcutAdvisor
+
+
+@enduml

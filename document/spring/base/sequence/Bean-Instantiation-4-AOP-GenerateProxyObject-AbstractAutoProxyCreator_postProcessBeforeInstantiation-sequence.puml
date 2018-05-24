@@ -1,0 +1,133 @@
+@startuml
+
+autonumber
+
+->AbstractAutoProxyCreator : postProcessBeforeInstantiation()
+activate AbstractAutoProxyCreator #DarkSalmon
+    note right of AbstractAutoProxyCreator #FAEBD7
+        *介绍生成代理主要步骤
+        ---这里只描述了主要步骤
+    end note
+
+    AbstractAutoProxyCreator -> 
+
+    note right of AbstractAutoProxyCreator #aqua
+        不生成代理的逻辑：
+            I.没有bean名字||有名字但不在已处理名单中处
+                1.验证过该同名缓存名称不需要处理，直接返回null
+                2.beanClass是基础设施类型||bean属于需要跳过的部分，记录到advisedBeans，
+                    直接返回null
+            II.getCustomTargetSource()方法返回null,直接返回null
+                ---实际上往往我们得到的是null，如果不配置customTargetSourceCreators
+    end note
+
+
+    AbstractAutoProxyCreator->AbstractAdvisorAutoProxyCreator : getAdvicesAndAdvisorsForBean()
+    activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+
+        note right of AbstractAdvisorAutoProxyCreator #aqua
+            找到所有符合条件的Advisor,筛选能够运用
+            该bean的Advisor集合，并排序；
+        end note
+
+        AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findEligibleAdvisors():找到所有符合条件的Advisor
+        activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+
+            AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findCandidateAdvisors()
+            activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+
+                AbstractAdvisorAutoProxyCreator->BeanFactoryAdvisorRetrievalHelper : findAdvisorBeans()
+                activate BeanFactoryAdvisorRetrievalHelper #DarkSalmon
+                     note right of BeanFactoryAdvisorRetrievalHelper #aqua
+                         1.首先尝试从缓存获取，获取不到，再在容器中查找
+                         2.从当前BeanFactory中获取所有的Advisor类型的bean名称，如果存在
+                         父容器，也继续找父容器中的。
+                         3.从BeanFactory中获取bean时，如果发现当前在创建该advisor则跳过
+                     end note
+                     alt 缓存中获取不到时
+                        BeanFactoryAdvisorRetrievalHelper -> BeanFactoryUtils : beanNamesForTypeIncludingAncestors()
+                        activate BeanFactoryUtils #DarkSalmon
+                        BeanFactoryUtils-->BeanFactoryAdvisorRetrievalHelper : String[] advisorNames
+                        deactivate BeanFactoryUtils
+
+                        loop String name : advisorNames
+                            BeanFactoryAdvisorRetrievalHelper ->BeanFactory : getBean(name, Advisor.class)
+                            activate BeanFactory #DarkSalmon
+                            BeanFactory-->BeanFactoryAdvisorRetrievalHelper : advisor
+                            deactivate BeanFactory
+                        end
+                     end
+                BeanFactoryAdvisorRetrievalHelper -->AbstractAdvisorAutoProxyCreator : List<Advisor>
+                deactivate BeanFactoryAdvisorRetrievalHelper
+
+            deactivate AbstractAdvisorAutoProxyCreator
+
+            AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findAdvisorsThatCanApply()：寻找满足当前bean的Adisor
+            activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+            deactivate AbstractAdvisorAutoProxyCreator
+
+            AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : extendAdvisors()：提供的扩展点，允许对获得的Advisor进行操作
+            activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+            deactivate AbstractAdvisorAutoProxyCreator
+
+            alt 当获得的Advisors不为空时
+                AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : sortAdvisors()：对Advisor进行排序，排序依据：@Order和@Priority注解
+                activate AbstractAdvisorAutoProxyCreator #DarkSalmon
+                deactivate AbstractAdvisorAutoProxyCreator
+            end
+
+        deactivate AbstractAdvisorAutoProxyCreator
+
+    AbstractAdvisorAutoProxyCreator --> AbstractAutoProxyCreator : Object[] specificInterceptors
+    deactivate AbstractAdvisorAutoProxyCreator
+
+    AbstractAutoProxyCreator->AbstractAutoProxyCreator : createProxy() 创建代理
+    activate AbstractAutoProxyCreator #DarkSalmon
+
+        note right of AbstractAutoProxyCreator #aqua
+            创建代理；
+                1.当BeanFactory为类型ConfigurableListableBeanFactory时，
+                    在Bean定义中间接介记录原始beanClass
+                2.创建ProxyFactory，并拷贝AbstractAutoProxyCreator的
+                    ProxyConfig信息给ProxyFactory
+                3.确定是用Cglib还是JDK方式生成代理,默认是Cglib：设置
+                    proxyTargetClass属性，如存在父接口，记录到当前proxyFactory
+        end note
+
+        AbstractAutoProxyCreator->AbstractAutoProxyCreator : buildAdvisors() :如存在公共的Advisor也要放入Advisor链中，并统一转换成Advisor来处理
+        activate AbstractAutoProxyCreator #DarkSalmon
+        deactivate AbstractAutoProxyCreator
+
+        AbstractAutoProxyCreator->AbstractAutoProxyCreator : customizeProxyFactory() :提供的扩展点，可以对ProxyFactory进行操作
+        activate AbstractAutoProxyCreator #DarkSalmon
+        deactivate AbstractAutoProxyCreator
+
+        note right of ProxyFactory #FF5000
+           生成代理对象
+           ---单独时序图说明
+        end note
+        AbstractAutoProxyCreator ->ProxyFactory :getProxy()
+        activate ProxyFactory #DarkSalmon
+        ProxyFactory ->AbstractAutoProxyCreator :proxyObject
+        deactivate ProxyFactory
+
+    deactivate AbstractAutoProxyCreator
+
+<--AbstractAutoProxyCreator : proxyObject
+deactivate AbstractAutoProxyCreator
+    note right of AbstractAutoProxyCreator #FAEBD7
+        *总结
+            1.BeanPostProcessor(具体为AbstractAutoProxyCreator)+ProxyFactory是
+                Spring IoC体系和 AOP体系打通的关键
+                ---AbstractAutoProxyCreator再具体是InfrastructureAdvisorAutoProxyCreator
+            2.与实例化之后生成代理逻辑大致相同，共用基础设施，把筛选匹配的Advisor通过动态代理生成；
+        *备注：
+            1.AbstractAutoProxyCreator属性含义
+                earlyProxyReferences：[提前暴露的代理对象引用]
+                advisedBeans：<cacheKey,false> 记录的是核实过不需要处理的缓存名称
+                proxyTypes：<cacheKey,代理的class> 记录生成的代理Class类型
+                targetSourcedBeans：[记录生成过代理的bean名称]；
+
+    end note
+
+@enduml

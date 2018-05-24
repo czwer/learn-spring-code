@@ -1,0 +1,88 @@
+@startuml
+
+-> BeanDefinitionParserDelegate : parseCustomElement()
+activate BeanDefinitionParserDelegate #DarkSalmon
+
+    note right of BeanDefinitionParserDelegate #FAEBD7
+        介绍component-scan标签解析的主要逻辑
+        测试用例参：org.springframework.context.annotation.SimpleScanTests
+    end note
+
+    BeanDefinitionParserDelegate -> DefaultNamespaceHandlerResolver : resolve()
+    activate DefaultNamespaceHandlerResolver #DarkSalmon
+
+        note right of DefaultNamespaceHandlerResolver #aqua
+            1.根据命名空间url获取ContextNamespaceHandler
+            2.调用ContextNamespaceHandler.init()方法注册各种BeanDefinitionParser
+        end note
+
+    DefaultNamespaceHandlerResolver --> BeanDefinitionParserDelegate : NamespaceHandler
+    deactivate DefaultNamespaceHandlerResolver
+
+
+    BeanDefinitionParserDelegate -> ContextNamespaceHandler:parse()
+    activate ContextNamespaceHandler #DarkSalmon
+        ContextNamespaceHandler -> ComponentScanBeanDefinitionParser: parse()
+        activate ComponentScanBeanDefinitionParser #DarkSalmon
+
+            ComponentScanBeanDefinitionParser -> ClassPathBeanDefinitionScanner:doScan()
+            activate ClassPathBeanDefinitionScanner #DarkSalmon
+                loop String basePackage : basePackages
+                    note right of ClassPathBeanDefinitionScanner #aqua
+                        <font color=red>包下所有Class,逐个遍历含有像@Controller,@Service,@Repository,</font>
+                        <font color=red>@Aspect,@Component等注解的类，这些都是要注册的bean定义</font>
+                    end note
+                    ClassPathBeanDefinitionScanner -> ClassPathScanningCandidateComponentProvider:findCandidateComponents()
+                    activate ClassPathScanningCandidateComponentProvider #DarkSalmon
+                    ClassPathScanningCandidateComponentProvider --> ClassPathBeanDefinitionScanner : candidates
+                    deactivate ClassPathScanningCandidateComponentProvider
+                    loop BeanDefinition candidate : candidates
+                        ClassPathBeanDefinitionScanner -> ClassPathBeanDefinitionScanner:registerBeanDefinition()
+                        activate ClassPathBeanDefinitionScanner #DarkSalmon
+                            note right of ClassPathBeanDefinitionScanner #aqua
+                                <font color=red>注册扫描到的bean到DefaultListableBeanFactory中</font>
+                            end note
+                        deactivate ClassPathBeanDefinitionScanner
+                    end
+                end
+            ClassPathBeanDefinitionScanner --> ComponentScanBeanDefinitionParser:Set<BeanDefinitionHolder>
+            deactivate ClassPathBeanDefinitionScanner
+
+            ComponentScanBeanDefinitionParser->ComponentScanBeanDefinitionParser:registerComponents()
+            activate ComponentScanBeanDefinitionParser #DarkSalmon
+                ComponentScanBeanDefinitionParser ->AnnotationConfigUtils : registerAnnotationConfigProcessors()
+                activate AnnotationConfigUtils #DarkSalmon
+                    note right of AnnotationConfigUtils #aqua
+                        <font color=red>注册基础组件如：</font>
+                        <font color=red>    AnnotationAwareOrderComparator</font>
+                        <font color=red>    ContextAnnotationAutowireCandidateResolver</font>
+                        <font color=red>    ConfigurationClassPostProcessor：对@ComponentScan支持</font>
+                        <font color=red>    AutowiredAnnotationBeanPostProcessor：对@Autowired支持</font>
+                        <font color=red>    RequiredAnnotationBeanPostProcessor：对@Required支持</font>
+                        <font color=red>    CommonAnnotationBeanPostProcessor：对@PostConstruct，@Resource等支持</font>
+                        <font color=red>    EventListenerMethodProcessor</font>
+                        <font color=red>    DefaultEventListenerFactory</font>
+                        <font color=red>也是以bean定义的方式注册</font>
+                    end note
+                    AnnotationConfigUtils ->AnnotationConfigUtils:registerPostProcessor()
+                    activate AnnotationConfigUtils #DarkSalmon
+                    deactivate AnnotationConfigUtils
+                AnnotationConfigUtils --> ComponentScanBeanDefinitionParser : Set<BeanDefinitionHolder>
+                deactivate AnnotationConfigUtils
+            deactivate ComponentScanBeanDefinitionParser
+
+        ComponentScanBeanDefinitionParser --> ContextNamespaceHandler
+        deactivate ComponentScanBeanDefinitionParser
+    ContextNamespaceHandler --> BeanDefinitionParserDelegate
+    deactivate ContextNamespaceHandler
+
+deactivate BeanDefinitionParserDelegate
+
+<--BeanDefinitionParserDelegate
+note right of BeanDefinitionParserDelegate #FAEBD7
+    总结：
+        1.基本原理是运用注解+反射为基础确认是否属于bean定义；
+        2.除了注册bean定义，还会注册一系列配套的基础设置；
+end note
+
+@enduml

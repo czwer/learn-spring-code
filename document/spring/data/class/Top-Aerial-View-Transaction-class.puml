@@ -1,0 +1,83 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    基于<tx:annotation-driven>全视角类图
+end note
+
+
+class AnnotationDrivenBeanDefinitionParser
+note top :注册基础设施
+
+class AnnotationTransactionAttributeSource
+note left : 基础设施：用于获取TransactionAttribute属性：应用AOP起重要作用
+
+class BeanFactoryTransactionAttributeSourceAdvisor
+note top : 基础设施：融入Spring AOP体系扮演Advisor角色，Spring全局扫描所有Advisor时会找到它
+
+interface PlatformTransactionManager
+note top : 事务管理的根基
+
+class SpringTransactionAnnotationParser
+note bottom : 真正扫描@Transactional注解的类
+
+annotation Transactional
+
+abstract class TransactionAspectSupport
+note bottom : TransactionInterceptor把事务的逻辑委托给它了
+
+
+abstract class TransactionAttributeSourcePointcut
+note left : 基础设施：融入Spring AOP体系扮演Pointcut，在Advior中以匿名内部类方式提供
+
+
+interface TransactionDefinition
+note bottom : 描述事务定义
+
+class TransactionInterceptor
+note top : 基础设施：融入Spring AOP体系扮演MethodInterceptor(环绕通知)
+
+class TxNamespaceHandler
+note top :xml解析时，支持tx命名空间解析，注册xxxBeanDefinitionParser，后者再注册基础设施
+
+interface TransactionStatus
+note bottom : 描述事务状态，提供有限的事务管理
+
+abstract class TransactionSynchronizationManager
+note bottom : ThreadLocal中绑定资源：如数据库连接
+
+AnnotationDrivenBeanDefinitionParser ..> AnnotationTransactionAttributeSource
+AnnotationDrivenBeanDefinitionParser ..> BeanFactoryTransactionAttributeSourceAdvisor
+AnnotationDrivenBeanDefinitionParser ..> TransactionInterceptor
+
+
+AnnotationTransactionAttributeSource --> SpringTransactionAnnotationParser
+
+BeanFactoryTransactionAttributeSourceAdvisor --> AnnotationTransactionAttributeSource
+BeanFactoryTransactionAttributeSourceAdvisor --> TransactionInterceptor
+BeanFactoryTransactionAttributeSourceAdvisor --> TransactionAttributeSourcePointcut
+
+
+
+PlatformTransactionManager ..> TransactionDefinition
+PlatformTransactionManager ..> TransactionStatus
+PlatformTransactionManager ..> TransactionSynchronizationManager
+
+SpringTransactionAnnotationParser ...> Transactional
+
+
+TransactionAspectSupport ..> PlatformTransactionManager
+
+TransactionInterceptor ..> TransactionAspectSupport
+
+
+TransactionAttributeSourcePointcut ..> AnnotationTransactionAttributeSource
+
+
+TxNamespaceHandler ..> AnnotationDrivenBeanDefinitionParser
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    Controller：Web请求的具体处理者。
+end note
+
+interface Controller
+Controller : +ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+abstract class AbstractController
+abstract class AbstractUrlViewController
+class ParameterizableViewController
+class ServletForwardingController
+class ServletWrappingController
+class UrlFilenameViewController
+
+
+AbstractController <|-- AbstractUrlViewController
+AbstractController <|-- ParameterizableViewController
+AbstractController <|-- ServletForwardingController
+AbstractController <|-- ServletWrappingController
+
+AbstractUrlViewController <|-- UrlFilenameViewController
+
+
+Controller <|.. AbstractController
+
+
+@enduml

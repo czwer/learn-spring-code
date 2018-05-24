@@ -1,0 +1,156 @@
+@startuml
+-> TransactionInterceptor: invoke()
+activate TransactionInterceptor #DarkSalmon
+
+note left of TransactionInterceptor #FAEBD7
+    *介绍事务作为环绕通知是如何执行的
+        ---我们以@Transactional使用方式进行说明
+        ---这里只描述了主要步骤
+end note
+
+    TransactionInterceptor -> TransactionAspectSupport : invokeWithinTransaction()
+    activate TransactionAspectSupport #DarkSalmon
+
+        TransactionAspectSupport -> AbstractFallbackTransactionAttributeSource: getTransactionAttribute()
+        activate AbstractFallbackTransactionAttributeSource #DarkSalmon
+            note right of AbstractFallbackTransactionAttributeSource #aqua
+                1.获取注解信息：先从缓存中获取，获取不到再解析。
+                解析时在方法上先尝试，获取不到再在类上尝试
+            end note
+
+            AbstractFallbackTransactionAttributeSource -> AbstractFallbackTransactionAttributeSource:computeTransactionAttribute()
+            activate AbstractFallbackTransactionAttributeSource #DarkSalmon
+
+                AbstractFallbackTransactionAttributeSource -> AnnotationTransactionAttributeSource:findTransactionAttribute()
+                activate AnnotationTransactionAttributeSource #DarkSalmon
+
+                    AnnotationTransactionAttributeSource -> AnnotationTransactionAttributeSource : determineTransactionAttribute()
+                    activate AnnotationTransactionAttributeSource #DarkSalmon
+                        note right of AnnotationTransactionAttributeSource #aqua
+                            用SpringTransactionAnnotationParser
+                            来解析@Transactional注解
+                        end note
+
+                        loop
+                            AnnotationTransactionAttributeSource -> TransactionAnnotationParser : parseTransactionAnnotation()
+                            activate TransactionAnnotationParser #DarkSalmon
+                            TransactionAnnotationParser -> AnnotationTransactionAttributeSource : transactionAttribute
+                            deactivate TransactionAnnotationParser
+                        end
+
+                    deactivate AnnotationTransactionAttributeSource
+
+                AnnotationTransactionAttributeSource --> AbstractFallbackTransactionAttributeSource : transactionAttribute
+                deactivate AnnotationTransactionAttributeSource
+
+            deactivate AbstractFallbackTransactionAttributeSource
+
+        AbstractFallbackTransactionAttributeSource --> TransactionAspectSupport
+        deactivate AbstractFallbackTransactionAttributeSource
+
+        TransactionAspectSupport -> TransactionAspectSupport : determineTransactionManager() :确定适用的事务管理器。
+        activate TransactionAspectSupport #DarkSalmon
+        deactivate TransactionAspectSupport
+
+        TransactionAspectSupport -> TransactionAspectSupport : methodIdentification() :
+        activate TransactionAspectSupport #DarkSalmon
+        deactivate TransactionAspectSupport
+
+        alt 存在事务定义和非CallbackPreferringPlatformTransactionManager类型的事务管理器
+
+            note right of TransactionAspectSupport #aqua
+                1.把上下文信息打包到TransactionInfo，在TransactionInfo中
+                    也维护了先前TransactionInfo，便于还原上下文。
+            end note
+            TransactionAspectSupport -> TransactionAspectSupport : createTransactionIfNecessary() :
+            activate TransactionAspectSupport #DarkSalmon
+                TransactionAspectSupport -> AbstractPlatformTransactionManager : getTransaction()
+                activate AbstractPlatformTransactionManager #DarkSalmon
+                    note right of AbstractPlatformTransactionManager #aqua
+                        线程绑定数据库连接，实现事务传播性语义
+                    end note
+                AbstractPlatformTransactionManager --> TransactionAspectSupport : transactionStatus
+                deactivate AbstractPlatformTransactionManager
+            deactivate TransactionAspectSupport
+
+            TransactionAspectSupport -> ReflectiveMethodInvocation : proceed() : invocation.proceedWithInvocation()等价
+            activate ReflectiveMethodInvocation #DarkSalmon
+                note right of ReflectiveMethodInvocation #FF5000
+                    执行其他织入逻辑的调用，
+                    直至调用目标方法，执行数据操作
+                end note
+            ReflectiveMethodInvocation --> TransactionAspectSupport
+            deactivate ReflectiveMethodInvocation
+
+            alt 抛出异常
+
+                TransactionAspectSupport -> TransactionAspectSupport : completeTransactionAfterThrowing() :
+                activate TransactionAspectSupport #DarkSalmon
+
+                    alt 滚异常返回内的异常
+
+                        TransactionAspectSupport -> AbstractPlatformTransactionManager : rollback()
+                        activate AbstractPlatformTransactionManager #DarkSalmon
+                            note right of AbstractPlatformTransactionManager #FF5000
+                                回滚
+                            end note
+                        AbstractPlatformTransactionManager --> TransactionAspectSupport
+                        deactivate AbstractPlatformTransactionManager
+
+                    else 忽略其他异常，继续提交
+
+                        TransactionAspectSupport -> AbstractPlatformTransactionManager : commit()
+                        activate AbstractPlatformTransactionManager #DarkSalmon
+                            note right of AbstractPlatformTransactionManager #FF5000
+                                提交事务，释放资源
+                            end note
+                        AbstractPlatformTransactionManager --> TransactionAspectSupport
+                        deactivate AbstractPlatformTransactionManager
+
+                    end
+
+
+                deactivate TransactionAspectSupport
+
+            end
+
+            TransactionAspectSupport -> TransactionAspectSupport : cleanupTransactionInfo() : 还原transactionInfo
+            activate TransactionAspectSupport #DarkSalmon
+            deactivate TransactionAspectSupport
+
+            TransactionAspectSupport -> TransactionAspectSupport : commitTransactionAfterReturning() : 还原transactionInfo
+            activate TransactionAspectSupport #DarkSalmon
+                TransactionAspectSupport -> AbstractPlatformTransactionManager : commit()
+                activate AbstractPlatformTransactionManager #DarkSalmon
+                    note right of AbstractPlatformTransactionManager #FF5000
+                        提交事务，释放资源
+                    end note
+                AbstractPlatformTransactionManager --> TransactionAspectSupport
+                deactivate AbstractPlatformTransactionManager
+            deactivate TransactionAspectSupport
+
+        else CallbackPreferringPlatformTransactionManager类型的描述略，因时序图已经太大了
+
+        end
+
+
+    TransactionAspectSupport --> TransactionInterceptor : result
+    deactivate TransactionAspectSupport
+
+
+
+
+<-- TransactionInterceptor: result
+deactivate TransactionInterceptor
+
+note right of TransactionInterceptor #FAEBD7
+    *总结
+        1.切记Spring的事务框架设计理念的基本原则：让事务管理的关注点与数据访问管理点相分离。
+            ---我们时序图都是描述的事务，具体数据访问由第三方如Mybatis来实现
+        2.这里使用了lambda表达式的方法引用：
+            invocation::proceed可以认为是符合InvocationCallback.proceedWithInvocation()规范的实现。
+        3.单从@Transactional注解的事务使用方式，JDK动态代理和Cglib动态代理性能上差不多，因都是在
+            织入逻辑执行中去解析的。
+end note
+
+@enduml

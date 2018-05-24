@@ -1,0 +1,71 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    Callback：增强器回调，我们织入的业务逻辑以Callback形式接入Cglib。
+    参考：
+        https://www.cnblogs.com/shijiaqi1066/p/3429691.html
+end note
+
+interface Callback
+class AdvisedDispatcher
+class EqualsInterceptor
+note bottom : Spring帮生成了equals方法
+interface Dispatcher
+note bottom : 每次访问延迟加载属性时都会触发代理类回调方法
+class DynamicAdvisedInterceptor #7FFFD4
+note top : 与FixedChainStaticTargetInterceptor无实质不同，增加获取织入调用链逻辑
+class DynamicUnadvisedExposedInterceptor #7FFFD4
+note bottom : 直接目标方法调用,需要从targetSource.getTarget(),当前代理对象绑定到ThreadLocal
+class DynamicUnadvisedInterceptor #7FFFD4
+note bottom : 直接目标方法调用,需要从targetSource.getTarget()
+class FixedChainStaticTargetInterceptor #7FFFD4
+note bottom : 包装后，间接调用ReflectiveMethodInvocation，调用链逻辑在生成代理时已设置
+class HashCodeInterceptor
+note top : Spring帮生成了hashcode方法
+interface MethodInterceptor
+MethodInterceptor : +Object intercept()
+note left : 能够满足任何的拦截需要，可以用于实现环绕通知
+interface NoOp
+note top : NoOp回调把对方法调用直接委派到这个方法在父类中的实现
+class SerializableNoOp
+note bottom : 暂时理解为标记
+class StaticDispatcher
+class StaticUnadvisedInterceptor #7FFFD4
+note bottom : 直接目标方法调用
+class StaticUnadvisedExposedInterceptor #7FFFD4
+note bottom : 直接目标方法调用，当前代理对象绑定到ThreadLocal
+
+
+
+
+
+Callback <|-- Dispatcher
+Callback <|-- MethodInterceptor
+Callback <|-- NoOp
+
+
+
+Dispatcher <|.. AdvisedDispatcher
+Dispatcher <|.. StaticDispatcher
+
+
+MethodInterceptor <|.. EqualsInterceptor
+MethodInterceptor <|.. FixedChainStaticTargetInterceptor
+MethodInterceptor <|.. DynamicAdvisedInterceptor
+MethodInterceptor <|.. DynamicUnadvisedExposedInterceptor
+MethodInterceptor <|.. DynamicUnadvisedInterceptor
+MethodInterceptor <|.. HashCodeInterceptor
+MethodInterceptor <|.. StaticUnadvisedExposedInterceptor
+MethodInterceptor <|.. StaticUnadvisedInterceptor
+
+
+NoOp <|.. SerializableNoOp
+
+
+
+@enduml

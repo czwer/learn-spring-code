@@ -1,0 +1,135 @@
+@startuml
+autonumber
+
+-> DispatcherServlet: doService()
+activate DispatcherServlet #DarkSalmon
+
+    note left of DispatcherServlet #FAEBD7
+        *DispatcherServlet处理请求主要步骤。
+            ---这里只描述了主要步骤
+    end note
+
+    note right of DispatcherServlet #aqua
+        1.在request中放置上下文环境
+        2.检查是否是文件上传，如果是进行解析
+        3.获得Handler，实际返回的是HandlerExecutionChain：含Handler和HandlerInterceptor
+        4.获得Handler适配器
+        5.Handler处理前调用拦截器
+        6.通过HandlerAdapter执行业务逻辑
+        7.设置默认视图名称
+            ---返回JSON数据不会设置
+        8.Handler处理后视图渲染前，调用拦截器
+        9.处理程序调用的结果
+            a.检查是否有异常
+            b.ModelAndView不空进行视图渲染
+            c.视图渲染后，调用拦截器
+            ---返回JSON数据只有步骤c
+        10.收尾工作：
+            a.如异步处理请求，进一步处理
+            b.如含文件上传，资源清理
+    end note
+    DispatcherServlet -> DispatcherServlet : doDispatch()
+    activate DispatcherServlet #DarkSalmon
+
+        DispatcherServlet -> DispatcherServlet : checkMultipart() :检查是否含文件上传
+        activate DispatcherServlet #DarkSalmon
+        deactivate DispatcherServlet
+
+        DispatcherServlet -> DispatcherServlet : getHandler() :获得处理的Handler
+        activate DispatcherServlet #DarkSalmon
+
+            DispatcherServlet -> RequestMappingHandlerMapping : getHandler()
+            activate RequestMappingHandlerMapping #DarkSalmon
+            RequestMappingHandlerMapping --> DispatcherServlet : HandlerExecutionChain
+            deactivate RequestMappingHandlerMapping
+
+        deactivate DispatcherServlet
+
+        DispatcherServlet -> DispatcherServlet : getHandlerAdapter() :RequestMappingHandlerAdapter
+        activate DispatcherServlet #DarkSalmon
+        deactivate DispatcherServlet
+
+        note right of HandlerExecutionChain #aqua
+            Handler处理前，调用拦截器
+        end note
+        DispatcherServlet -> HandlerExecutionChain : applyPreHandle() :
+        activate HandlerExecutionChain #DarkSalmon
+
+            loop
+                HandlerExecutionChain -> HandlerInterceptor : preHandle()
+                activate HandlerInterceptor #DarkSalmon
+                HandlerInterceptor --> HandlerExecutionChain: boolean
+                deactivate HandlerInterceptor
+            end
+
+        HandlerExecutionChain --> DispatcherServlet
+        deactivate HandlerExecutionChain
+
+
+        DispatcherServlet -> RequestMappingHandlerAdapter : handle() :执行业务逻辑
+        activate RequestMappingHandlerAdapter #DarkSalmon
+        RequestMappingHandlerAdapter --> DispatcherServlet : ModelAndView
+        deactivate RequestMappingHandlerAdapter
+
+        DispatcherServlet -> DispatcherServlet : applyDefaultViewName() :设置默认视图名称
+        activate DispatcherServlet #DarkSalmon
+        deactivate DispatcherServlet
+
+        note right of HandlerExecutionChain #aqua
+            Handler处理后视图渲染前，调用拦截器
+        end note
+        DispatcherServlet -> HandlerExecutionChain : applyPostHandle() :
+        activate HandlerExecutionChain #DarkSalmon
+
+            loop
+                HandlerExecutionChain -> HandlerInterceptor : postHandle()
+                activate HandlerInterceptor #DarkSalmon
+                HandlerInterceptor --> HandlerExecutionChain
+                deactivate HandlerInterceptor
+            end
+
+        HandlerExecutionChain --> DispatcherServlet
+        deactivate HandlerExecutionChain
+
+        DispatcherServlet -> DispatcherServlet : processDispatchResult() :
+        activate DispatcherServlet #DarkSalmon
+
+            DispatcherServlet -> DispatcherServlet : render() : 视图渲染
+            activate DispatcherServlet #DarkSalmon
+            deactivate DispatcherServlet
+
+        deactivate DispatcherServlet
+
+        note right of HandlerExecutionChain #aqua
+            视图渲染后，调用拦截器
+        end note
+        DispatcherServlet -> HandlerExecutionChain : triggerAfterCompletion() :
+        activate HandlerExecutionChain #DarkSalmon
+
+            loop
+                HandlerExecutionChain -> HandlerInterceptor : afterCompletion()
+                activate HandlerInterceptor #DarkSalmon
+                HandlerInterceptor --> HandlerExecutionChain
+                deactivate HandlerInterceptor
+            end
+
+        HandlerExecutionChain --> DispatcherServlet
+        deactivate HandlerExecutionChain
+
+    deactivate DispatcherServlet
+   
+<-- DispatcherServlet
+deactivate DispatcherServlet
+
+note right of DispatcherServlet #FAEBD7
+    *总结
+        1.DispatcherServlet作为总的流程控制者，具体的事情委托给其他角色处理；
+        2.通过HandlerAdapter的形式，统一调用Handler的方式；
+        3.通过HandlerInterceptor可以作为扩展点，对处理过程进行干预；
+        4.DispatcherServlet不关心参数解析，也由具体的HandlerAdapter内部处理；
+            ---HandlerMethodArgumentResolver来负责参数解析；
+    *备注
+        DispatcherServlet是在收到第一次请求时，进行的初始化：准备上下文环境；
+end note
+
+@enduml

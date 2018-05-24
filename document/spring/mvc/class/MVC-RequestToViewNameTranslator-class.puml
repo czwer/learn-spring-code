@@ -1,0 +1,19 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    RequestToViewNameTranslator：用于在未明确提供视图名称时将传入的
+    HttpServletRequest转换为逻辑视图名称。
+end note
+
+interface RequestToViewNameTranslator
+class DefaultRequestToViewNameTranslator #7FFFD4
+
+
+RequestToViewNameTranslator <|.. DefaultRequestToViewNameTranslator
+
+@enduml

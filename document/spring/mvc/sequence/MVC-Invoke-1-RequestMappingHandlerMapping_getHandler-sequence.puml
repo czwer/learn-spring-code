@@ -1,0 +1,71 @@
+@startuml
+autonumber
+
+-> RequestMappingHandlerMapping: getHandler()
+activate RequestMappingHandlerMapping #DarkSalmon
+
+    note left of RequestMappingHandlerMapping #FAEBD7
+        *介绍获得Handler的过程。
+            ---这里只描述了主要步骤
+    end note
+
+    RequestMappingHandlerMapping -> AbstractHandlerMapping : getHandler()
+    activate AbstractHandlerMapping #DarkSalmon
+
+        AbstractHandlerMapping -> AbstractHandlerMethodMapping : getHandlerInternal()
+        activate AbstractHandlerMethodMapping #DarkSalmon
+
+            AbstractHandlerMethodMapping -> UrlPathHelper :getLookupPathForRequest():获取请求路径
+            activate UrlPathHelper #DarkSalmon
+            UrlPathHelper --> AbstractHandlerMethodMapping : lookupPath
+            deactivate UrlPathHelper
+
+            note right of AbstractHandlerMethodMapping #aqua
+                1.根据请求路径查询匹配的MappingRegistration，如果查询不到，
+                    就要用所有已注册Mapping的一个个去匹配
+                2.如果找能够找到，返回找到的（大于一个匹配要抛出异常）；找
+                    不到时，返回null或抛出异常
+            end note
+            AbstractHandlerMethodMapping -> AbstractHandlerMethodMapping : lookupHandlerMethod() : handlerMethod
+            activate AbstractHandlerMethodMapping #DarkSalmon
+
+            deactivate AbstractHandlerMethodMapping
+
+        AbstractHandlerMethodMapping --> AbstractHandlerMapping : HandlerMethod
+        deactivate AbstractHandlerMethodMapping
+
+        alt 没有匹配到，查询默认的
+            AbstractHandlerMapping -> AbstractHandlerMapping : getHandlerInternal()
+            activate AbstractHandlerMapping #DarkSalmon
+            deactivate AbstractHandlerMapping
+        end
+
+        alt 最终没有匹配的，返回null
+<--AbstractHandlerMapping : null
+        end
+
+        AbstractHandlerMapping -> AbstractHandlerMapping : getHandlerExecutionChain() : HandlerExecutionChain
+        activate AbstractHandlerMapping #DarkSalmon
+            note right of AbstractHandlerMapping #aqua
+                包装成HandlerExecutionChain，含有Handler(HandlerMethod)及HandlerInterceptor
+            end note
+            loop HandlerInterceptor interceptor : this.adaptedInterceptors
+                note right of AbstractHandlerMapping #aqua
+                    获得符合当前请求的HandlerInterceptor
+                end note
+            end
+        deactivate AbstractHandlerMapping
+
+    AbstractHandlerMapping -> RequestMappingHandlerMapping : HandlerExecutionChain
+    deactivate AbstractHandlerMapping
+
+<-- RequestMappingHandlerMapping: HandlerExecutionChain
+deactivate RequestMappingHandlerMapping
+
+note right of RequestMappingHandlerMapping #FAEBD7
+    *总结
+        查询符合条件的Handler(HandlerMethod)和HandlerInterceptor
+
+end note
+
+@enduml

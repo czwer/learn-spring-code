@@ -1,0 +1,28 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    MultipartResolver：支持文件上传。
+end note
+
+interface MultipartResolver
+MultipartResolver : +boolean isMultipart(HttpServletRequest request)
+MultipartResolver : +MultipartHttpServletRequest resolveMultipart(HttpServletRequest request)
+MultipartResolver : +void cleanupMultipart(MultipartHttpServletRequest request)
+class CommonsMultipartResolver
+class StandardServletMultipartResolver #7FFFD4
+
+abstract class CommonsFileUploadSupport
+
+
+CommonsFileUploadSupport <|-- CommonsMultipartResolver
+
+MultipartResolver <|.. CommonsMultipartResolver
+MultipartResolver <|.. StandardServletMultipartResolver
+
+
+@enduml

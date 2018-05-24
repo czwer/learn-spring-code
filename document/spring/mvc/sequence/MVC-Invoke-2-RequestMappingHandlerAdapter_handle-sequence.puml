@@ -1,0 +1,115 @@
+@startuml
+autonumber
+
+-> RequestMappingHandlerAdapter: handle()
+activate RequestMappingHandlerAdapter #DarkSalmon
+
+    note left of RequestMappingHandlerAdapter #FAEBD7
+        *介绍通过RequestMappingHandlerAdapter最终
+            调用HandlerMethod的过程。
+            ---这里只描述了主要步骤
+    end note
+
+    RequestMappingHandlerAdapter -> AbstractHandlerMethodAdapter : handle()
+    activate RequestMappingHandlerAdapter #DarkSalmon
+
+        AbstractHandlerMethodAdapter -> RequestMappingHandlerAdapter : handleInternal()
+        activate RequestMappingHandlerAdapter #DarkSalmon
+
+            alt 需要基于session在synchronized块中执行
+                alt 存在session,在synchronized块中执行
+
+                    RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : invokeHandlerMethod(): ModelAndView
+                    activate RequestMappingHandlerAdapter #DarkSalmon
+                    deactivate RequestMappingHandlerAdapter
+
+                else 直接执行
+
+                    RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : invokeHandlerMethod(): ModelAndView
+                    activate RequestMappingHandlerAdapter #DarkSalmon
+                    deactivate RequestMappingHandlerAdapter
+
+                end
+            else 直接执行
+                RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : invokeHandlerMethod(): ModelAndView
+                activate RequestMappingHandlerAdapter #DarkSalmon
+                    note right of RequestMappingHandlerAdapter #aqua
+                        1.包装request和response为ServletWebRequest，
+                        2.包装handlerMethod为ServletInvocableHandlerMethod并设置
+                            HandlerMethodArgumentResolver
+                            HandlerMethodReturnValueHandler
+                            WebDataBinderFactory
+                            ParameterNameDiscoverer
+
+                    end note
+
+                    RequestMappingHandlerAdapter -> ServletInvocableHandlerMethod : invokeAndHandle()
+                    activate ServletInvocableHandlerMethod #DarkSalmon
+                        ServletInvocableHandlerMethod -> InvocableHandlerMethod :invokeForRequest()
+                        activate InvocableHandlerMethod #DarkSalmon
+
+                            note right of InvocableHandlerMethod #FF5000
+                                里面涉及参数绑定
+                            end note
+                            InvocableHandlerMethod -> InvocableHandlerMethod :getMethodArgumentValues()
+                            activate InvocableHandlerMethod #DarkSalmon
+                            deactivate InvocableHandlerMethod
+
+
+                            note right of InvocableHandlerMethod #FF5000
+                                最终通过反射调用方法：getBridgedMethod().invoke(getBean(), args)
+                            end note
+                            InvocableHandlerMethod -> InvocableHandlerMethod :doInvoke(): returnValue
+                            activate InvocableHandlerMethod #DarkSalmon
+                            deactivate InvocableHandlerMethod
+
+                        InvocableHandlerMethod --> ServletInvocableHandlerMethod : returnValue
+                        deactivate InvocableHandlerMethod
+
+                        ServletInvocableHandlerMethod -> HandlerMethodReturnValueHandlerComposite : handleReturnValue()
+                        activate HandlerMethodReturnValueHandlerComposite #DarkSalmon
+                            note right of HandlerMethodReturnValueHandlerComposite #FF5000
+                                Json数据会写入response
+                            end note
+                        HandlerMethodReturnValueHandlerComposite --> ServletInvocableHandlerMethod
+                        deactivate HandlerMethodReturnValueHandlerComposite
+
+                    ServletInvocableHandlerMethod --> RequestMappingHandlerAdapter
+                    deactivate ServletInvocableHandlerMethod
+
+                    note right of RequestMappingHandlerAdapter #aqua
+                        数据包装成ModelAndView
+                    end note
+
+                    RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : getModelAndView(): ModelAndView
+                    activate RequestMappingHandlerAdapter #DarkSalmon
+                    deactivate RequestMappingHandlerAdapter
+
+                    RequestMappingHandlerAdapter -> ServletWebRequest : requestCompleted()
+                    activate ServletWebRequest #DarkSalmon
+                    ServletWebRequest --> RequestMappingHandlerAdapter
+                    deactivate ServletWebRequest
+                deactivate RequestMappingHandlerAdapter
+            end
+
+        RequestMappingHandlerAdapter --> AbstractHandlerMethodAdapter : ModelAndView
+        deactivate RequestMappingHandlerAdapter
+
+    AbstractHandlerMethodAdapter --> RequestMappingHandlerAdapter : ModelAndView
+    deactivate RequestMappingHandlerAdapter
+
+
+
+
+
+
+<-- RequestMappingHandlerAdapter : ModelAndView
+deactivate RequestMappingHandlerAdapter
+
+note right of RequestMappingHandlerAdapter #FAEBD7
+    *总结
+        主要是准备参数，反射调用web接口方法，输出数据。
+
+end note
+
+@enduml

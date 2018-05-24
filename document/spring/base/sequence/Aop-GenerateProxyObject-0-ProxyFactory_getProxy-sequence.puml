@@ -1,0 +1,65 @@
+@startuml
+
+autonumber
+
+
+
+-> ProxyFactory : getProxy()
+activate ProxyFactory #DarkSalmon
+    note left of ProxyFactory #FAEBD7
+        *介绍ProxyFactory获取AopProxy和生成代理对象
+        ---这里只描述了主要步骤
+    end note
+
+    ProxyFactory -> ProxyCreatorSupport : createAopProxy()
+    activate ProxyCreatorSupport #DarkSalmon
+
+        ProxyCreatorSupport -> ProxyCreatorSupport : getAopProxyFactory(): DefaultAopProxyFactory
+        activate ProxyCreatorSupport #DarkSalmon
+        deactivate ProxyCreatorSupport
+
+        ProxyCreatorSupport -> DefaultAopProxyFactory : createAopProxy(AdvisedSupport config)
+        activate DefaultAopProxyFactory #DarkSalmon
+            note right of DefaultAopProxyFactory #FF5000
+                构建具体AopProxy
+            end note
+            alt : 根据AdvisedSupport信息来判断使用哪种代理方式
+                DefaultAopProxyFactory -> JdkDynamicAopProxy : new JdkDynamicAopProxy(config)
+                activate JdkDynamicAopProxy #DarkSalmon
+                JdkDynamicAopProxy --> DefaultAopProxyFactory : aopProxy
+                deactivate JdkDynamicAopProxy
+            else
+                DefaultAopProxyFactory -> ObjenesisCglibAopProxy : new ObjenesisCglibAopProxy(config)
+                activate ObjenesisCglibAopProxy #DarkSalmon
+                ObjenesisCglibAopProxy --> DefaultAopProxyFactory : aopProxy
+                deactivate ObjenesisCglibAopProxy
+            end
+        DefaultAopProxyFactory-->ProxyCreatorSupport : aopProxy
+        deactivate DefaultAopProxyFactory
+
+    ProxyCreatorSupport-->ProxyFactory : aopProxy
+    deactivate ProxyCreatorSupport
+
+    ProxyFactory -> AopProxy : getProxy()
+    activate AopProxy #DarkSalmon
+        note right of AopProxy #FF5000
+           具体由Cglib和JDK方式生成代理对象
+           ---单独时序图说明
+        end note
+    AopProxy-->ProxyFactory : proxyObject
+    deactivate AopProxy
+
+
+<--ProxyFactory: proxyObject
+deactivate ProxyFactory
+
+note right of ProxyFactory #FAEBD7
+    *总结
+        1.每个目标对象创建代理时，都会new ProxyFactory()，是不共享的。
+        2.AopProxy是帮我们生成代理的渠道，并不是我们要使用的代理对象
+    *备注
+        1.ObjenesisCglibAopProxy：是CglibAopProxy的子类，特性是无需构造函数必须存在
+end note
+
+
+@enduml

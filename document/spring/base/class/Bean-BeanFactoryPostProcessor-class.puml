@@ -1,0 +1,63 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    BeanFactoryPostProcessor可以让我们在容器实例化相应对象之前，对注册到容器的BeanDefinition所
+    保存的信息做相应的修改，仅在应用上下文初始化时调用一次。比如修改其中bean定义的某些属性，为
+    bean定义增加其他信息等。
+end note
+
+interface BeanFactoryPostProcessor
+BeanFactoryPostProcessor : +void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+class AspectJWeavingEnabler
+interface BeanDefinitionRegistryPostProcessor #7FFFD4
+note top #7FFFD4: 可以在这一步，增加注册其他的bean定义（非常规bean）
+class ConfigurationClassPostProcessor #FF5000
+note bottom #FF5000: 用于支持@Configuration注解中定义的Bean
+class CustomAutowireConfigurer
+class CustomEditorConfigurer  #7FFFD4
+note top #7FFFD4: 维护自定义PropertyEditor信息
+
+class CustomScopeConfigurer
+class DeprecatedBeanWarner
+abstract class PlaceholderConfigurerSupport
+class PreferencesPlaceholderConfigurer
+class PropertyOverrideConfigurer
+class PropertyPlaceholderConfigurer  #7FFFD4
+note top #7FFFD4: 允许我们在xml配置文件中使用占位符
+class PropertyOverrideConfigurer
+abstract class PropertyResourceConfigurer
+class PropertySourcesPlaceholderConfigurer
+
+BeanDefinitionRegistryPostProcessor <|.. ConfigurationClassPostProcessor
+
+BeanFactoryPostProcessor <|.. AspectJWeavingEnabler
+BeanFactoryPostProcessor <|-- BeanDefinitionRegistryPostProcessor
+BeanFactoryPostProcessor <|.. CustomAutowireConfigurer
+BeanFactoryPostProcessor <|.. CustomEditorConfigurer
+BeanFactoryPostProcessor <|.. CustomScopeConfigurer
+BeanFactoryPostProcessor <|.. DeprecatedBeanWarner
+BeanFactoryPostProcessor <|.. PropertyResourceConfigurer
+
+
+
+PlaceholderConfigurerSupport <|-- PropertyPlaceholderConfigurer
+PlaceholderConfigurerSupport <|-- PropertySourcesPlaceholderConfigurer
+
+
+PropertyPlaceholderConfigurer <|-- PreferencesPlaceholderConfigurer
+
+
+PropertyResourceConfigurer <|-- PlaceholderConfigurerSupport
+PropertyResourceConfigurer <|-- PropertyOverrideConfigurer
+
+
+
+
+
+@enduml

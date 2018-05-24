@@ -1,0 +1,57 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    Advice实现了将被织入到Pointcut规定的Joinpoint处的横切逻辑。
+    per-instance类型的Advice不会在目标类所有对象实例之间共享，
+    而是会为不同的实例对象保存它们各自的状态以及相关逻辑。
+    在Spring AOP中Introduction是唯一的一种per-instance类型的Advice。
+    Introduction可以在不改动目标类定义的情况下，为目标类添加新的属性以
+    及行为。
+end note
+
+interface Advice
+interface Interceptor
+interface IntroductionInterceptor #7FFFD4
+note top #7FFFD4: 用于执行Introduction逻辑
+interface MethodInterceptor
+interface DynamicIntroductionAdvice
+note right : 运行时判断当前Introduction可应用到的目标接口类型
+class DelegatePerTargetObjectIntroductionInterceptor
+note bottom : 会在内部对象与相应的Introduction逻辑实现类之间的映射关系
+class DelegatingIntroductionInterceptor
+class ExposeBeanNameInterceptor
+
+interface IntroductionInfo
+note top : 实现类必须返回预定的目标接口类型
+class IntroductionInfoSupport
+
+
+
+
+Advice <|-- Interceptor
+Advice <|-- DynamicIntroductionAdvice
+
+DynamicIntroductionAdvice <|-- IntroductionInterceptor
+
+Interceptor <|-- MethodInterceptor
+
+IntroductionInfo <|.. IntroductionInfoSupport
+
+IntroductionInfoSupport <|-- DelegatePerTargetObjectIntroductionInterceptor
+IntroductionInfoSupport <|-- DelegatingIntroductionInterceptor
+
+IntroductionInterceptor <|.. DelegatingIntroductionInterceptor
+IntroductionInterceptor <|.. DelegatePerTargetObjectIntroductionInterceptor
+
+MethodInterceptor <.. ExposeBeanNameInterceptor
+MethodInterceptor <|-- IntroductionInterceptor
+
+
+
+
+@enduml

@@ -1,0 +1,74 @@
+@startuml
+
+autonumber
+
+->AbstractRefreshableApplicationContext : refreshBeanFactory()
+    activate AbstractRefreshableApplicationContext #DarkSalmon
+
+    note left of AbstractRefreshableApplicationContext #FAEBD7
+        *介绍xml配置式bean定义读取
+        ---这里只描述了主要步骤
+    end note
+
+    AbstractRefreshableApplicationContext -> XmlWebApplicationContext: loadBeanDefinitions()
+    activate XmlWebApplicationContext #DarkSalmon
+        note right of AbstractRefreshableApplicationContext #aqua
+            1.把配置文件转换为Resource
+            2.读取到的内容转换成Document
+            3.逐一解析元素，解析后注册到DefaultListableBeanFactory中
+        end note
+        loop
+
+            XmlWebApplicationContext -> XmlBeanDefinitionReader: loadBeanDefinitions()
+            activate XmlBeanDefinitionReader #DarkSalmon
+
+                XmlBeanDefinitionReader -> XmlBeanDefinitionReader: doLoadDocument():Document
+                activate XmlBeanDefinitionReader #DarkSalmon
+                deactivate XmlBeanDefinitionReader
+
+                XmlBeanDefinitionReader -> BeanDefinitionDocumentReader: registerBeanDefinitions()
+                activate BeanDefinitionDocumentReader #DarkSalmon
+
+                    BeanDefinitionDocumentReader -> DefaultBeanDefinitionDocumentReader: doRegisterBeanDefinitions()
+                    activate DefaultBeanDefinitionDocumentReader #DarkSalmon
+                        note right of DefaultBeanDefinitionDocumentReader #aqua
+                            解析分两种：
+                                1.解析bean命名空间元素，如<bean>标签
+                                2.解析非bean定义命名空间元素，如<context:component-scan>
+                                    ---涉及新的bean定义注册
+                                ---解析前与解析后，提供了操作Document的扩展点
+                                ---单独时序图描述
+                        end note
+
+                        DefaultBeanDefinitionDocumentReader -> DefaultBeanDefinitionDocumentReader: parseBeanDefinitions()
+                        activate DefaultBeanDefinitionDocumentReader #DarkSalmon
+                        deactivate DefaultBeanDefinitionDocumentReader
+
+                    DefaultBeanDefinitionDocumentReader --> BeanDefinitionDocumentReader
+                    deactivate DefaultBeanDefinitionDocumentReader
+
+                BeanDefinitionDocumentReader --> XmlBeanDefinitionReader
+                deactivate BeanDefinitionDocumentReader
+
+            XmlBeanDefinitionReader <-- XmlWebApplicationContext
+            deactivate XmlBeanDefinitionReader
+
+        end
+
+    AbstractRefreshableApplicationContext <-- XmlWebApplicationContext
+    deactivate XmlWebApplicationContext
+
+
+<--AbstractRefreshableApplicationContext
+    deactivate AbstractRefreshableApplicationContext
+
+
+note right of AbstractRefreshableApplicationContext #FAEBD7
+    总结：
+        1.把定义在xml的bean，转换成内存中BeanDefinition的数据结构；
+        2.期间会实现命名空间的语义；
+end note
+
+
+
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    Java异常层次体系图
+end note
+
+class Throwable
+class Error
+class Exception
+class RuntimeException
+note bottom : 非检查异常，应用程序没有能力处理，人为干预，和Error语义一样
+class xxxNotRuntimeException
+note bottom : 检查异常，应用程序需要捕捉，程序处理
+
+
+
+Exception <|-- RuntimeException
+Exception <|-- xxxNotRuntimeException
+
+Throwable <|-- Error
+Throwable <|-- Exception
+
+@enduml

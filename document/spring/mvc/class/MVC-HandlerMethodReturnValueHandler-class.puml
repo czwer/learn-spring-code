@@ -1,0 +1,32 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    HandlerMethodReturnValueHandler：处理handler的返回值
+end note
+
+interface HandlerMethodReturnValueHandler
+HandlerMethodReturnValueHandler : +handleReturnValue()
+abstract class AbstractMessageConverterMethodProcessor
+AbstractMessageConverterMethodProcessor : #writeWithMessageConverters()
+class HandlerMethodReturnValueHandlerComposite
+class RequestResponseBodyMethodProcessor #FF5000
+
+interface HandlerMethodArgumentResolver
+abstract class AbstractMessageConverterMethodArgumentResolver
+
+
+AbstractMessageConverterMethodArgumentResolver <|-- AbstractMessageConverterMethodProcessor
+
+AbstractMessageConverterMethodProcessor <|-- RequestResponseBodyMethodProcessor
+
+HandlerMethodArgumentResolver <|.. AbstractMessageConverterMethodArgumentResolver
+
+HandlerMethodReturnValueHandler <|.. AbstractMessageConverterMethodProcessor
+HandlerMethodReturnValueHandler <|.. HandlerMethodReturnValueHandlerComposite
+
+@enduml

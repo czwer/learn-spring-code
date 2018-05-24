@@ -1,0 +1,24 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    HandlerMethod：可以理解为最终Web层处理业务逻辑方法的包装。
+end note
+
+class HandlerMethod
+class InvocableHandlerMethod
+class ServletInvocableHandlerMethod #FF5000
+class SyncInvocableHandlerMethod
+
+
+HandlerMethod <|-- InvocableHandlerMethod
+HandlerMethod <|-- SyncInvocableHandlerMethod
+
+
+InvocableHandlerMethod <|-- ServletInvocableHandlerMethod
+
+@enduml

@@ -1,0 +1,93 @@
+@startuml
+-> AbstractPlatformTransactionManager: rollback()
+activate AbstractPlatformTransactionManager #DarkSalmon
+
+    note left of AbstractPlatformTransactionManager #FAEBD7
+        *回滚事务
+            ---模板方法调用实现以DataSourceTransactionManager为例
+            ---这里只描述了主要步骤
+    end note
+
+    AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : processRollback()
+    activate AbstractPlatformTransactionManager #DarkSalmon
+
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerBeforeCompletion():触发回滚前事务同步回调
+        activate AbstractPlatformTransactionManager #DarkSalmon
+            alt 当前需要事务同步
+                AbstractPlatformTransactionManager -> TransactionSynchronizationUtils : triggerBeforeCompletion()
+                activate TransactionSynchronizationUtils #DarkSalmon
+                TransactionSynchronizationUtils --> AbstractPlatformTransactionManager
+                deactivate TransactionSynchronizationUtils
+
+            end
+        deactivate AbstractPlatformTransactionManager
+
+        alt 存在保存点
+            AbstractPlatformTransactionManager -> AbstractTransactionStatus : rollbackToHeldSavepoint()
+            activate AbstractTransactionStatus #DarkSalmon
+                note right of AbstractTransactionStatus #aqua
+                    1.回滚到保存点
+                    2.释放保存点
+                    3.清空TransactionStatus中记录的保存点
+                end note
+            AbstractTransactionStatus --> AbstractPlatformTransactionManager
+            deactivate AbstractTransactionStatus
+        else 新的事务
+            AbstractPlatformTransactionManager -> DataSourceTransactionManager : doRollback() 回滚事务
+            activate DataSourceTransactionManager #DarkSalmon
+
+                DataSourceTransactionManager -> Connection : rollback()
+                activate Connection #DarkSalmon
+                    note right of Connection #aqua
+                        事务回滚
+                    end note
+                Connection --> DataSourceTransactionManager
+                deactivate Connection
+
+            DataSourceTransactionManager --> AbstractPlatformTransactionManager
+            deactivate DataSourceTransactionManager
+
+        else 存在全局事务
+            note right of AbstractPlatformTransactionManager #aqua
+                由具体支持全局事务的子类实现
+            end note
+            AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : doSetRollbackOnly()
+            activate AbstractPlatformTransactionManager #DarkSalmon
+            deactivate AbstractPlatformTransactionManager
+
+        end
+
+        alt 处理中存在异常
+            AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCompletion():触发回滚后事务同步回调，回滚遇到异常，传递出去
+            activate AbstractPlatformTransactionManager #DarkSalmon
+            deactivate AbstractPlatformTransactionManager
+        end
+
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCompletion():触发回滚后事务同步回调，正常回滚
+        activate AbstractPlatformTransactionManager #DarkSalmon
+        deactivate AbstractPlatformTransactionManager
+
+        note right of AbstractPlatformTransactionManager #aqua
+            1.标记已提交
+            2.回复数据库连接原来的信息：自动提交标识
+            3.解除线程绑定资源
+            4.还原数据库连接之前的配置，释放连接
+            5.还原因事务挂起的资源
+        end note
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : cleanupAfterCompletion():提交后资源清理
+        activate AbstractPlatformTransactionManager #DarkSalmon
+        deactivate AbstractPlatformTransactionManager
+
+    deactivate AbstractPlatformTransactionManager
+
+
+<-- AbstractPlatformTransactionManager
+deactivate AbstractPlatformTransactionManager
+
+note right of AbstractPlatformTransactionManager #FAEBD7
+    *总结
+        我们可以把回滚同提交等同看待，流程上有相似的地方。
+
+end note
+
+@enduml

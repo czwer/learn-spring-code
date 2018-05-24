@@ -1,0 +1,88 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    备注：
+        数据绑定的全视角类图
+end note
+
+
+
+interface BeanWrapper
+note top : 核心接口，完成bean属性的操作
+
+interface BindingResult
+note top :代表数据绑定的结果
+
+
+
+class DataBinder
+note top :绑定PropertyValues到目标对象，及验证绑定结果分析
+
+
+interface PropertyAccessor
+note top : 操作bean的属性
+interface ConfigurablePropertyAccessor
+
+interface PropertyEditor
+note top : 将外部的设置值转换为JVM内部的对应类型
+
+interface PropertyEditorRegistry
+note top : 用于注册属性编辑器
+
+interface TypeConverter
+note top : 用于类型转换
+
+interface Validator
+note bottom : 数据校验
+
+
+BindingResult --> BeanWrapper
+
+
+ConfigurablePropertyAccessor <|-- BeanWrapper
+
+
+
+
+DataBinder -->  BindingResult
+DataBinder ..>  Validator
+
+
+PropertyAccessor <|-- ConfigurablePropertyAccessor
+
+PropertyEditorRegistry <|-- ConfigurablePropertyAccessor
+PropertyEditorRegistry <|.. DataBinder
+PropertyEditorRegistry --> PropertyEditor
+
+
+TypeConverter <|-- ConfigurablePropertyAccessor
+TypeConverter <|.. DataBinder
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@enduml

@@ -1,0 +1,112 @@
+@startuml
+
+-> DefaultBeanDefinitionDocumentReader : parseDefaultElement()
+activate DefaultBeanDefinitionDocumentReader #DarkSalmon
+
+    note right of DefaultBeanDefinitionDocumentReader #FAEBD7
+        介绍xml中bean定义的解析
+        测试用例参：org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests
+    end note
+
+    DefaultBeanDefinitionDocumentReader -> DefaultBeanDefinitionDocumentReader : processBeanDefinition()
+    activate DefaultBeanDefinitionDocumentReader #DarkSalmon
+
+        DefaultBeanDefinitionDocumentReader -> BeanDefinitionParserDelegate : parseBeanDefinitionElement()
+        activate BeanDefinitionParserDelegate #DarkSalmon
+
+            note right of BeanDefinitionParserDelegate #aqua
+                解析<bean>标签中各种属性及子标签
+            end note
+            BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseBeanDefinitionElement()
+            activate BeanDefinitionParserDelegate #DarkSalmon
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseBeanDefinitionAttributes()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseMetaElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseLookupOverrideSubElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseReplacedMethodSubElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseConstructorArgElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parsePropertyElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+
+                    BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parsePropertyElement()
+                    activate BeanDefinitionParserDelegate #DarkSalmon
+
+                        BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parsePropertyValue()
+                        activate BeanDefinitionParserDelegate #DarkSalmon
+
+                            BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parsePropertySubElement()
+                            activate BeanDefinitionParserDelegate #DarkSalmon
+
+                                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseArrayElement()
+                                activate BeanDefinitionParserDelegate #DarkSalmon
+                                deactivate BeanDefinitionParserDelegate
+
+                                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseListElement()
+                                activate BeanDefinitionParserDelegate #DarkSalmon
+                                deactivate BeanDefinitionParserDelegate
+
+                                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseSetElement()
+                                activate BeanDefinitionParserDelegate #DarkSalmon
+                                deactivate BeanDefinitionParserDelegate
+
+                                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseMapElement()
+                                activate BeanDefinitionParserDelegate #DarkSalmon
+                                deactivate BeanDefinitionParserDelegate
+
+                                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parsePropsElement()
+                                activate BeanDefinitionParserDelegate #DarkSalmon
+                                deactivate BeanDefinitionParserDelegate
+
+                            deactivate BeanDefinitionParserDelegate
+
+                        deactivate BeanDefinitionParserDelegate
+
+                    deactivate BeanDefinitionParserDelegate
+
+                deactivate BeanDefinitionParserDelegate
+
+                BeanDefinitionParserDelegate -> BeanDefinitionParserDelegate : parseQualifierElements()
+                activate BeanDefinitionParserDelegate #DarkSalmon
+                deactivate BeanDefinitionParserDelegate
+
+            deactivate BeanDefinitionParserDelegate
+
+        BeanDefinitionParserDelegate --> DefaultBeanDefinitionDocumentReader : BeanDefinitionHolder
+        deactivate BeanDefinitionParserDelegate
+
+    deactivate DefaultBeanDefinitionDocumentReader
+
+    note right of BeanDefinitionReaderUtils #aqua
+        <font color=red>注册bean定义到DefaultListableBeanFactory中</font>
+    end note
+    DefaultBeanDefinitionDocumentReader -> BeanDefinitionReaderUtils : registerBeanDefinition()
+    activate BeanDefinitionReaderUtils #DarkSalmon
+    BeanDefinitionReaderUtils -> DefaultBeanDefinitionDocumentReader
+    deactivate BeanDefinitionReaderUtils
+
+
+
+<--DefaultBeanDefinitionDocumentReader
+deactivate DefaultBeanDefinitionDocumentReader
+
+note right of DefaultBeanDefinitionDocumentReader #FAEBD7
+    总结：
+        解析xml中<bean>标签所支持的所有属性及子标签。
+end note
+
+@enduml

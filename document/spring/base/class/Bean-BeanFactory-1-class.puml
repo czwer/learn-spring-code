@@ -1,0 +1,96 @@
+@startuml
+
+note  as N1 #FAEBD7
+背景颜色介绍：
+    红色：非常重要
+    绿色：重点关注
+    黄色：可一般关注
+    灰色：弃用
+    ---简化版类图
+end note
+
+
+interface BeanFactory
+BeanFactory : +Object getBean(String name)
+abstract class AbstractAutowireCapableBeanFactory #FF5000
+AbstractAutowireCapableBeanFactory : #Object createBean()
+AbstractAutowireCapableBeanFactory : +Object applyBeanPostProcessorsAfterInitialization()
+note bottom #FF5000 : createBean()是创建bean实例化的核心，也是嵌入BeanPostPorcessor的核心
+abstract class AbstractBeanFactory #FF5000
+AbstractBeanFactory : +Object getBean(String name)
+note top #FF5000 : getBean()是获取bean实例化的核心
+interface ApplicationContext #FF5000
+note bottom #FF5000 : 单独描述
+interface AutowireCapableBeanFactory
+interface ConfigurableBeanFactory
+interface ConfigurableListableBeanFactory
+class DefaultListableBeanFactory #FF5000
+DefaultListableBeanFactory : -String[] doGetBeanNamesForType()
+DefaultListableBeanFactory : +String[] getBeanNamesForType()
+DefaultListableBeanFactory : +void registerBeanDefinition()
+interface HierarchicalBeanFactory
+HierarchicalBeanFactory : +BeanFactory getParentBeanFactory()
+HierarchicalBeanFactory : +boolean containsLocalBean(String name)
+interface ListableBeanFactory
+
+
+interface ApplicationEventPublisher
+
+interface EnvironmentCapable
+
+interface MessageSource
+
+interface ResourceLoader
+interface ResourcePatternResolver
+
+
+
+
+
+
+AbstractAutowireCapableBeanFactory <|-- DefaultListableBeanFactory
+
+AbstractBeanFactory <|-- AbstractAutowireCapableBeanFactory
+
+AutowireCapableBeanFactory <|.. AbstractAutowireCapableBeanFactory
+AutowireCapableBeanFactory <|-- ConfigurableListableBeanFactory
+
+
+
+
+
+ApplicationEventPublisher <|-- ApplicationContext
+
+
+BeanFactory <|-- AutowireCapableBeanFactory
+BeanFactory <|-- HierarchicalBeanFactory
+BeanFactory <|-- ListableBeanFactory
+
+
+
+ConfigurableBeanFactory <|.. AbstractBeanFactory
+ConfigurableBeanFactory <|-- ConfigurableListableBeanFactory
+
+ConfigurableListableBeanFactory <|.. DefaultListableBeanFactory
+
+
+EnvironmentCapable <|-- ApplicationContext
+
+
+
+HierarchicalBeanFactory <|-- ApplicationContext
+HierarchicalBeanFactory <|-- ConfigurableBeanFactory
+
+ListableBeanFactory <|-- ApplicationContext
+ListableBeanFactory <|-- ConfigurableListableBeanFactory
+
+
+MessageSource <|-- ApplicationContext
+
+ResourceLoader <|-- ResourcePatternResolver
+
+ResourcePatternResolver <|-- ApplicationContext
+
+
+
+@enduml

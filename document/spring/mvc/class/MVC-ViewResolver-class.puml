@@ -1,0 +1,53 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    ViewResolver根据ModelAndView中的逻辑视图名查找相应的View实现类。
+    ---视图定位器
+end note
+
+interface ViewResolver
+ViewResolver : +View resolveViewName(String viewName, Locale locale)
+abstract class AbstractCachingViewResolver
+class AbstractTemplateViewResolver
+class BeanNameViewResolver #7FFFD4
+class ContentNegotiatingViewResolver #7FFFD4
+class FreeMarkerViewResolver
+class GroovyMarkupViewResolver
+class InternalResourceViewResolver #7FFFD4
+note bottom #7FFFD4: 面向单一视图类型：优先级设低一些，处理JSP模板类型的视图映射。
+class ResourceBundleViewResolver
+note bottom : 面向多视图类型：含国际化支持。
+class TilesViewResolver
+class UrlBasedViewResolver
+class ViewResolverComposite #7FFFD4
+class XmlViewResolver
+class XsltViewResolver
+
+
+AbstractCachingViewResolver <|-- ResourceBundleViewResolver
+AbstractCachingViewResolver <|-- UrlBasedViewResolver
+AbstractCachingViewResolver <|-- XmlViewResolver
+
+
+AbstractTemplateViewResolver <|-- FreeMarkerViewResolver
+AbstractTemplateViewResolver <|-- GroovyMarkupViewResolver
+
+
+ViewResolver <|.. AbstractCachingViewResolver
+ViewResolver <|.. BeanNameViewResolver
+ViewResolver <|.. ContentNegotiatingViewResolver
+ViewResolver <|.. ViewResolverComposite
+
+
+UrlBasedViewResolver <|-- AbstractTemplateViewResolver
+UrlBasedViewResolver <|-- InternalResourceViewResolver
+UrlBasedViewResolver <|-- TilesViewResolver
+UrlBasedViewResolver <|-- XsltViewResolver
+
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+-> JdbcTemplate: execute()
+activate JdbcTemplate #DarkSalmon
+
+note left of JdbcTemplate #FAEBD7
+    *介绍JDBC模板方法及CallBack回调。
+        Callback以参数的方式传入
+        ---这里只描述了主要步骤
+end note
+
+    JdbcTemplate -> DataSourceUtils : getConnection() :获取连接
+    activate DataSourceUtils #DarkSalmon
+    DataSourceUtils --> JdbcTemplate : connection
+    deactivate DataSourceUtils
+
+    JdbcTemplate -> PreparedStatementCreator : createPreparedStatement()
+    activate PreparedStatementCreator #DarkSalmon
+    PreparedStatementCreator --> JdbcTemplate : preparedStatement
+    deactivate PreparedStatementCreator
+
+    JdbcTemplate -> PreparedStatementCallback : doInPreparedStatement()
+    activate PreparedStatementCallback #DarkSalmon
+        note right of PreparedStatementCallback #aqua
+            执行数据库操作，并返回结果
+        end note
+    PreparedStatementCallback --> JdbcTemplate : result
+    deactivate PreparedStatementCallback
+
+    alt 如果抛出异常
+        JdbcTemplate -> JdbcTemplate : translateException()
+        activate JdbcTemplate #DarkSalmon
+            JdbcTemplate ->SQLErrorCodeSQLExceptionTranslator : translate()
+            activate SQLErrorCodeSQLExceptionTranslator #DarkSalmon
+                note right of SQLErrorCodeSQLExceptionTranslator #aqua
+                    这里可能涉及调用其他SQLExceptionTranslator子类
+                end note
+            SQLErrorCodeSQLExceptionTranslator --> JdbcTemplate : dataAccessException
+            deactivate SQLErrorCodeSQLExceptionTranslator
+        deactivate JdbcTemplate
+    end
+
+    JdbcTemplate -> JdbcUtils : closeStatement()
+    activate JdbcUtils #DarkSalmon
+    JdbcUtils --> JdbcTemplate : result
+    deactivate JdbcUtils
+
+    JdbcTemplate -> DataSourceUtils : releaseConnection()
+    activate DataSourceUtils #DarkSalmon
+    DataSourceUtils --> JdbcTemplate : result
+    deactivate DataSourceUtils
+
+<-- JdbcTemplate: result
+deactivate JdbcTemplate
+
+note right of JdbcTemplate #FAEBD7
+    *总结
+        通过模板方法集中管理资源的获取和释放，其他类似对称的操作都可以参考这样的处理方式。
+end note
+
+@enduml

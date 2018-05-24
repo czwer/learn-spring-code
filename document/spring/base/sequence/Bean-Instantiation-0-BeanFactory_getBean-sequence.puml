@@ -1,0 +1,173 @@
+@startuml
+
+autonumber
+
+-> AbstractBeanFactory: getBean(String name)
+activate AbstractBeanFactory #DarkSalmon
+    note right of AbstractBeanFactory #FAEBD7
+        介绍getBean()的主要逻辑
+        测试用例参：org.springframework.context.annotation.SimpleScanTests
+    end note
+
+    AbstractBeanFactory -> AbstractBeanFactory: doGetBean()
+    activate AbstractBeanFactory #DarkSalmon
+
+        note right of AbstractBeanFactory #aqua
+           由bean名称|别名获取bean名称
+        end note
+        AbstractBeanFactory -> AbstractBeanFactory: transformedBeanName():转换成bean的名称
+        activate AbstractBeanFactory #DarkSalmon
+        deactivate AbstractBeanFactory
+
+        note right of AbstractBeanFactory #aqua
+           尝试获取该Bean名称对应的缓存单例
+              1.如果缓存中已存在，直接返回缓存对象
+              2.如果缓存中不存在，且当前未创建，看是否有半成品的bean（属性未赋值的bean）,
+                 存在返回该半成品
+                 ---earlySingletonObjects与singletonFactories不同在于有没有调用.getObject()
+                    调用可能是原bean，也能是代理后的
+        end note
+        AbstractBeanFactory -> DefaultSingletonBeanRegistry: getSingleton()
+        activate DefaultSingletonBeanRegistry #DarkSalmon
+        DefaultSingletonBeanRegistry --> AbstractBeanFactory :shareInstance
+        deactivate DefaultSingletonBeanRegistry
+
+        alt sharedInstance != null && args == null
+            note right of AbstractBeanFactory #aqua
+                主要逻辑：
+                    1.要获取FactoryBean本身,当前缓存bean实例是NullBean直接返回；
+                        ---NullBean可以看做已经走过获取FactoryBean逻辑，用于表示为null的情况
+                    2.要获取FactoryBean本身,当前缓存Bean实例非FactoryBean本身，则抛出异常：因与其期望不符
+                    3.要获取FactoryBean本身,当前缓存Bean实例是一个FactoryBean,直接反回;
+                    4.要获取普通Bean实例，当前缓存Bean实例正好一个普通bean，直接返回；
+                    5.<font color=red>要获取普通Bean实例，当前缓存为FactoryBean实例，则由FactoryBean去构建；</font>
+                        <font color=red>---这里是重点，单独时序图描述</font>
+                    ---<font color=red>主要目的：验证Bean实例的合法性，以及对FactoryBean语义的实现。</font>
+            end note
+            AbstractBeanFactory -> AbstractBeanFactory: getObjectForBeanInstance()
+            activate AbstractBeanFactory #DarkSalmon
+            deactivate AbstractBeanFactory
+        else
+            note right of AbstractBeanFactory #aqua
+                主要逻辑：
+                    1.检查当前线程是否在创建，如果在创建说明是循环创建
+                        ---在创建的时候，又要再来创建，说明我们进入了无限循环中
+                    2.如有当前BeanFactory中不包含该Bean名称，且存在父BeanFactory,则交由父BeanFactory来尝试
+                    3.如果属于当前BeanFactory创建的责任，先记录下在创建中
+                    4.获取合并后Bean定义：有可能当前Bean是依赖父Bean中的定义；
+                    5.获取依赖的Bean定义，如果不空，记录Bean之间的依赖关系并先实例化依赖的Bean
+                    6.根据不同的作用域走，不同的创建逻辑
+                        <font color=red>a.如果是当前Bean定义中作用域是Singleton，走Singleton类型Bean的创建逻辑</font>
+                        b.如果是当前Bean定义中作用域是Prototype，走Prototype类型Bean的创建逻辑
+                            ---创建前后，在prototypesCurrentlyInCreation字段中添加和删除标记
+                        c.如果是当前Bean定义中作用域是Prototype，走Prototype类型Bean的创建逻辑
+                    7.如果要求了返回类型，且Bean实例类型与其不符，进行类型转换
+                        ---<font color=red>主要目的：实现BeanFactory的父子责任和Bean生命周期不同作用域的语义。</font>
+            end note
+
+            alt 需要委托父BeanFactory创建
+                AbstractBeanFactory -> parentBeanFactory : getBean()
+                activate parentBeanFactory #DarkSalmon
+                parentBeanFactory --> AbstractBeanFactory : bean
+                deactivate parentBeanFactory
+<-- AbstractBeanFactory:bean
+            end
+
+            alt 存在依赖的Bean定义
+                AbstractBeanFactory -> DefaultSingletonBeanRegistry : registerDependentBean()
+                activate DefaultSingletonBeanRegistry #DarkSalmon
+                DefaultSingletonBeanRegistry --> AbstractBeanFactory : bean
+                deactivate DefaultSingletonBeanRegistry
+
+                AbstractBeanFactory -> AbstractBeanFactory : getBean():先实例化依赖的Bean
+                activate AbstractBeanFactory #DarkSalmon
+                deactivate AbstractBeanFactory
+            end
+
+            alt 当前Bean定义中作用域是Singleton
+                note right of AbstractBeanFactory #aqua
+                    1.getSingleton()与createBean()方法单独描述
+                    2.getObjectForBeanInstance方法前面在前面有描述
+                end note
+
+
+                AbstractBeanFactory -> DefaultSingletonBeanRegistry : getSingleton()
+                activate DefaultSingletonBeanRegistry #DarkSalmon
+
+                    DefaultSingletonBeanRegistry -> AbstractAutowireCapableBeanFactory : createBean()
+                    activate AbstractAutowireCapableBeanFactory #DarkSalmon
+                    AbstractAutowireCapableBeanFactory --> DefaultSingletonBeanRegistry : Object
+                    deactivate AbstractAutowireCapableBeanFactory
+
+                DefaultSingletonBeanRegistry --> AbstractBeanFactory : bean
+                deactivate DefaultSingletonBeanRegistry
+
+                AbstractBeanFactory -> AbstractBeanFactory: getObjectForBeanInstance()
+                activate AbstractBeanFactory #DarkSalmon
+                deactivate AbstractBeanFactory
+            end
+
+            alt 当前Bean定义中作用域是Prototype
+                AbstractBeanFactory -> AbstractAutowireCapableBeanFactory : createBean()
+                activate AbstractAutowireCapableBeanFactory #DarkSalmon
+                AbstractAutowireCapableBeanFactory --> AbstractBeanFactory : Object
+                deactivate AbstractAutowireCapableBeanFactory
+
+                AbstractBeanFactory -> AbstractBeanFactory: getObjectForBeanInstance()
+                activate AbstractBeanFactory #DarkSalmon
+                deactivate AbstractBeanFactory
+            end
+
+            alt 当前Bean定义中作用域是其他作用域时
+                AbstractBeanFactory -> AbstractAutowireCapableBeanFactory : createBean()
+                activate AbstractAutowireCapableBeanFactory #DarkSalmon
+                AbstractAutowireCapableBeanFactory --> AbstractBeanFactory : Object
+                deactivate AbstractAutowireCapableBeanFactory
+
+                AbstractBeanFactory -> AbstractBeanFactory: getObjectForBeanInstance()
+                activate AbstractBeanFactory #DarkSalmon
+                deactivate AbstractBeanFactory
+            end
+
+        end
+
+
+
+    deactivate AbstractBeanFactory
+
+    alt 如果需要进行类型转换
+
+        AbstractBeanFactory -> TypeConverter : convertIfNecessary()
+        activate TypeConverter #DarkSalmon
+        TypeConverter --> AbstractBeanFactory : bean
+        deactivate TypeConverter
+
+    end
+<-- AbstractBeanFactory:bean
+deactivate AbstractBeanFactory
+
+
+    note right of AbstractBeanFactory #FAEBD7
+        *总结
+            围绕：
+                xml或注解描述的bean定义->BeanDefinition->BeanDefinition->BeanWrapper->bean或proxyBean
+            1.缓存中存在，则用缓存中的；
+            2.如果需要FactoryBean来创建，就委托给FactoryBean来创建
+            3.需要父BeanFactory创建时，委托父BeanFactory创建
+            4.根据Bean的作用域进行创建；
+        *备注
+            1.AbstractBeanFactory中字段含义
+                alreadyCreated：记录当前在创建或即将创建
+                prototypesCurrentlyInCreation：记录Prototype作用域创建的Bean
+            2.DefaultSingletonBeanRegistry
+                earlySingletonObjects：<bean名称，提前返回办成品的bean实例或被代理过>
+                dependentBeanMap：<bean名称，被依赖bean的名称>
+                dependenciesForBeanMap：<被依赖bean的名称，bean名称>
+                inCreationCheckExclusions：[创建过程中不需要检查的bean名称]
+                registeredSingletons：[以bean名称来记录实例化顺序]
+                singletonFactories：<bean名称，提前返回办成品的bean实例>
+                singletonObjects：<bean名称，bean实例>
+                singletonsCurrentlyInCreation：[创建过程中的bean名称]，在创建标记，临时的
+    end note
+
+@enduml

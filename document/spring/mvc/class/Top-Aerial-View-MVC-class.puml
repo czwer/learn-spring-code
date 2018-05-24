@@ -1,0 +1,117 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    MVC全视角类图
+end note
+
+class DispatcherServlet
+note top : 处理所有请求的分发,调度中心
+
+interface HandlerAdapter
+note top : 作为DispatcherServlet和Handler之间的适配器
+
+class HandlerExecutionChain
+note bottom : 包含handler和HandlerInterceptor
+
+interface HandlerExceptionResolver
+note bottom : 异常处理
+
+
+interface HandlerInterceptor
+note bottom : 可以在Handler的执行前后对处理流程进行拦截操作
+
+interface HandlerMapping
+note top : 用于处理Web请求与具体请求处理控制器之间的映射关系
+
+class HandlerMethod
+note bottom : 一种handler
+
+interface HandlerMethodArgumentResolver
+note bottom : 参数解析
+
+interface HttpMessageConverter
+note bottom : 返回值参数转换
+
+interface HandlerMethodReturnValueHandler
+note bottom : 返回值处理
+
+interface LocaleResolver
+note bottom : 国际化支持
+
+class ModelAndView
+note bottom : 包含模型和视图
+
+interface MultipartResolver
+note bottom : 支持文件上传
+
+interface ParameterNameDiscoverer
+note bottom :用于发现方法和构造函数的参数名称
+
+interface RequestBodyAdvice
+note bottom :可以理解为处理json输入数据的扩展点
+interface ResponseBodyAdvice
+note bottom :可以理解为处理json输出数据的扩展点
+
+interface RequestToViewNameTranslator
+note bottom :转换逻辑视图名
+
+interface ThemeResolver
+note bottom : 主题解析
+
+interface ThemeSource
+note bottom : 管理针对各个主题的那些静态资源
+
+interface View
+note bottom :  视图渲染
+
+interface ViewResolver
+note bottom : 逻辑视图名到View的转换
+
+interface WebDataBinderFactory
+note bottom : 用于创建WebDataBinder
+
+class WebDataBinder
+note bottom : 完成数据绑定
+
+
+DispatcherServlet --> HandlerAdapter
+DispatcherServlet --> HandlerMapping
+DispatcherServlet --> HandlerExceptionResolver
+DispatcherServlet --> LocaleResolver
+DispatcherServlet --> MultipartResolver
+DispatcherServlet --> RequestToViewNameTranslator
+DispatcherServlet --> ThemeResolver
+DispatcherServlet ..> ThemeSource
+DispatcherServlet ..> View
+DispatcherServlet ..> ViewResolver
+
+
+
+HandlerAdapter ..> HandlerMethod
+HandlerAdapter ..> ModelAndView
+HandlerAdapter ..> WebDataBinderFactory
+
+HandlerExecutionChain --> HandlerInterceptor
+HandlerExecutionChain --> HandlerMethod
+
+
+HandlerMapping --> HandlerMethod
+
+HandlerMethod ..> HandlerMethodArgumentResolver
+HandlerMethod ..> HandlerMethodReturnValueHandler
+HandlerMethod --> ParameterNameDiscoverer
+
+HandlerMethodArgumentResolver ..> RequestBodyAdvice
+
+HandlerMethodReturnValueHandler ..> HttpMessageConverter
+HandlerMethodReturnValueHandler ..> ResponseBodyAdvice
+
+
+WebDataBinderFactory ..> WebDataBinder
+
+@enduml

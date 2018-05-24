@@ -1,0 +1,38 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    HandlerExceptionResolver：在Handler查找以及Handler执行期间的异常处理。
+end note
+
+interface HandlerExceptionResolver
+HandlerExceptionResolver : +ModelAndView resolveException()
+abstract class AbstractHandlerExceptionResolver
+abstract class AbstractHandlerMethodExceptionResolver
+class DefaultHandlerExceptionResolver #7FFFD4
+class ExceptionHandlerExceptionResolver
+class HandlerExceptionResolverComposite #7FFFD4
+class ResponseStatusExceptionResolver
+class SimpleMappingExceptionResolver
+
+
+AbstractHandlerExceptionResolver <|-- AbstractHandlerMethodExceptionResolver
+AbstractHandlerExceptionResolver <|-- DefaultHandlerExceptionResolver
+AbstractHandlerExceptionResolver <|-- ResponseStatusExceptionResolver
+AbstractHandlerExceptionResolver <|-- SimpleMappingExceptionResolver
+
+AbstractHandlerMethodExceptionResolver <|-- ExceptionHandlerExceptionResolver
+
+
+HandlerExceptionResolver <|.. AbstractHandlerExceptionResolver
+HandlerExceptionResolver <|.. HandlerExceptionResolverComposite
+
+
+
+
+
+@enduml

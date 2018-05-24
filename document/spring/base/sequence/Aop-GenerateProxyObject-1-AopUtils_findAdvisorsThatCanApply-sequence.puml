@@ -1,0 +1,106 @@
+@startuml
+
+autonumber
+
+
+
+-> AopUtils : findAdvisorsThatCanApply()
+activate AopUtils #DarkSalmon
+    note left of AopUtils #FAEBD7
+        *介绍AopUtils筛选Advisor中适用Class的过程
+        ---这里只描述了主要步骤
+    end note
+
+    note right of AopUtils #aqua
+         先循环遍历出所有能应用当前class的IntroductionAdvisor类型
+    end note
+    loop candidate : candidateAdvisors
+
+        AopUtils -> AopUtils : canApply() : boolean
+        activate AopUtils #DarkSalmon
+
+            alt 如果是IntroductionAdvisor类型
+
+                AopUtils -> ClassFilter :  matches()
+                activate ClassFilter #DarkSalmon
+                ClassFilter -> AopUtils : boolean
+                deactivate ClassFilter
+
+            else 如果是PointcutAdvisor类型
+
+                note right of AopUtils #aqua
+                    主要逻辑：
+                       1.先在类上匹配，类通不过就不需要继续匹配了
+                          ---提高性能
+                       2.如果MethodMatcher为MethodMather.True就不用判断了，直接返回true
+                          ---提高性能
+                       3.如MethodMatcher为IntroductionAwareMethodMatcher类型进行转换
+                       4.获取类信息：通常是当前的类，但在CGLIB生成子类的情况下是原始类
+                       5.获取类及父类声明的所有方法
+                       6.运用MethodMatcher对每个方法进行匹配，只要有ture的就中止匹配
+                          ---提高性能
+                end note
+                AopUtils -> AopUtils : canApply() : boolean
+                activate AopUtils #DarkSalmon
+
+                    AopUtils -> ClassFilter :  matches()
+                    activate ClassFilter #DarkSalmon
+                    ClassFilter -> AopUtils : boolean
+                    deactivate ClassFilter
+
+                    loop clazz : classes
+
+                        loop method : methods
+                            AopUtils -> methodMatcher:matches()
+                            activate methodMatcher #DarkSalmon
+                            methodMatcher -> AopUtils : boolean
+                            deactivate methodMatcher
+                        end
+
+                    end
+
+                deactivate AopUtils
+
+            else 默认是适用的，返回true
+
+            end
+
+
+        deactivate AopUtils
+
+    end
+
+    note right of AopUtils #aqua
+        逻辑同上，唯一不同是参数不同：只把否有IntroductionAdvisor类型的Advisor信息作为入参之一
+    end note
+    loop candidate : candidateAdvisors
+
+        AopUtils -> AopUtils : canApply() : boolean
+        activate AopUtils #DarkSalmon
+        deactivate AopUtils
+
+    end
+
+
+
+
+
+<--AopUtils: List<Advisor>
+deactivate AopUtils
+
+note right of AopUtils #FAEBD7
+    *总结
+        1.实现Pointcut语义,能在范围大的层次上确定，就不用要处理范围小的
+            ---减少不必要的工作量，越懒，越有价值
+    *备注
+        1.Introduction：是一种Advice，会为不同的实例对象保存它们各自的状态以及相关逻辑。
+            可以在不改动目标类定义的情况下，为目标类添加新的属性以及行为。
+        2.IntroductionAdvisor：只能应用于Introduction类型的Advisor；
+        3.IntroductionAwareMethodMatcher：一种特殊的MethodMatcher,考虑了Introduction是否存在。
+        4.常用的Advisor：
+            BeanFactoryTransactionAttributeSourceAdvisor：织入事务
+            BeanFactoryCacheOperationSourceAdvisor：织入缓存
+end note
+
+
+@enduml

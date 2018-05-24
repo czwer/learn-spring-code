@@ -1,0 +1,72 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    Validator：负责实现具体的验证逻辑。
+    Errors：负责承载验证过程中出现的错误信息
+end note
+
+interface Errors
+abstract class AbstractBindingResult
+abstract class AbstractErrors
+abstract class AbstractPropertyBindingResult
+class BeanPropertyBindingResult
+class BindException
+interface BindingResult
+class DirectFieldBindingResult
+class EscapedErrors
+class MapBindingResult
+class WebExchangeBindException
+
+
+
+interface Validator
+Validator : +boolean supports(Class<?> clazz)
+Validator : +void validate(@Nullable Object target, Errors errors)
+class CustomValidatorBean
+class LocalValidatorFactoryBean
+class OptionalValidatorFactoryBean
+interface SmartValidator
+class SpringValidatorAdapter
+
+interface javax.validation.Validator
+
+AbstractBindingResult <|-- AbstractPropertyBindingResult
+AbstractBindingResult <|-- MapBindingResult
+
+AbstractErrors <|-- AbstractBindingResult
+
+AbstractPropertyBindingResult <|-- BeanPropertyBindingResult
+AbstractPropertyBindingResult <|-- DirectFieldBindingResult
+
+
+BindingResult <|.. BindException
+BindingResult <|.. WebExchangeBindException
+
+
+Errors <|.. AbstractErrors
+Errors <|-- BindingResult
+Errors <|.. EscapedErrors
+
+
+javax.validation.Validator <|.. SpringValidatorAdapter
+
+LocalValidatorFactoryBean <|-- OptionalValidatorFactoryBean
+
+
+SmartValidator <|.. SpringValidatorAdapter
+
+SpringValidatorAdapter <|-- CustomValidatorBean
+SpringValidatorAdapter <|-- LocalValidatorFactoryBean
+
+
+Validator <|.. CustomValidatorBean
+Validator ..> Errors
+Validator <|-- SmartValidator
+
+
+@enduml

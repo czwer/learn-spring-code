@@ -1,0 +1,23 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用
+    WebDataBinderFactory：用于创建WebDataBinder实例的工厂类。
+end note
+
+interface WebDataBinderFactory
+class DefaultDataBinderFactory
+class InitBinderDataBinderFactory
+class ServletRequestDataBinderFactory #FF5000
+
+DefaultDataBinderFactory <|-- InitBinderDataBinderFactory
+
+InitBinderDataBinderFactory <|-- ServletRequestDataBinderFactory
+
+WebDataBinderFactory <|.. DefaultDataBinderFactory
+
+@enduml

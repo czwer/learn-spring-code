@@ -1,0 +1,57 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    HandlerMapping：负责查找Handler以处理web请求。
+end note
+
+interface HandlerMapping
+HandlerMapping : +HandlerExecutionChain getHandler(HttpServletRequest request)
+abstract class AbstractDetectingUrlHandlerMapping
+abstract class AbstractHandlerMapping
+abstract class AbstractHandlerMethodMapping<T> #FF5000
+AbstractHandlerMethodMapping : -MappingRegistry mappingRegistry = new MappingRegistry()
+note left  #FF5000: HandlerMethod注册在mappingRegistry变量中
+abstract class AbstractUrlHandlerMapping
+class BeanNameUrlHandlerMapping #7FFFD4
+note bottom #7FFFD4: 根据URL与Controller的bean定义的名称进行匹配。
+interface MatchableHandlerMapping
+class RequestMappingHandlerMapping  #FF5000
+note bottom #FF5000: 常用
+abstract class RequestMappingInfoHandlerMapping
+class SimpleUrlHandlerMapping
+class WebSocketHandlerMapping
+
+
+
+AbstractDetectingUrlHandlerMapping <|-- BeanNameUrlHandlerMapping
+
+AbstractUrlHandlerMapping <|-- AbstractDetectingUrlHandlerMapping
+
+
+
+AbstractHandlerMapping <|-- AbstractHandlerMethodMapping
+AbstractHandlerMapping <|-- AbstractUrlHandlerMapping
+
+AbstractHandlerMethodMapping <|-- RequestMappingInfoHandlerMapping
+
+
+AbstractUrlHandlerMapping <|-- SimpleUrlHandlerMapping
+
+HandlerMapping <|.. AbstractHandlerMapping
+HandlerMapping <|-- MatchableHandlerMapping
+
+
+MatchableHandlerMapping <|.. AbstractUrlHandlerMapping
+MatchableHandlerMapping <|.. RequestMappingHandlerMapping
+
+
+RequestMappingInfoHandlerMapping <|-- RequestMappingHandlerMapping
+
+SimpleUrlHandlerMapping <|-- WebSocketHandlerMapping
+
+@enduml

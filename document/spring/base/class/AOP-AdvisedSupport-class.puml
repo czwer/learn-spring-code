@@ -1,0 +1,59 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+
+class AdvisedSupport #FF5000
+AdvisedSupport : -Advisor[] advisorArray
+AdvisedSupport : -List<Advisor> advisors
+AdvisedSupport : ~TargetSource targetSource
+AdvisedSupport : +void addAdvisor(Advisor advisor)
+AdvisedSupport : +void addAdvice(Advice advice)
+interface Advised
+note top : 承载生成代理对象所需的必要信息，如目标类，Advice,Advisor等
+class ProxyCreatorSupport
+class ProxyConfig
+ProxyConfig : -boolean proxyTargetClass
+ProxyConfig : -boolean optimize
+ProxyConfig : -boolean opaque
+ProxyConfig : -boolean exposeProxy
+ProxyConfig : -boolean frozen
+note bottom : 代理对象生成时，采取哪些行为措施，可以理解为开关
+class ProxyFactory  #FF5000
+ProxyFactory : -AopProxyFactory aopProxyFactory
+ProxyFactory : #final synchronized AopProxy createAopProxy()
+ProxyFactory : +Object getProxy()
+class AspectJProxyFactory  #FF5000
+note bottom : 支持@Aspect注解形式的Spring AOP
+class ProxyFactoryBean #7FFFD4
+ProxyFactoryBean : +Object getObject()
+interface TargetClassAware
+
+
+interface FactoryBean<T>
+
+
+Advised <|.. AdvisedSupport
+
+AdvisedSupport <|-- ProxyCreatorSupport
+
+
+FactoryBean <|.. ProxyFactoryBean
+
+
+
+ProxyConfig <|-- AdvisedSupport
+
+ProxyCreatorSupport <-- AspectJProxyFactory
+ProxyCreatorSupport <|-- ProxyFactory
+ProxyCreatorSupport <|-- ProxyFactoryBean
+
+TargetClassAware <|-- Advised
+
+@enduml

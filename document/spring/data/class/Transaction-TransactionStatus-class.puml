@@ -1,0 +1,45 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    TransactionStatus表示整个事务处理过程中的事务状态，更多时候是在
+    编程式事务中使用该接口。
+end note
+
+
+interface TransactionStatus
+TransactionStatus : +boolean isNewTransaction()
+TransactionStatus : +boolean hasSavepoint()
+TransactionStatus : +void setRollbackOnly()
+TransactionStatus : +boolean isRollbackOnly()
+TransactionStatus : +void flush()
+TransactionStatus : +boolean isCompleted()
+abstract class AbstractTransactionStatus
+class DefaultTransactionStatus #FF5000
+DefaultTransactionStatus : -Object transaction
+DefaultTransactionStatus : -boolean newTransaction
+DefaultTransactionStatus : -boolean newSynchronization
+DefaultTransactionStatus : -boolean readOnly
+DefaultTransactionStatus : -Object suspendedResources
+interface Flushable
+interface SavepointManager
+class SimpleTransactionStatus
+
+
+
+AbstractTransactionStatus <|-- DefaultTransactionStatus
+AbstractTransactionStatus <|-- SimpleTransactionStatus
+
+
+Flushable <|-- TransactionStatus
+
+SavepointManager <|-- TransactionStatus
+
+
+TransactionStatus <|.. AbstractTransactionStatus
+
+@enduml

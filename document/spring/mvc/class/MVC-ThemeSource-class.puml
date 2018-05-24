@@ -1,0 +1,39 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    ThemeSource：负责管理针对各个主题的那些静态资源。
+end note
+
+interface ThemeSource
+ThemeSource : +Theme getTheme(String themeName)
+abstract class AbstractRefreshableWebApplicationContext
+class AnnotationConfigWebApplicationContext
+class DelegatingThemeSource
+class GenericWebApplicationContext
+class GroovyWebApplicationContext
+interface HierarchicalThemeSource
+class ResourceBundleThemeSource #FF5000
+note bottom #FF5000: 允许我们以properties文件来定义每个主题的静态资源
+class StaticWebApplicationContext
+class XmlWebApplicationContext
+
+AbstractRefreshableWebApplicationContext <|-- AnnotationConfigWebApplicationContext
+AbstractRefreshableWebApplicationContext <|-- GroovyWebApplicationContext
+AbstractRefreshableWebApplicationContext <|-- XmlWebApplicationContext
+
+
+HierarchicalThemeSource <|.. DelegatingThemeSource
+HierarchicalThemeSource <|.. ResourceBundleThemeSource
+
+
+ThemeSource <|.. AbstractRefreshableWebApplicationContext
+ThemeSource <|.. GenericWebApplicationContext
+ThemeSource <|-- HierarchicalThemeSource
+ThemeSource <|.. StaticWebApplicationContext
+
+@enduml

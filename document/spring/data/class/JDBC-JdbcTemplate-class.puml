@@ -1,0 +1,27 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+end note
+
+class JdbcTemplate
+abstract class JdbcAccessor
+JdbcAccessor : -DataSource dataSource
+JdbcAccessor : -SQLExceptionTranslator exceptionTranslator
+note left : 为子类提供了公共属性
+interface JdbcOperations
+JdbcOperations : +<T> T execute(xxxCallback<T> action)
+note right : 定义了可以使用的JDBC操作集合
+interface InitializingBean
+
+JdbcAccessor <|-- JdbcTemplate
+
+JdbcOperations <|.. JdbcTemplate
+
+InitializingBean <|-- JdbcAccessor
+
+@enduml

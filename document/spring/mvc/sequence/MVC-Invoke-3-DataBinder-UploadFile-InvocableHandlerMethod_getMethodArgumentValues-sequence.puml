@@ -1,0 +1,77 @@
+@startuml
+autonumber
+
+-> InvocableHandlerMethod: getMethodArgumentValues()
+activate InvocableHandlerMethod #DarkSalmon
+
+    note left of InvocableHandlerMethod #FAEBD7
+        *介绍Web调用JSON数据绑定。
+            ---这里只描述了主要步骤
+    end note
+
+    InvocableHandlerMethod -> HandlerMethod : getMethodParameters():获得方法参数信息
+    activate HandlerMethod #DarkSalmon
+    HandlerMethod --> InvocableHandlerMethod : MethodParameter[]
+    deactivate HandlerMethod
+    note right of InvocableHandlerMethod #aqua
+        获取当前接口方法所有参数，从请求中键值对，对它们进行赋值
+        ---这里参数可能是个Vo，也可能是Integer类型字段，我们暂且理解为Vo
+    end note
+    loop
+        note right of InvocableHandlerMethod #aqua
+            1.HandlerMethodArgumentResolverComposite中获取支持当前参数的
+                HandlerMethodArgumentResolver进行参数解析；
+                ---用到RequestParamMethodArgumentResolver
+            2.前面其实已经解析了，这里只是取出来；
+            3.通过DataBinderFactory构建WebDataBinder；
+                ---用到ServletRequestDataBinderFactory
+                ---用到ExtendedServletRequestDataBinder
+            4.如有必要进行格式转换
+        end note
+
+
+        InvocableHandlerMethod -> HandlerMethodArgumentResolverComposite: resolveArgument()：解析参数
+        activate HandlerMethodArgumentResolverComposite #DarkSalmon
+
+            HandlerMethodArgumentResolverComposite -> RequestParamMethodArgumentResolver: resolveArgument()
+            activate RequestParamMethodArgumentResolver #DarkSalmon
+
+                RequestParamMethodArgumentResolver -> StandardMultipartHttpServletRequest: getFile()
+                activate StandardMultipartHttpServletRequest #DarkSalmon
+
+
+
+                StandardMultipartHttpServletRequest --> RequestParamMethodArgumentResolver : Object
+                deactivate StandardMultipartHttpServletRequest
+
+                note right of RequestParamMethodArgumentResolver #aqua
+                   如有必要进行转换
+                end note
+                RequestParamMethodArgumentResolver -> DataBinder : convertIfNecessary()
+                activate DataBinder #DarkSalmon
+                DataBinder --> RequestParamMethodArgumentResolver
+                deactivate DataBinder
+
+            RequestParamMethodArgumentResolver --> HandlerMethodArgumentResolverComposite : Object
+            deactivate RequestParamMethodArgumentResolver
+
+        HandlerMethodArgumentResolverComposite --> InvocableHandlerMethod : Object
+        deactivate HandlerMethodArgumentResolverComposite
+
+
+    end
+
+   
+<-- InvocableHandlerMethod : Object[]
+deactivate InvocableHandlerMethod
+
+note right of InvocableHandlerMethod #FAEBD7
+    *总结
+        1.仅是把前期解析的结果拿过来
+    *备注
+        1.RequestParamMethodArgumentResolver
+            ---文件上传提交
+
+end note
+
+@enduml

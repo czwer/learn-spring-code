@@ -1,0 +1,43 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+            ---简化版类图
+    MethodMatcher用于判断将目标方法是否匹配Pointcut。
+end note
+
+interface MethodMatcher
+MethodMatcher : +boolean matches(Method method, @Nullable Class<?> targetClass)
+MethodMatcher : +boolean isRuntime()
+MethodMatcher : +boolean matches(Method method, @Nullable Class<?> targetClass, Object... args)
+MethodMatcher : +MethodMatcher TRUE = TrueMethodMatcher.INSTANCE
+class AdviceExcludingMethodMatcher
+class ClassFilterAwareUnionMethodMatcher
+abstract class DynamicMethodMatcher #7FFFD4
+interface IntroductionAwareMethodMatcher
+class IntersectionMethodMatcher
+abstract class StaticMethodMatcher #FF5000
+class TrueMethodMatcher
+class UnionMethodMatcher
+
+MethodMatcher <|.. DynamicMethodMatcher
+MethodMatcher <|-- IntroductionAwareMethodMatcher
+MethodMatcher <|.. StaticMethodMatcher
+MethodMatcher <|.. TrueMethodMatcher
+
+
+IntroductionAwareMethodMatcher <|.. IntersectionMethodMatcher
+IntroductionAwareMethodMatcher <|.. UnionMethodMatcher
+
+
+StaticMethodMatcher <|-- AdviceExcludingMethodMatcher
+StaticMethodMatcher <|-- AnnotationMethodMatcher
+
+
+UnionMethodMatcher <|-- ClassFilterAwareUnionMethodMatcher
+
+@enduml

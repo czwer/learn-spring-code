@@ -1,0 +1,52 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    TransactionDefinition负责定义事务相关属性，包括隔离级别，传播行为等
+end note
+
+interface TransactionDefinition
+TransactionDefinition : +int getPropagationBehavior()
+TransactionDefinition : +int getIsolationLevel()
+TransactionDefinition : +int getTimeout()
+TransactionDefinition : +int isReadOnly()
+class DefaultTransactionAttribute  #FF5000
+class DefaultTransactionDefinition #00FFFF
+abstract class DelegatingTransactionAttribute
+abstract class DelegatingTransactionDefinition
+class RuleBasedTransactionAttribute
+interface TransactionAttribute #00FFFF
+TransactionAttribute : + boolean rollbackOn(Throwable ex)
+note bottom #00FFFF: 主要面向Spring AOP进行声明式事务管理
+class TransactionTemplate
+note bottom : 提供编程式事务管理的模板方法类
+
+
+interface TransactionOperations
+TransactionOperations : +<T> T execute(TransactionCallback<T> action)
+
+DefaultTransactionAttribute <|-- RuleBasedTransactionAttribute
+
+DefaultTransactionDefinition <|-- DefaultTransactionAttribute
+DefaultTransactionDefinition <|-- TransactionTemplate
+
+
+DelegatingTransactionDefinition <|-- DelegatingTransactionAttribute
+
+
+TransactionAttribute <|.. DefaultTransactionAttribute
+TransactionAttribute <|.. DelegatingTransactionAttribute
+
+
+TransactionDefinition <|.. DefaultTransactionDefinition
+TransactionDefinition <|.. DelegatingTransactionDefinition
+TransactionDefinition <|-- TransactionAttribute
+
+TransactionOperations <|.. TransactionTemplate
+
+
+@enduml

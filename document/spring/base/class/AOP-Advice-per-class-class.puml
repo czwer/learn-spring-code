@@ -1,0 +1,58 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+        ---简化版类图
+    1.Advice织入到Pointcut规定的Joinpoint处的横切逻辑。
+    2.per-class类型的Advice是指，该类型的Advice的实例可以在目标对象类的所有实例之间共享。
+    3.xxx对等物的存在，使我们以MethodInterceptor统一的方式在AOP运行时进行方法调用
+end note
+
+interface Advice
+interface AfterAdvice
+interface AfterReturningAdvice
+interface BeforeAdvice
+interface MethodBeforeAdvice
+interface Interceptor
+interface MethodInterceptor #FF5000
+note right #FF5000: 相当于Around Advice，具体的实现我们自己来做
+interface ThrowsAdvice
+class AfterReturningAdviceInterceptor #FF5000
+note bottom #FF5000: 可以理解为AfterReturningAdvice实现的对等物
+class MethodBeforeAdviceInterceptor #FF5000
+note bottom #FF5000: 可以理解为MethodBeforeAdvice实现的对等物
+class ThrowsAdviceInterceptor #FF5000
+note bottom #FF5000: 可以理解为ThrowsAdvice实现的对等物
+
+
+
+
+Advice <|-- AfterAdvice
+Advice <|-- BeforeAdvice
+Advice <|-- Interceptor
+
+
+AfterAdvice <|-- AfterReturningAdvice
+AfterAdvice <|.. AfterReturningAdviceInterceptor
+AfterAdvice <|-- ThrowsAdvice
+AfterAdvice <|.. ThrowsAdviceInterceptor
+
+
+
+BeforeAdvice <|--  MethodBeforeAdvice
+
+Interceptor <|-- MethodInterceptor
+
+
+MethodInterceptor <|.. AfterReturningAdviceInterceptor
+MethodInterceptor <|.. MethodBeforeAdviceInterceptor
+MethodInterceptor <|.. ThrowsAdviceInterceptor
+
+
+
+
+@enduml

@@ -1,0 +1,51 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要
+        绿色：重点关注
+        黄色：可一般关注
+        灰色：弃用
+    HandlerInterceptor：可以在Handler的执行前后对处理流程进行拦截操作。主要方法如下：
+        preHandle()：调用具体的Handler处理Web请求之前执行；
+        postHanle()：调用具体的Handler处理Web请求之后，并且在视图解析和渲染之前；
+        afterCompletion()：视图渲染完成，不管是否异常，都会执行；
+end note
+
+interface HandlerInterceptor
+HandlerInterceptor : +default boolean preHandle()
+HandlerInterceptor : +default void postHandle()
+HandlerInterceptor : +default void afterCompletion()
+
+interface AsyncHandlerInterceptor
+class ConversionServiceExposingInterceptor #FF5000
+abstract class HandlerInterceptorAdapter
+class LocaleChangeInterceptor
+class MappedInterceptor
+class ResourceUrlProviderExposingInterceptor #FF5000
+class ThemeChangeInterceptor
+class UserRoleAuthorizationInterceptor
+class WebContentInterceptor
+class WebRequestHandlerInterceptorAdapter
+
+
+
+
+AsyncHandlerInterceptor <|.. HandlerInterceptorAdapter
+AsyncHandlerInterceptor <|.. WebRequestHandlerInterceptorAdapter
+
+
+HandlerInterceptor <|-- AsyncHandlerInterceptor
+HandlerInterceptor <|.. MappedInterceptor
+HandlerInterceptor <|.. WebContentInterceptor
+
+
+HandlerInterceptorAdapter <|-- ConversionServiceExposingInterceptor
+HandlerInterceptorAdapter <|-- LocaleChangeInterceptor
+HandlerInterceptorAdapter <|-- ResourceUrlProviderExposingInterceptor
+HandlerInterceptorAdapter <|-- ThemeChangeInterceptor
+HandlerInterceptorAdapter <|-- UserRoleAuthorizationInterceptor
+
+
+
+@enduml
