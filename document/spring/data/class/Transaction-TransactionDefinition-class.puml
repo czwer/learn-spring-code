@@ -2,10 +2,10 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
     TransactionDefinition负责定义事务相关属性，包括隔离级别，传播行为等
 end note
 
@@ -15,13 +15,13 @@ TransactionDefinition : +int getIsolationLevel()
 TransactionDefinition : +int getTimeout()
 TransactionDefinition : +int isReadOnly()
 class DefaultTransactionAttribute  #FF5000
-class DefaultTransactionDefinition #00FFFF
+class DefaultTransactionDefinition #7FFFD4
 abstract class DelegatingTransactionAttribute
 abstract class DelegatingTransactionDefinition
 class RuleBasedTransactionAttribute
-interface TransactionAttribute #00FFFF
+interface TransactionAttribute #7FFFD4
 TransactionAttribute : + boolean rollbackOn(Throwable ex)
-note bottom #00FFFF: 主要面向Spring AOP进行声明式事务管理
+note bottom #7FFFD4: 主要面向Spring AOP进行声明式事务管理
 class TransactionTemplate
 note bottom : 提供编程式事务管理的模板方法类
 

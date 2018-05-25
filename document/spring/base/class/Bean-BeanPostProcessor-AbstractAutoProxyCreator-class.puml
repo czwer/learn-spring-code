@@ -2,10 +2,10 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
     了解BeanPostProcessor对Bean的影响，对于深入理解Spring核心功能的工作原理将会有很大的帮助。
     很多Spring扩展插件或Spring子项目都是使用这些后处理器完成激动人心的功能的。
 end note

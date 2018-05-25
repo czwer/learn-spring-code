@@ -2,17 +2,20 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
 end note
 
 interface DataSource
 abstract class AbstractDataSource
 abstract class AbstractDriverBasedDataSource
-abstract class AbstractRoutingDataSource
-note bottom : 持有一组DataSource，可以做到精细分配数据库连接
+abstract class AbstractRoutingDataSource #7FFFD4
+AbstractRoutingDataSource : +void afterPropertiesSet()
+AbstractRoutingDataSource : #abstract Object determineCurrentLookupKey()
+AbstractRoutingDataSource : +void setTargetDataSources(Map<Object, Object> targetDataSources)
+note bottom #7FFFD4: 持有一组DataSource，可以做到精细分配数据库连接，可以实现动态切换数据源
 class DelegatingDataSource
 note left : 可以在获取数据源的时候添加一些业务逻辑，类似AOP
 class DriverManagerDataSource

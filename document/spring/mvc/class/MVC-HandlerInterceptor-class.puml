@@ -2,10 +2,10 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
     HandlerInterceptor：可以在Handler的执行前后对处理流程进行拦截操作。主要方法如下：
         preHandle()：调用具体的Handler处理Web请求之前执行；
         postHanle()：调用具体的Handler处理Web请求之后，并且在视图解析和渲染之前；

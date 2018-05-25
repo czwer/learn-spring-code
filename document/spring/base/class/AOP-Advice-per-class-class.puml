@@ -2,10 +2,10 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
         ---简化版类图
     1.Advice织入到Pointcut规定的Joinpoint处的横切逻辑。
     2.per-class类型的Advice是指，该类型的Advice的实例可以在目标对象类的所有实例之间共享。

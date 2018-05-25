@@ -3,7 +3,7 @@
 activate TransactionInterceptor #DarkSalmon
 
 note left of TransactionInterceptor #FAEBD7
-    *介绍事务作为环绕通知是如何执行的
+    *介绍织入事务逻辑作为环绕通知是如何执行的
         ---我们以@Transactional使用方式进行说明
         ---这里只描述了主要步骤
 end note
@@ -151,6 +151,8 @@ note right of TransactionInterceptor #FAEBD7
             invocation::proceed可以认为是符合InvocationCallback.proceedWithInvocation()规范的实现。
         3.单从@Transactional注解的事务使用方式，JDK动态代理和Cglib动态代理性能上差不多，因都是在
             织入逻辑执行中去解析的。
+    备注：
+        1.事务使用的Advisor：BeanFactoryTransactionAttributeSourceAdvisor
 end note
 
 @enduml

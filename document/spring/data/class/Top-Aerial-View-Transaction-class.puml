@@ -2,10 +2,10 @@
 
 note  as N1 #FAEBD7
     背景颜色介绍：
-        红色：非常重要
-        绿色：重点关注
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
         黄色：可一般关注
-        灰色：弃用
+        灰色：弃用 #C0C0C0
     基于<tx:annotation-driven>全视角类图
 end note
 
@@ -23,7 +23,7 @@ interface PlatformTransactionManager
 note top : 事务管理的根基
 
 class SpringTransactionAnnotationParser
-note bottom : 真正扫描@Transactional注解的类
+note bottom : 真正扫描解析@Transactional注解的类
 
 annotation Transactional
 
@@ -32,7 +32,7 @@ note bottom : TransactionInterceptor把事务的逻辑委托给它了
 
 
 abstract class TransactionAttributeSourcePointcut
-note left : 基础设施：融入Spring AOP体系扮演Pointcut，在Advior中以匿名内部类方式提供
+note top : 基础设施：融入Spring AOP体系扮演Pointcut，在Advior中以匿名内部类方式提供
 
 
 interface TransactionDefinition
@@ -70,9 +70,11 @@ PlatformTransactionManager ..> TransactionSynchronizationManager
 SpringTransactionAnnotationParser ...> Transactional
 
 
-TransactionAspectSupport ..> PlatformTransactionManager
+TransactionAspectSupport --> AnnotationTransactionAttributeSource
+TransactionAspectSupport --> PlatformTransactionManager
 
-TransactionInterceptor ..> TransactionAspectSupport
+
+TransactionInterceptor --|> TransactionAspectSupport
 
 
 TransactionAttributeSourcePointcut ..> AnnotationTransactionAttributeSource
