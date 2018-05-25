@@ -1,0 +1,43 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    Cache类似Map的数据结构，一个缓存集，
+    一个Cache仅能被一个CacheManager拥有。
+end note
+
+
+interface Cache
+Cache : +String getName()
+Cache : +T get(Object key, @Nullable Class<T> type)
+Cache : +void put(Object key, @Nullable Object value)
+Cache : +void evict(Object key)
+Cache : +void clear()
+abstract class AbstractValueAdaptingCache
+class ConcurrentMapCache
+class EhCacheCache #FF5000
+class JCacheCache #7FFFD4
+class RedisCache #FF5000
+note bottom #FF5000:该类在spring-data-redis.jar中
+class TransactionAwareCacheDecorator
+
+
+Cache <|.. AbstractValueAdaptingCache
+Cache <|.. EhCacheCache
+Cache <|.. TransactionAwareCacheDecorator
+
+
+
+AbstractValueAdaptingCache <|-- ConcurrentMapCache
+AbstractValueAdaptingCache <|-- JCacheCache
+AbstractValueAdaptingCache <|-- RedisCache
+
+
+
+
+@enduml

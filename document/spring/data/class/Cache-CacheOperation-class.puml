@@ -1,0 +1,35 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    CacheOperation对缓存操作的封装
+end note
+
+
+abstract class CacheOperation
+interface BasicOperation
+BasicOperation : +Set<String> getCacheNames()
+note left : 操作的基本接口，getCacheNames()返回所有的Cache名称
+class CacheEvictOperation
+class CachePutOperation
+class CacheableOperation
+
+
+
+BasicOperation <|.. CacheOperation
+
+
+CacheOperation <|-- CacheEvictOperation
+CacheOperation <|-- CachePutOperation
+CacheOperation <|-- CacheableOperation
+
+
+
+
+
+
+@enduml
