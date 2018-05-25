@@ -52,7 +52,7 @@ activate BeanDefinitionParserDelegate #DarkSalmon
             activate ComponentScanBeanDefinitionParser #DarkSalmon
                 ComponentScanBeanDefinitionParser ->AnnotationConfigUtils : registerAnnotationConfigProcessors()
                 activate AnnotationConfigUtils #DarkSalmon
-                    note right of AnnotationConfigUtils #aqua
+                    note left of AnnotationConfigUtils #aqua
                         <font color=red>注册基础组件如：</font>
                         <font color=red>    AnnotationAwareOrderComparator</font>
                         <font color=red>    ContextAnnotationAutowireCandidateResolver</font>

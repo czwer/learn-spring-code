@@ -2,11 +2,11 @@
 
 autonumber
 
--> AbstractApplicationContext: refresh() : 代理对象方法调用
+-> AbstractApplicationContext: refresh()
 activate AbstractApplicationContext #DarkSalmon
 
     note right of AbstractApplicationContext #FAEBD7
-        *介绍AbstractApplicationContext.refresh()主要步骤
+        *介绍Spring容器启动的主要步骤
         ---这里只描述了主要步骤
     end note
 
@@ -59,26 +59,30 @@ activate AbstractApplicationContext #DarkSalmon
     activate AbstractApplicationContext #DarkSalmon
     deactivate AbstractApplicationContext
 
-    note right of AbstractApplicationContext #aqua
-        运用BeanFactory处理器：
-            I.先使用现有的BeanFactoryPostProcessor；
-            II.调用postProcessBeanDefinitionRegistry()方法
-                1.从所有的bean定义中查找BeanDefinitionRegistryPostProcessor类型的名称;
-                2.然后先实例化BeanDefinitionRegistryPostProcessor,通过getBean()的形式实例化;
-                    PriorityOrdered：最优先
-                    Ordered：次优先
-                    其他：最后
-                3.实例化后进行排序，并注册到BeanFactory中
-                4.运用实例化的BeanDefinitionRegistryPostProcessor；
-                    ---ConfigurationClassPostProcessor时涉及bean定义加载(SpringBoot就是这样用的)
-            III.最后执行其他普通的BeanFactoryPostProcessor.postProcessBeanFactory()方法
-                ---可能设计bean属性解析
-    end note
+
     AbstractApplicationContext -> AbstractApplicationContext : invokeBeanFactoryPostProcessors()
     activate AbstractApplicationContext #DarkSalmon
+        note right of AbstractApplicationContext #aqua
+            运用BeanFactory处理器：
+                I.先使用现有的BeanFactoryPostProcessor；
+                II.调用postProcessBeanDefinitionRegistry()方法
+                    1.从所有的bean定义中查找BeanDefinitionRegistryPostProcessor类型的名称;
+                    2.然后先实例化BeanDefinitionRegistryPostProcessor,通过getBean()的形式实例化;
+                        PriorityOrdered：最优先
+                        Ordered：次优先
+                        其他：最后
+                    3.实例化后进行排序，并注册到BeanFactory中
+                    4.运用实例化的BeanDefinitionRegistryPostProcessor；
+                        ---ConfigurationClassPostProcessor时涉及bean定义加载(SpringBoot就是这样用的)
+                III.最后执行其他普通的BeanFactoryPostProcessor.postProcessBeanFactory()方法
+                    ---可能设计bean属性解析
+        end note
 
         AbstractApplicationContext -> PostProcessorRegistrationDelegate : invokeBeanFactoryPostProcessors()
         activate PostProcessorRegistrationDelegate #DarkSalmon
+            note right of PostProcessorRegistrationDelegate #aqua
+                ConfigurationClassPostProcessor：支持@Configuration注解
+            end note
 
             PostProcessorRegistrationDelegate -> BeanDefinitionRegistryPostProcessor : postProcessBeanDefinitionRegistry()
             activate BeanDefinitionRegistryPostProcessor #DarkSalmon
@@ -95,17 +99,18 @@ activate AbstractApplicationContext #DarkSalmon
 
     deactivate AbstractApplicationContext
 
-    note right of AbstractApplicationContext #aqua
-        注册拦截bean创建的bean处理器：
-            1.从所有的bean定义中查找BeanPostProcessor类型的名称;
-            2.然后先实例化BeanPostProcessor,通过getBean()的形式实例化;
-                PriorityOrdered：最优先
-                Ordered：次优先
-                其他：最后
-            3.实例化后进行排序，并注册到BeanFactory中
-    end note
+
     AbstractApplicationContext -> AbstractApplicationContext : registerBeanPostProcessors()
     activate AbstractApplicationContext #DarkSalmon
+        note right of AbstractApplicationContext #aqua
+            注册bean处理器：
+                1.从所有的bean定义中查找BeanPostProcessor类型的名称;
+                2.然后先实例化BeanPostProcessor,通过getBean()的形式实例化;
+                    PriorityOrdered：最优先
+                    Ordered：次优先
+                    其他：最后
+                3.实例化后进行排序，并注册到BeanFactory中
+        end note
 
         AbstractApplicationContext -> PostProcessorRegistrationDelegate : registerBeanPostProcessors()
         activate PostProcessorRegistrationDelegate #DarkSalmon
@@ -143,12 +148,12 @@ activate AbstractApplicationContext #DarkSalmon
     activate AbstractApplicationContext #DarkSalmon
     deactivate AbstractApplicationContext
 
-    note right of AbstractApplicationContext #aqua
-        预实例Singleton作用域的Bean
-    end note
+
     AbstractApplicationContext -> AbstractApplicationContext : finishBeanFactoryInitialization()
     activate AbstractApplicationContext #DarkSalmon
-
+        note right of AbstractApplicationContext #aqua
+            预实例Singleton作用域的Bean
+        end note
         AbstractApplicationContext -> DefaultListableBeanFactory : preInstantiateSingletons()
         activate DefaultListableBeanFactory #DarkSalmon
             note right of DefaultListableBeanFactory #FF5000
