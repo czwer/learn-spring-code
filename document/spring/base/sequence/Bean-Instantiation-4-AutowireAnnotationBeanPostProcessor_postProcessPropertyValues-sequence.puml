@@ -1,0 +1,59 @@
+@startuml
+
+autonumber
+
+-> AutowiredAnnotationBeanPostProcessor: postProcessPropertyValues() 
+activate AutowiredAnnotationBeanPostProcessor #DarkSalmon
+
+    note right of AutowiredAnnotationBeanPostProcessor #FAEBD7
+        *介绍@Autowired在字段标注时，如何生效的主要步骤
+        ---这里只描述了主要步骤
+    end note
+
+    note right of AutowiredAnnotationBeanPostProcessor #aqua
+        获取注入的元数据信息
+    end note
+    AutowiredAnnotationBeanPostProcessor -> AutowiredAnnotationBeanPostProcessor : findAutowiringMetadata()
+    activate AutowiredAnnotationBeanPostProcessor #DarkSalmon
+    deactivate AutowiredAnnotationBeanPostProcessor
+
+    AutowiredAnnotationBeanPostProcessor -> InjectionMetadata : inject()
+    activate InjectionMetadata #DarkSalmon
+
+        InjectionMetadata -> AutowiredFieldElement : inject()
+        activate AutowiredFieldElement #DarkSalmon
+
+            AutowiredFieldElement -> DefaultListableBeanFactory : resolveDependency()
+            activate DefaultListableBeanFactory #DarkSalmon
+
+                DefaultListableBeanFactory -> DefaultListableBeanFactory : doResolveDependency()
+                activate DefaultListableBeanFactory #DarkSalmon
+                deactivate DefaultListableBeanFactory
+
+            DefaultListableBeanFactory --> AutowiredFieldElement: dependencyObject
+            deactivate DefaultListableBeanFactory
+
+
+            AutowiredFieldElement -> Field : set()
+            activate Field #DarkSalmon
+                note right of Field #FF5000
+                    通过反射设置值
+                end note
+            Field --> AutowiredFieldElement
+            deactivate Field
+
+        AutowiredFieldElement --> InjectionMetadata
+        deactivate AutowiredFieldElement
+
+    InjectionMetadata --> AutowiredAnnotationBeanPostProcessor
+    deactivate InjectionMetadata
+
+<-- AutowiredAnnotationBeanPostProcessor
+deactivate AutowiredAnnotationBeanPostProcessor
+
+note right of AutowiredAnnotationBeanPostProcessor #FAEBD7
+    *总结
+        1.解析@Autowired标签，从BeanFactory中获取依赖的Bean，通过反射设置值。
+end note
+
+@enduml

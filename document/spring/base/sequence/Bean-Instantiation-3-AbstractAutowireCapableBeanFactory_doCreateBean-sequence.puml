@@ -80,7 +80,7 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         note right of AbstractAutowireCapableBeanFactory #aqua
             主要逻辑：bean属性中需要Spring填充或验证的进行处理
                 1.运用InstantiationAwareBeanPostProcessor类型BeanPostProcessor
-                    a.ImportAwareBeanPostProcessor
+                    a.ImportAwareBeanPostProcessor---只是对EnhancedConfiguration类型bean注入BeanFactory
                     b.InfrastructureAdvisorAutoProxyCreator---未做实质处理
                     c.CommonAnnotationBeanPostProcessor---实现注解语义
                     d.AutowiredAnnotationBeanPostProcessor---实现注解语义
@@ -194,11 +194,11 @@ note right of AbstractAutowireCapableBeanFactory #FAEBD7
         3.对象初始化完成后，再通过BeanPostProcessor，在已有的Advisor是否存在，
             符合应用当前bean的Advisor，存在时生成代理对象。
     *备注
-        不要混淆
-        postProcessBeforeInstantiation：实例化前处理
-        postProcessBeforeInitialization：初始化前处理
-        postProcessAfterInstantiation：实例后处理
-        postProcessAfterInitialization：初始化后处理
+        不要混淆：
+            postProcessBeforeInstantiation：实例化前处理
+            postProcessBeforeInitialization：初始化前处理
+            postProcessAfterInstantiation：实例后处理
+            postProcessAfterInitialization：初始化后处理
 
 end note
 
