@@ -57,6 +57,9 @@ note bottom : 工厂类接口定制实例化Bean的逻辑
 interface PropertyAccessor
 note top : 操作bean的属性
 
+interface PropertyEditor
+note  bottom : 属性编辑器
+
 
 interface PropertyEditorRegistrar
 note  bottom : 注册PropertyEditor
@@ -110,6 +113,10 @@ BeanWrapper --> PropertyAccessor
 BeanWrapper --> ResultBean
 
 DocumentLoader ..> Resource
+
+PropertyAccessor ..> PropertyEditor
+
+PropertyEditorRegistrar o-- PropertyEditor
 
 ResultBean ..> FactoryBean
 
