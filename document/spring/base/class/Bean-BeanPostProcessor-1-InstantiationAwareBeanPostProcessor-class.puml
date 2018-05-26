@@ -1,0 +1,48 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    InstantiationAwareBeanPostProcessor在注入注解属性和动态代理生成发挥了重要的作用
+end note
+
+abstract class AbstractAutoProxyCreator #FF5000
+AbstractAutoProxyCreator : +Object postProcessBeforeInstantiation()
+AbstractAutoProxyCreator : #abstract Object[] getAdvicesAndAdvisorsForBean()
+note left #FF5000: 自动代理的核心，太重要了单独一个类图
+class AutowiredAnnotationBeanPostProcessor #7FFFD4
+interface BeanPostProcessor
+class CommonAnnotationBeanPostProcessor #7FFFD4
+class ImportAwareBeanPostProcessor
+interface InstantiationAwareBeanPostProcessor
+abstract class InstantiationAwareBeanPostProcessorAdapter
+class PersistenceAnnotationBeanPostProcessor
+class RequiredAnnotationBeanPostProcessor
+class ScriptFactoryPostProcessor
+interface SmartInstantiationAwareBeanPostProcessor
+
+
+
+BeanPostProcessor <|-- InstantiationAwareBeanPostProcessor
+
+
+
+InstantiationAwareBeanPostProcessor <|.. CommonAnnotationBeanPostProcessor
+InstantiationAwareBeanPostProcessor <|.. PersistenceAnnotationBeanPostProcessor
+InstantiationAwareBeanPostProcessor <|-- SmartInstantiationAwareBeanPostProcessor
+
+InstantiationAwareBeanPostProcessorAdapter <|-- AutowiredAnnotationBeanPostProcessor
+InstantiationAwareBeanPostProcessorAdapter <|-- ImportAwareBeanPostProcessor
+InstantiationAwareBeanPostProcessorAdapter <|-- RequiredAnnotationBeanPostProcessor
+InstantiationAwareBeanPostProcessorAdapter <|-- ScriptFactoryPostProcessor
+
+
+
+SmartInstantiationAwareBeanPostProcessor <.. AbstractAutoProxyCreator
+SmartInstantiationAwareBeanPostProcessor <.. InstantiationAwareBeanPostProcessorAdapter
+
+@enduml

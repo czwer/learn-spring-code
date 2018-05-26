@@ -1,0 +1,47 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    Resource：资源抽象接口
+end note
+
+
+interface Resource
+abstract class AbstractResource
+abstract class AbstractFileResolvingResource
+class ClassPathResource #7FFFD4
+class FileSystemResource #7FFFD4
+interface InputStreamSource
+InputStreamSource : +InputStream getInputStream()
+class UrlResource
+class InputStreamResource #7FFFD4
+class PathResource #7FFFD4
+interface WritableResource
+
+
+
+AbstractFileResolvingResource <|-- ClassPathResource
+AbstractFileResolvingResource <|-- UrlResource
+
+
+AbstractResource <|-- AbstractFileResolvingResource
+AbstractResource <|-- FileSystemResource
+AbstractResource <|-- InputStreamResource
+AbstractResource <|-- PathResource
+
+
+InputStreamSource <|-- Resource
+
+Resource <|.. AbstractResource
+Resource <|-- WritableResource
+
+
+WritableResource <|.. FileSystemResource
+WritableResource <|.. PathResource
+
+@enduml

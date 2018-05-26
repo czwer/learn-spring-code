@@ -31,7 +31,7 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors()
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
             note right of AbstractAutowireCapableBeanFactory #aqua
-            主要逻辑：为特定的bean合并bean定义
+            主要逻辑：为bean定义属性填充做准备
                 1.运用MergedBeanDefinitionPostProcessor类型BeanPostProcessor
                     a.CommonAnnotationBeanPostProcessor
                         ---@PostConstruct,@PreDestroy,@WebServiceRef,@EJB,@Resource

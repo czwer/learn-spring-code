@@ -18,7 +18,7 @@ class AspectJWeavingEnabler
 interface BeanDefinitionRegistryPostProcessor #7FFFD4
 note top #7FFFD4: 可以在这一步，增加注册其他的bean定义（非常规bean）
 class ConfigurationClassPostProcessor #FF5000
-note bottom #FF5000: 用于支持@Configuration注解中定义的Bean
+note bottom #FF5000: 解析注解定义的Bean起了重要作用
 class CustomAutowireConfigurer
 class CustomEditorConfigurer  #7FFFD4
 note top #7FFFD4: 维护自定义PropertyEditor信息

@@ -5,7 +5,7 @@ activate DefaultBeanDefinitionDocumentReader #DarkSalmon
 
     note right of DefaultBeanDefinitionDocumentReader #FAEBD7
         介绍xml中bean定义的解析
-        测试用例参：org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests
+        测试用例参：XmlBeanDefinitionReaderTests
     end note
 
     DefaultBeanDefinitionDocumentReader -> DefaultBeanDefinitionDocumentReader : processBeanDefinition()

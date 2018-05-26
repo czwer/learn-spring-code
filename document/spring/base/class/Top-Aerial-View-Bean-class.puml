@@ -1,0 +1,124 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    顶层鸟瞰Bean有关类之间关系
+end note
+
+interface ApplicationContext
+note top :在BeanFacotry基础上的扩展，减少手工配置
+
+class ResultBean
+note bottom : 暂用它来表示生成的Bean
+
+
+interface BeanDefinition
+note bottom :Bean定义
+
+interface BeanDefinitionDocumentReader
+note top :读取xml定义bean定义并注册
+
+class BeanDefinitionHolder
+note bottom :Bean定义和别名信息
+
+
+interface  BeanDefinitionReader
+note top :读取Resource指向的配置文件资源
+
+interface BeanDefinitionRegistry
+note top : 注册bean定义
+
+class BeanDefinitionParserDelegate
+note bottom : xml格式bean定义的真正解析者
+
+interface BeanFactory
+note top : 获取bean
+
+interface BeanFactoryPostProcessor
+note top : 解析bean定义或注册基础组件
+
+interface BeanPostProcessor
+note bottom : 实例化/初始化前后对bean进行加工，通往Spring AOP桥梁
+
+interface BeanWrapper
+note top : 完成bean属性的填充工作
+
+
+interface DocumentLoader
+note bottom : 把xml数据，转换成Document
+
+interface FactoryBean<T>
+note bottom : 工厂类接口定制实例化Bean的逻辑
+
+interface PropertyAccessor
+note top : 操作bean的属性
+
+
+interface PropertyEditorRegistrar
+note  bottom : 注册PropertyEditor
+
+
+interface Resource
+note bottom : 资源抽象接口
+
+
+interface ResourceLoader
+note top : 资源加载
+
+interface SingletonBeanRegistry
+note top : 注册实例化bean
+
+interface TypeConverter
+note bottom : 转换生成的bean到指定类型
+
+ApplicationContext --> BeanDefinitionReader
+ApplicationContext --> BeanFactory
+ApplicationContext --> BeanFactoryPostProcessor
+
+
+
+BeanDefinitionDocumentReader --> BeanDefinitionHolder
+BeanDefinitionDocumentReader --> BeanDefinitionParserDelegate
+
+
+BeanDefinitionHolder --> BeanDefinition
+
+BeanDefinitionReader ..> BeanDefinitionDocumentReader
+BeanDefinitionReader ..> DocumentLoader
+BeanDefinitionReader ..> Resource
+BeanDefinitionReader ..> ResourceLoader
+
+BeanDefinitionRegistry o--BeanDefinition
+
+BeanFactory ..> BeanDefinitionRegistry
+BeanFactory ..> BeanDefinition
+BeanFactory ..> BeanPostProcessor
+BeanFactory ..> BeanWrapper
+BeanFactory ..> SingletonBeanRegistry
+BeanFactory ..> TypeConverter
+BeanFactory ..> PropertyEditorRegistrar
+
+BeanFactoryPostProcessor ..> BeanDefinition
+
+BeanPostProcessor ..> ResultBean
+
+BeanWrapper --> PropertyAccessor
+BeanWrapper --> ResultBean
+
+DocumentLoader ..> Resource
+
+ResultBean ..> FactoryBean
+
+ResourceLoader ..> Resource
+
+SingletonBeanRegistry o.. FactoryBean
+SingletonBeanRegistry o.. ResultBean
+
+TypeConverter ..> ResultBean
+
+
+@enduml

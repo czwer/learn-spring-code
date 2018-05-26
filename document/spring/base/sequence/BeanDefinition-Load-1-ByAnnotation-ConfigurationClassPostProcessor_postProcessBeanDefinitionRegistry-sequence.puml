@@ -138,7 +138,9 @@ note right of ConfigurationClassPostProcessor #FAEBD7
 *总结
     1.整个解析过程，涉及大量的递归解析。主要时把支持的注解一一实现其语义。
     2.在Spring基础设置的注入中起到重要作用。
-    3.注解与xml是不冲突的，它们共用了基础设施；
+    3.Bean定义最终注册在：DefaultListableBeanFactory的
+        Map<String, BeanDefinition> beanDefinitionMap变量中
+    4.注解与xml是不冲突的，它们共用了基础设施；
         ComponentScanAnnotationParser.parse：注解解析
         ComponentScanBeanDefinitionParser.parse：xml解析
 end note

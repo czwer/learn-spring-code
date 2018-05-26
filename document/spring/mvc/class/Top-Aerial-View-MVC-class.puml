@@ -9,27 +9,31 @@ note  as N1 #FAEBD7
     MVC全视角类图
 end note
 
+interface BindingResult
+note top :代表数据绑定的结果
+
+
 class DispatcherServlet
-note top : 处理所有请求的分发,调度中心
+note top : 处理所有请求的分发
 
 interface HandlerAdapter
 note top : 作为DispatcherServlet和Handler之间的适配器
 
 class HandlerExecutionChain
-note bottom : 包含handler和HandlerInterceptor
+note top : 包含handler和HandlerInterceptor
 
 interface HandlerExceptionResolver
 note bottom : 异常处理
 
 
 interface HandlerInterceptor
-note bottom : 可以在Handler的执行前后对处理流程进行拦截操作
+note bottom : Handler的执行前后对处理流程进行拦截操作
 
 interface HandlerMapping
-note top : 用于处理Web请求与具体请求处理控制器之间的映射关系
+note top : 处理Web请求与具体请求处理控制器之间的映射关系
 
 class HandlerMethod
-note bottom : 一种handler
+note top : 一种handler
 
 interface HandlerMethodArgumentResolver
 note bottom : 参数解析
@@ -47,15 +51,15 @@ class ModelAndView
 note bottom : 包含模型和视图
 
 interface MultipartResolver
-note bottom : 支持文件上传
+note bottom : 文件上传
 
 interface ParameterNameDiscoverer
-note bottom :用于发现方法和构造函数的参数名称
+note bottom :发现方法和构造函数的参数名称
 
 interface RequestBodyAdvice
-note bottom :可以理解为处理json输入数据的扩展点
+note bottom :处理json输入数据的扩展点
 interface ResponseBodyAdvice
-note bottom :可以理解为处理json输出数据的扩展点
+note bottom :处理json输出数据的扩展点
 
 interface RequestToViewNameTranslator
 note bottom :转换逻辑视图名
@@ -66,17 +70,21 @@ note bottom : 主题解析
 interface ThemeSource
 note bottom : 管理针对各个主题的那些静态资源
 
+interface Validator
+note bottom : 数据校验
+
 interface View
 note bottom :  视图渲染
 
 interface ViewResolver
 note bottom : 逻辑视图名到View的转换
 
+
 interface WebDataBinderFactory
-note bottom : 用于创建WebDataBinder
+note bottom : 创建WebDataBinder
 
 class WebDataBinder
-note bottom : 完成数据绑定
+note bottom : 数据绑定
 
 
 DispatcherServlet --> HandlerAdapter
@@ -106,7 +114,9 @@ HandlerMethod ..> HandlerMethodArgumentResolver
 HandlerMethod ..> HandlerMethodReturnValueHandler
 HandlerMethod --> ParameterNameDiscoverer
 
+HandlerMethodArgumentResolver ..> BindingResult
 HandlerMethodArgumentResolver ..> RequestBodyAdvice
+HandlerMethodArgumentResolver ..> Validator
 
 HandlerMethodReturnValueHandler ..> HttpMessageConverter
 HandlerMethodReturnValueHandler ..> ResponseBodyAdvice

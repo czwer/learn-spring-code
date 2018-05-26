@@ -83,6 +83,8 @@ note right of BeanDefinitionParserDelegate #FAEBD7
     总结：
         1.基本原理是运用注解+反射为基础确认是否属于bean定义；
         2.除了注册bean定义，还会注册一系列配套的基础设置；
+        3.Bean定义最终注册在：DefaultListableBeanFactory的
+            Map<String, BeanDefinition> beanDefinitionMap变量中
 end note
 
 @enduml

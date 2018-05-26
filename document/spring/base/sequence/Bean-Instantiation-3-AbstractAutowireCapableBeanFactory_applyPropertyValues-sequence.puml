@@ -1,0 +1,116 @@
+@startuml
+
+autonumber
+
+-> AbstractAutowireCapableBeanFactory: applyPropertyValues()
+activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+    note right of AbstractAutowireCapableBeanFactory #FAEBD7
+        *介绍BeanWrapper如何通过填充实例属性，目标属性以int类型为例
+        ---这里只描述了主要步骤
+    end note
+
+    loop PropertyValue pv : original
+
+        AbstractAutowireCapableBeanFactory -> BeanDefinitionValueResolver:resolveValueIfNecessary()
+        activate BeanDefinitionValueResolver #DarkSalmon
+            note right of BeanDefinitionValueResolver #aqua
+                根据当前值的类型，进行不同的处理，主要对Reference类型，
+                    Managed类型的支持
+                ---如果仅仅是字符串的话，返回的该字符串
+            end note
+        BeanDefinitionValueResolver --> AbstractAutowireCapableBeanFactory
+        deactivate BeanDefinitionValueResolver
+
+        alt
+
+            AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory : convertForProperty()
+            activate AbstractAutowireCapableBeanFactory #DarkSalmon
+
+                AbstractAutowireCapableBeanFactory -> BeanWrapperImpl : convertForProperty()
+                activate BeanWrapperImpl #DarkSalmon
+
+                    BeanWrapperImpl -> AbstractNestablePropertyAccessor : convertForProperty()
+                    activate AbstractNestablePropertyAccessor #DarkSalmon
+
+                        AbstractNestablePropertyAccessor -> TypeConverterDelegate : convertIfNecessary()
+                        activate TypeConverterDelegate #DarkSalmon
+
+                            TypeConverterDelegate -> TypeConverterDelegate : findDefaultEditor()
+                            activate TypeConverterDelegate #DarkSalmon
+                            deactivate TypeConverterDelegate
+
+                            TypeConverterDelegate -> TypeConverterDelegate : doConvertValue()
+                            activate TypeConverterDelegate #DarkSalmon
+
+                                note right of TypeConverterDelegate #FF5000
+                                    通过PropertyEditor转换成期望的类型
+                                end note
+
+                                TypeConverterDelegate -> PropertyEditor : setAsText()
+                                activate PropertyEditor #DarkSalmon
+                                PropertyEditor --> TypeConverterDelegate
+                                deactivate PropertyEditor
+
+                                TypeConverterDelegate -> PropertyEditor : getValue()
+                                activate PropertyEditor #DarkSalmon
+                                PropertyEditor --> TypeConverterDelegate
+                                deactivate PropertyEditor
+
+                            deactivate TypeConverterDelegate
+
+                        TypeConverterDelegate --> AbstractNestablePropertyAccessor
+                        deactivate TypeConverterDelegate
+
+                    BeanWrapperImpl --> AbstractNestablePropertyAccessor
+                    deactivate AbstractNestablePropertyAccessor
+
+                BeanWrapperImpl --> AbstractAutowireCapableBeanFactory
+                deactivate BeanWrapperImpl
+
+            deactivate AbstractAutowireCapableBeanFactory
+
+        end
+
+        note right of AbstractAutowireCapableBeanFactory #aqua
+            设置到PropertyValue.convertedValue字段，以便后面使用
+        end note
+
+        AbstractAutowireCapableBeanFactory -> BeanWrapperImpl : setPropertyValues()
+        activate BeanWrapperImpl #DarkSalmon
+
+            BeanWrapperImpl -> AbstractNestablePropertyAccessor : setPropertyValues()
+            activate AbstractNestablePropertyAccessor #DarkSalmon
+
+                AbstractNestablePropertyAccessor -> BeanWrapperImpl : setValue()
+                activate BeanWrapperImpl #DarkSalmon
+
+                    note right of BeanWrapperImpl #FF5000
+                        最后通过Method.invoke()反射设置值
+                    end note
+
+                BeanWrapperImpl --> AbstractNestablePropertyAccessor
+                deactivate BeanWrapperImpl
+
+            AbstractNestablePropertyAccessor --> BeanWrapperImpl
+            deactivate AbstractNestablePropertyAccessor
+
+        BeanWrapperImpl --> AbstractAutowireCapableBeanFactory
+        deactivate BeanWrapperImpl
+
+    end
+
+
+
+
+<-- AbstractAutowireCapableBeanFactory
+deactivate AbstractAutowireCapableBeanFactory
+
+note right of AbstractAutowireCapableBeanFactory #FAEBD7
+    *总结
+        通过PropertyEditor转换成期望的类型，然后通过反射设置值。
+    *备注
+        1.单元测试参：DefaultListableBeanFactoryTests.testApplyBeanPropertyValues()
+end note
+
+@enduml

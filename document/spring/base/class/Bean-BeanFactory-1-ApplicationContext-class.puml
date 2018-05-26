@@ -38,7 +38,7 @@ class ResourceAdapterApplicationContext
 class XmlWebApplicationContext #7FFFD4
 XmlWebApplicationContext : #void loadBeanDefinitions(DefaultListableBeanFactory beanFactory)
 interface WebApplicationContext #7FFFD4
-
+WebApplicationContext : ServletContext getServletContext()
 
 
 

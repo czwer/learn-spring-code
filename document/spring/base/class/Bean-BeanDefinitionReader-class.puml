@@ -1,0 +1,31 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    BeanDefinitionReader：读取Resource指向的配置文件资源
+end note
+
+
+interface BeanDefinitionReader
+BeanDefinitionReader : +int loadBeanDefinitions(Resource resource)
+abstract class AbstractBeanDefinitionReader
+class GroovyBeanDefinitionReader
+class PropertiesBeanDefinitionReader
+class XmlBeanDefinitionReader #FF5000
+
+
+AbstractBeanDefinitionReader <|-- GroovyBeanDefinitionReader
+AbstractBeanDefinitionReader <|-- PropertiesBeanDefinitionReader
+AbstractBeanDefinitionReader <|-- XmlBeanDefinitionReader
+
+
+BeanDefinitionReader <|.. AbstractBeanDefinitionReader
+
+
+
+@enduml

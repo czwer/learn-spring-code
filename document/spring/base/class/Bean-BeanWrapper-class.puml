@@ -1,0 +1,76 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    BeanWrapper：完成Bean属性的填充工作
+    PropertyEditor：属性编辑器的主要功能就是将外部的设置值
+        转换为JVM内部的对应类型。
+end note
+
+
+
+
+
+interface BeanWrapper
+class BeanWrapperImpl #FF5000
+
+interface PropertyAccessor
+PropertyAccessor : +Object getPropertyValue(String propertyName)
+PropertyAccessor : +void setPropertyValue(PropertyValue pv)
+note bottom : 定义了访问Bean属性的方法
+interface ConfigurablePropertyAccessor
+abstract class AbstractNestablePropertyAccessor
+abstract class AbstractPropertyAccessor
+
+interface PropertyEditor
+PropertyEditor : +void setValue(Object value)
+PropertyEditor : +Object getValue()
+PropertyEditor : +String getAsText()
+PropertyEditor : +void setAsText(String text)
+note bottom : 对PropertyValue进行转换得到Bean的属性值
+
+interface PropertyEditorRegistry
+note right : 属性编辑器的注册表
+class PropertyEditorRegistrySupport
+
+
+interface TypeConverter
+abstract class TypeConverterSupport
+
+
+AbstractNestablePropertyAccessor <|-- BeanWrapperImpl
+
+
+AbstractPropertyAccessor <|-- AbstractNestablePropertyAccessor
+
+
+BeanWrapper <|.. BeanWrapperImpl
+
+
+ConfigurablePropertyAccessor <.. AbstractPropertyAccessor
+
+
+PropertyAccessor <|-- ConfigurablePropertyAccessor
+
+
+PropertyEditorRegistry <--  ConfigurablePropertyAccessor
+PropertyEditorRegistry o-- PropertyEditor
+PropertyEditorRegistry <..  PropertyEditorRegistrySupport
+
+
+PropertyEditorRegistrySupport <|-- TypeConverterSupport
+
+TypeConverter <-- ConfigurablePropertyAccessor
+TypeConverter <.. TypeConverterSupport
+
+
+TypeConverterSupport <|-- AbstractPropertyAccessor
+
+
+
+
+@enduml

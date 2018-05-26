@@ -6,44 +6,28 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
+        ---简化版类图
     了解BeanPostProcessor对Bean的影响，对于深入理解Spring核心功能的工作原理将会有很大的帮助。
     很多Spring扩展插件或Spring子项目都是使用这些后处理器完成激动人心的功能的。
 end note
 
 interface BeanPostProcessor  #7FFFD4
 abstract class AbstractAdvisingBeanPostProcessor
-abstract class AbstractAutoProxyCreator #FF5000
-AbstractAutoProxyCreator : +Object postProcessBeforeInstantiation()
-AbstractAutoProxyCreator : #abstract Object[] getAdvicesAndAdvisorsForBean()
-note top #FF5000: 自动代理的核心:postProcessBeforeInstantiation()是AbstractAutoProxyCreator这一脉络中唯一的实现,太重要了单独一个类图
 abstract class AbstractBeanFactoryAwareAdvisingPostProcessor
 class ApplicationContextAwareProcessor #7FFFD4
-note top : 注入各种xxxAware到bean里面
 class ApplicationListenerDetector
 class AsyncAnnotationBeanPostProcessor
-class AutowiredAnnotationBeanPostProcessor #7FFFD4
-note right : 与@Autowired注解有关
 class BeanValidationPostProcessor
-class BootstrapContextAwareProcessor
 class CommonAnnotationBeanPostProcessor #7FFFD4
-note top : 与@Resource,@PostConstruct,@PreDestroy注解有关
 interface DestructionAwareBeanPostProcessor
-class ImportAwareBeanPostProcessor
 class InitDestroyAnnotationBeanPostProcessor
 interface InstantiationAwareBeanPostProcessor  #7FFFD4
-abstract class InstantiationAwareBeanPostProcessorAdapter
-class JmsListenerAnnotationBeanPostProcessor
-class LoadTimeWeaverAwareProcessor
 interface MergedBeanDefinitionPostProcessor #7FFFD4
 class MethodValidationPostProcessor
 class PersistenceAnnotationBeanPostProcessor
 class PersistenceExceptionTranslationPostProcessor
-class RequiredAnnotationBeanPostProcessor
 class ScheduledAnnotationBeanPostProcessor  #7FFFD4
-note bottom : @Scheduled注解有关
-class ScriptFactoryPostProcessor
 class ServletContextAwareProcessor
-interface SmartInstantiationAwareBeanPostProcessor
 
 
 
@@ -58,10 +42,8 @@ AbstractBeanFactoryAwareAdvisingPostProcessor <|-- PersistenceExceptionTranslati
 BeanPostProcessor <|-- AbstractAdvisingBeanPostProcessor
 BeanPostProcessor <|.. ApplicationContextAwareProcessor
 BeanPostProcessor <|.. BeanValidationPostProcessor
-BeanPostProcessor <|.. BootstrapContextAwareProcessor
 BeanPostProcessor <|-- DestructionAwareBeanPostProcessor
 BeanPostProcessor <|-- InstantiationAwareBeanPostProcessor
-BeanPostProcessor <|-- LoadTimeWeaverAwareProcessor
 BeanPostProcessor <|-- MergedBeanDefinitionPostProcessor
 BeanPostProcessor <|-- ServletContextAwareProcessor
 
@@ -76,25 +58,6 @@ InitDestroyAnnotationBeanPostProcessor <|-- CommonAnnotationBeanPostProcessor
 
 InstantiationAwareBeanPostProcessor <|.. CommonAnnotationBeanPostProcessor
 InstantiationAwareBeanPostProcessor <|.. PersistenceAnnotationBeanPostProcessor
-InstantiationAwareBeanPostProcessor <|-- SmartInstantiationAwareBeanPostProcessor
 
-InstantiationAwareBeanPostProcessorAdapter <|-- AutowiredAnnotationBeanPostProcessor
-InstantiationAwareBeanPostProcessorAdapter <|-- ImportAwareBeanPostProcessor
-InstantiationAwareBeanPostProcessorAdapter <|-- RequiredAnnotationBeanPostProcessor
-InstantiationAwareBeanPostProcessorAdapter <|-- ScriptFactoryPostProcessor
-
-
-MergedBeanDefinitionPostProcessor <|.. ApplicationListenerDetector
-MergedBeanDefinitionPostProcessor <|.. AutowiredAnnotationBeanPostProcessor
-MergedBeanDefinitionPostProcessor <|.. InitDestroyAnnotationBeanPostProcessor
-MergedBeanDefinitionPostProcessor <|.. JmsListenerAnnotationBeanPostProcessor
-MergedBeanDefinitionPostProcessor <|.. PersistenceAnnotationBeanPostProcessor
-MergedBeanDefinitionPostProcessor <|.. RequiredAnnotationBeanPostProcessor
-MergedBeanDefinitionPostProcessor <|.. ScheduledAnnotationBeanPostProcessor
-
-
-
-SmartInstantiationAwareBeanPostProcessor <.. AbstractAutoProxyCreator
-SmartInstantiationAwareBeanPostProcessor <.. InstantiationAwareBeanPostProcessorAdapter
 
 @enduml

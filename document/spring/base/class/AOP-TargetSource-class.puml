@@ -6,6 +6,7 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
+        ---简化版类图
     TargetSource用于包装目标对象：在调用链和目标对象之间。
 end note
 
@@ -18,15 +19,13 @@ abstract class AbstractPrototypeBasedTargetSource
 abstract class AbstractRefreshableTargetSource
 class BeanFactoryRefreshableTargetSource
 class CommonsPool2TargetSource
-class EmptyTargetSource
 class HotSwappableTargetSource #7FFFD4
-class JndiObjectTargetSource
 class LazyInitTargetSource
 class PrototypeTargetSource
 class RefreshableScriptTargetSource
 class SimpleBeanTargetSource
 class SingletonTargetSource #7FFFD4
-note bottom : 用的最多的TargetSource
+note bottom #7FFFD4: 用的最多的TargetSource
 class ThreadLocalTargetSource
 
 
@@ -49,9 +48,7 @@ BeanFactoryRefreshableTargetSource <|-- RefreshableScriptTargetSource
 TargetSource <|.. AbstractBeanFactoryBasedTargetSource
 TargetSource <|.. AbstractLazyCreationTargetSource
 TargetSource <|.. AbstractRefreshableTargetSource
-TargetSource <|.. EmptyTargetSource
 TargetSource <|.. HotSwappableTargetSource
-TargetSource <|.. JndiObjectTargetSource
 TargetSource <|.. SingletonTargetSource
 
 
