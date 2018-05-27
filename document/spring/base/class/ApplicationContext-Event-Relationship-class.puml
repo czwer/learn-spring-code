@@ -1,0 +1,84 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+            红色：非常重要 #FF5000
+            绿色：重点关注 #7FFFD4
+            黄色：可一般关注
+            灰色：弃用 #C0C0C0
+end note
+
+interface ApplicationEventPublisher
+interface ApplicationContext
+
+interface ApplicationEventMulticaster
+abstract class AbstractApplicationEventMulticaster
+class SimpleApplicationEventMulticaster #7FFFD4
+
+interface ConfigurableApplicationContext
+abstract class AbstractApplicationContext #7FFFD4
+
+
+class EventObject
+abstract class ApplicationEvent
+abstract class ApplicationContextEvent
+class BrokerAvailabilityEvent
+class ContextClosedEvent #7FFFD4
+class ContextRefreshedEvent #7FFFD4
+class ContextStartedEvent #7FFFD4
+class ContextStoppedEvent #7FFFD4
+class PayloadApplicationEvent<T>
+class RequestHandledEvent
+class ServletRequestHandledEvent
+
+
+
+interface EventListener
+interface ApplicationListener<E extends ApplicationEvent>
+class ContextRefreshListener #7FFFD4
+
+AbstractApplicationContext --> ApplicationEvent
+AbstractApplicationContext --> ApplicationEventMulticaster
+AbstractApplicationContext --> ApplicationListener
+
+AbstractApplicationEventMulticaster <|-- SimpleApplicationEventMulticaster
+
+
+ApplicationContext <|-- ConfigurableApplicationContext
+
+ApplicationContextEvent <|-- ContextClosedEvent
+ApplicationContextEvent <|-- ContextRefreshedEvent
+ApplicationContextEvent <|-- ContextStartedEvent
+ApplicationContextEvent <|-- ContextStoppedEvent
+
+
+
+ApplicationEvent <|-- ApplicationContextEvent
+ApplicationEvent <|-- BrokerAvailabilityEvent
+ApplicationEvent <|-- PayloadApplicationEvent
+ApplicationEvent <|-- RequestHandledEvent
+
+ApplicationEventMulticaster ..> ApplicationEvent
+ApplicationEventMulticaster ..> ApplicationListener
+ApplicationEventMulticaster <|..  AbstractApplicationEventMulticaster
+
+
+ApplicationEventPublisher <|-- ApplicationContext
+
+
+ApplicationListener <|.. ContextRefreshListener
+
+ConfigurableApplicationContext <|.. AbstractApplicationContext
+
+
+EventListener <|-- ApplicationListener
+
+EventObject <|-- ApplicationEvent
+
+
+RequestHandledEvent <|-- ServletRequestHandledEvent
+
+
+
+
+@enduml

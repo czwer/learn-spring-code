@@ -1,0 +1,73 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        蓝色：第三方类 #00FFFF
+    在注解扫描中，@EnableCaching相关的全局类图，下面简单描述下大致步骤：
+        1.Spring会解析@EnableCaching标签上的@Import(CachingConfigurationSelector.class)
+        2.CachingConfigurationSelector返回需要导入的类名：AutoProxyRegistrar和
+            ProxyCachingConfiguration
+        3.ProxyCachingConfiguration因标有@Configuration标签，会注册该类声明的Bean
+            ---声明的Bean用于后面动态代理
+        4.这里我们用到了AutoProxyRegistrar，主要注册InfrastructureAdvisorAutoProxyCreator
+            ---其他第三方技术可以使用ImportBeanDefinitionRegistrar来自定义bean的注册
+end note
+
+class AnnotationCacheOperationSource
+
+class AutoProxyRegistrar
+note bottom : 必要时注册InfrastructureAdvisorAutoProxyCreator
+
+
+class BeanFactoryCacheOperationSourceAdvisor
+
+class CacheInterceptor
+
+interface ImportSelector
+ImportSelector : +String[] selectImports()
+abstract class AdviceModeImportSelector
+class CachingConfigurationSelector
+note top : 返回需要导入的类名
+
+annotation Configuration
+
+annotation EnableCaching
+note top : 声明注解方式使用缓存的能力
+
+
+interface ImportBeanDefinitionRegistrar
+ImportBeanDefinitionRegistrar : void registerBeanDefinitions()
+
+class ProxyCachingConfiguration
+note top : 代理配置---基础设施
+
+
+AdviceModeImportSelector <|-- CachingConfigurationSelector
+
+
+
+BeanFactoryCacheOperationSourceAdvisor --> AnnotationCacheOperationSource
+BeanFactoryCacheOperationSourceAdvisor --> CacheInterceptor
+
+
+CachingConfigurationSelector ..> AutoProxyRegistrar
+CachingConfigurationSelector ..> ProxyCachingConfiguration
+
+
+EnableCaching --> CachingConfigurationSelector
+
+ImportBeanDefinitionRegistrar <.. AutoProxyRegistrar
+
+ImportSelector <.. AdviceModeImportSelector
+
+ProxyCachingConfiguration --> AnnotationCacheOperationSource
+ProxyCachingConfiguration --> BeanFactoryCacheOperationSourceAdvisor
+ProxyCachingConfiguration --> CacheInterceptor
+ProxyCachingConfiguration ..> Configuration
+
+
+@enduml

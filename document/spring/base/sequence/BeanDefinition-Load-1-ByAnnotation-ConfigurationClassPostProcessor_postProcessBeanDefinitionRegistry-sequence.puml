@@ -15,12 +15,10 @@ activate ConfigurationClassPostProcessor #DarkSalmon
 
         note right of ConfigurationClassPostProcessor #aqua
             主要逻辑：
-                1.初始化BeanNameGenerator
-                2.解析bean定义中标签
-                3.验证解析的bean定义
-                4.加载扫描的bean定义
-                5.验证所有的含@Configuration标签的类都处理过，如有发现递归处理
-                6.
+                1.解析bean定义中标签
+                2.验证解析的bean定义
+                3.加载扫描的bean定义
+                4.验证所有的含@Configuration标签的类都处理过，如有发现递归处理
         end note
 
         ConfigurationClassPostProcessor -> ConfigurationClassParser: parse()
@@ -88,6 +86,7 @@ activate ConfigurationClassPostProcessor #DarkSalmon
                                     note right of ImportSelector #aqua
                                         对@EnableCaching类似标签语义的生效起重要作用
                                         ---注入基础设施Bean定义
+                                        ---扩展点之一，支持第三方提供类似的@Enablexxx注解能力
                                     end note
                                 ImportSelector --> ConfigurationClassParser
                                 deactivate ImportSelector
@@ -119,30 +118,48 @@ activate ConfigurationClassPostProcessor #DarkSalmon
 
         ConfigurationClassPostProcessor -> ConfigurationClassBeanDefinitionReader: loadBeanDefinitions()
         activate ConfigurationClassBeanDefinitionReader #DarkSalmon
+
+            ConfigurationClassPostProcessor -> ConfigurationClassPostProcessor: loadBeanDefinitions()
+            activate ConfigurationClassPostProcessor #DarkSalmon
+
+                ConfigurationClassBeanDefinitionReader -> ConfigurationClassBeanDefinitionReader: loadBeanDefinitionsForBeanMethod()
+                activate ConfigurationClassBeanDefinitionReader #DarkSalmon
+                deactivate ConfigurationClassBeanDefinitionReader
+
+                ConfigurationClassBeanDefinitionReader -> ConfigurationClassBeanDefinitionReader: loadBeanDefinitionsFromImportedResources()
+                activate ConfigurationClassBeanDefinitionReader #DarkSalmon
+                deactivate ConfigurationClassBeanDefinitionReader
+
+                note right of ConfigurationClassBeanDefinitionReader #aqua
+                    调用实现ImportBeanDefinitionRegistrar.registerBeanDefinitions()方法
+                    ---扩展点之一，自定义注册逻辑
+                end note
+                ConfigurationClassBeanDefinitionReader -> ConfigurationClassBeanDefinitionReader: loadBeanDefinitionsFromRegistrars()
+                activate ConfigurationClassBeanDefinitionReader #DarkSalmon
+                deactivate ConfigurationClassBeanDefinitionReader
+
+            deactivate ConfigurationClassPostProcessor
+
         ConfigurationClassBeanDefinitionReader --> ConfigurationClassPostProcessor
         deactivate ConfigurationClassBeanDefinitionReader
 
-
     deactivate ConfigurationClassPostProcessor
-
-
-
-
-
-
 
 <-- ConfigurationClassPostProcessor
 deactivate ConfigurationClassPostProcessor
 
 note right of ConfigurationClassPostProcessor #FAEBD7
 *总结
-    1.整个解析过程，涉及大量的递归解析。主要时把支持的注解一一实现其语义。
-    2.在Spring基础设置的注入中起到重要作用。
-    3.Bean定义最终注册在：DefaultListableBeanFactory的
-        Map<String, BeanDefinition> beanDefinitionMap变量中
-    4.注解与xml是不冲突的，它们共用了基础设施；
+    1.主要是实现注解语义，及对发现的bean做同样的操作。
+        ---基础设置的注入中也起到重要作用。
+        ---整个解析过程，涉及大量的递归和循环。
+        ---扩展点之一，支持第三方提供类似的@Enablexxx注解能力，和自定义注册逻辑
+    2.Bean定义最终注册在：DefaultListableBeanFactory的
+        Map<String, BeanDefinition> beanDefinitionMap变量中，与xml注册在同样的地方
+    3.注解与xml是不冲突的，是两者分别用到的解析器：
         ComponentScanAnnotationParser.parse：注解解析
         ComponentScanBeanDefinitionParser.parse：xml解析
+        ---底层共用了ClassPathBeanDefinitionScanner
 end note
 
 @enduml

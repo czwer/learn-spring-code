@@ -6,6 +6,7 @@ activate DefaultBeanDefinitionDocumentReader #DarkSalmon
     note right of DefaultBeanDefinitionDocumentReader #FAEBD7
         介绍xml中bean定义的解析
         测试用例参：XmlBeanDefinitionReaderTests
+        ---这里只描述了主要步骤
     end note
 
     DefaultBeanDefinitionDocumentReader -> DefaultBeanDefinitionDocumentReader : processBeanDefinition()
@@ -107,6 +108,7 @@ deactivate DefaultBeanDefinitionDocumentReader
 note right of DefaultBeanDefinitionDocumentReader #FAEBD7
     总结：
         解析xml中<bean>标签所支持的所有属性及子标签。
+        ---标签越丰富，代码越复杂
 end note
 
 @enduml

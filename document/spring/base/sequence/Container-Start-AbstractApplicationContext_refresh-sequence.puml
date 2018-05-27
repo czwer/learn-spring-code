@@ -42,11 +42,14 @@ activate AbstractApplicationContext #DarkSalmon
     deactivate AbstractApplicationContext
 
     note right of AbstractApplicationContext #aqua
-        DefaultListableBeanFactory中注册基础组件：
-            1.类加载器
-            2.StandardBeanExpressionResolver：Spring EL表达式
-            2.ResourceEditorRegistrar：
-            3.环境变量以bean的形式来记录
+        主要是注册基础组件
+            1.注册基础组件StandardBeanExpressionResolver：Spring EL表达式
+            2.初始化ResourceEditorRegistrar：用于注册ResourceEditor
+            3.注册基础组件ApplicationContextAwareProcessor：初始化前织入xxxAware定义的资源
+            4.注册忽略依赖检查和自动装配的接口
+            5.把当前容器以资源加载，事件发布等设置到自身，以便后面上下文中使用
+            6.注册基础组件ApplicationListenerDetector：用于检测实现了ApplicationListener的Bean
+            7.以bean实例的方式，记录当前环境变量
     end note
     AbstractApplicationContext -> AbstractApplicationContext : prepareBeanFactory()
     activate AbstractApplicationContext #DarkSalmon
@@ -64,26 +67,27 @@ activate AbstractApplicationContext #DarkSalmon
     AbstractApplicationContext -> AbstractApplicationContext : invokeBeanFactoryPostProcessors()
     activate AbstractApplicationContext #DarkSalmon
         note right of AbstractApplicationContext #aqua
-            运用BeanFactory处理器：
+            使用BeanFactory处理器工厂注册Bean定义及预处理Bean定义：
                 I.先使用现有的BeanFactoryPostProcessor；
                 II.调用postProcessBeanDefinitionRegistry()方法
                     1.从所有的bean定义中查找BeanDefinitionRegistryPostProcessor类型的名称;
                     2.然后先实例化BeanDefinitionRegistryPostProcessor,通过getBean()的形式实例化;
-                        PriorityOrdered：最优先
-                        Ordered：次优先
-                        其他：最后
+                        优先级：PriorityOrdered > Ordered > 其他
                     3.实例化后进行排序，并注册到BeanFactory中
-                    4.运用实例化的BeanDefinitionRegistryPostProcessor；
-                        ---ConfigurationClassPostProcessor时涉及bean定义加载(SpringBoot就是这样用的)
+                    4.运用实例化的BeanDefinitionRegistryPostProcessor.postProcessBeanDefinitionRegistry()；
+                    ---ConfigurationClassPostProcessor：加载Bean定义的入口之一，注解版
                 III.最后执行其他普通的BeanFactoryPostProcessor.postProcessBeanFactory()方法
+                    ---SharedMetadataReaderFactoryContextInitializer：没有做什么
+                    ---ConfigurationClassPostProcessor：
+                        1.设置bean定义中一些公共变量，
+                        2.一般替换成Cglib生成的Class
+                        3.注册基础设施ImportAwareBeanPostProcessor
+                    ---PropertySourcesPlaceholderConfigurer：占位符的解析
+                    ---ConfigurationBeanFactoryMetadata：预找出使用工厂方法创建的bean
         end note
 
         AbstractApplicationContext -> PostProcessorRegistrationDelegate : invokeBeanFactoryPostProcessors()
         activate PostProcessorRegistrationDelegate #DarkSalmon
-            note right of PostProcessorRegistrationDelegate #aqua
-                ConfigurationClassPostProcessor：支持@Configuration注解
-                    ---加载Bean定义的入口之一，注解版
-            end note
 
             PostProcessorRegistrationDelegate -> BeanDefinitionRegistryPostProcessor : postProcessBeanDefinitionRegistry()
             activate BeanDefinitionRegistryPostProcessor #DarkSalmon
@@ -100,16 +104,13 @@ activate AbstractApplicationContext #DarkSalmon
 
     deactivate AbstractApplicationContext
 
-
     AbstractApplicationContext -> AbstractApplicationContext : registerBeanPostProcessors()
     activate AbstractApplicationContext #DarkSalmon
         note right of AbstractApplicationContext #aqua
-            注册bean处理器：
+            <font color=red>注册并实例化bean处理器：</font>
                 1.从所有的bean定义中查找BeanPostProcessor类型的名称;
                 2.然后先实例化BeanPostProcessor,通过getBean()的形式实例化;
-                    PriorityOrdered：最优先
-                    Ordered：次优先
-                    其他：最后
+                   优先级：PriorityOrdered > Ordered > 其他
                 3.实例化后进行排序，并注册到BeanFactory中
         end note
 
@@ -185,11 +186,12 @@ deactivate AbstractApplicationContext
 
 note right of AbstractApplicationContext #FAEBD7
 *总结
-    1.在上面的步骤中重要的是bean定义加载和实例化bean；
-    2.顺序很重要，规则带来秩序
-        PriorityOrdered：最优先
-        Ordered：次优先
-        其他：最后
+    1.主要围绕以下几点：
+        a.注册基础组件；
+        b.Bean定义加载与预处理；
+        c.注册并实例化BeanPostProcessor；
+        d.实例化非延迟加载的Bean；
+        ---顺序很重要，规则带来秩序；
 end note
 
 @enduml

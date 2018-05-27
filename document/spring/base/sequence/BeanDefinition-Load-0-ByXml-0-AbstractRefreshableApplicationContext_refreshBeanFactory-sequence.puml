@@ -7,15 +7,17 @@ autonumber
 
     note left of AbstractRefreshableApplicationContext #FAEBD7
         *介绍xml配置式bean定义读取
+        测试用例参：XmlBeanDefinitionReaderTests
         ---这里只描述了主要步骤
     end note
 
     AbstractRefreshableApplicationContext -> XmlWebApplicationContext: loadBeanDefinitions()
     activate XmlWebApplicationContext #DarkSalmon
         note right of AbstractRefreshableApplicationContext #aqua
-            1.把配置文件转换为Resource
-            2.读取到的内容转换成Document
-            3.逐一解析元素，解析后注册到DefaultListableBeanFactory中
+            主要逻辑：
+                1.把配置文件转换为Resource
+                2.读取到的内容转换成Document
+                3.逐一解析元素，解析后注册到DefaultListableBeanFactory中
         end note
         loop
 
@@ -65,8 +67,8 @@ autonumber
 
 note right of AbstractRefreshableApplicationContext #FAEBD7
     总结：
-        1.把定义在xml的bean，转换成内存中BeanDefinition的数据结构；
-        2.期间会实现命名空间的语义；
+        1.通过解析xml，把定义在xml的bean，转换成内存中BeanDefinition的数据结构；
+        2.处理正常的bean解析，还支持命名空间标签，实现标签语义；
 end note
 
 

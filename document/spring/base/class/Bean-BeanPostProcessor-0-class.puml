@@ -11,7 +11,7 @@ note  as N1 #FAEBD7
     很多Spring扩展插件或Spring子项目都是使用这些后处理器完成激动人心的功能的。
 end note
 
-interface BeanPostProcessor  #7FFFD4
+interface BeanPostProcessor
 abstract class AbstractAdvisingBeanPostProcessor
 abstract class AbstractBeanFactoryAwareAdvisingPostProcessor
 class ApplicationContextAwareProcessor #7FFFD4
@@ -26,7 +26,7 @@ interface MergedBeanDefinitionPostProcessor #7FFFD4
 class MethodValidationPostProcessor
 class PersistenceAnnotationBeanPostProcessor
 class PersistenceExceptionTranslationPostProcessor
-class ScheduledAnnotationBeanPostProcessor  #7FFFD4
+class ScheduledAnnotationBeanPostProcessor
 class ServletContextAwareProcessor
 
 

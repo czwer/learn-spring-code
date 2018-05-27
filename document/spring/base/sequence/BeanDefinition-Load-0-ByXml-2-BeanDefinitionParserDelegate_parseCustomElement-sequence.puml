@@ -4,8 +4,9 @@
 activate BeanDefinitionParserDelegate #DarkSalmon
 
     note right of BeanDefinitionParserDelegate #FAEBD7
-        介绍component-scan标签解析的主要逻辑
+        介绍<context:component-scan>标签解析的主要逻辑
         测试用例参：org.springframework.context.annotation.SimpleScanTests
+        ---这里只描述了主要步骤
     end note
 
     BeanDefinitionParserDelegate -> DefaultNamespaceHandlerResolver : resolve()
