@@ -7,7 +7,7 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
             ---简化版类图
-    Pointcut代表执行点（Joinpoint）的集合，用ClassFilter和MethodMatcher进行表达。
+    Pointcut：用于描述执行点（Joinpoint）的集合，具体用ClassFilter和MethodMatcher进行表达。
 end note
 
 interface Pointcut
@@ -18,20 +18,17 @@ abstract class AbstractExpressionPointcut
 abstract class AbstractRegexpMethodPointcut
 class AnnotationMatchingPointcut
 note bottom : 根据目标对象是否存在指定类型的注解来匹配
-class AspectJExpressionPointcut #FF5000
-note bottom #FF5000: Spring AOP中面向AspectJ的Pointcut的具体实现
 class ComposablePointcut
 note bottom : 支持pointcut切点逻辑运算
 class ControlFlowPointcut
 interface ExpressionPointcut
-abstract class DynamicMethodMatcherPointcut #7FFFD4
+abstract class DynamicMethodMatcherPointcut
 class JdkRegexpMethodPointcut
 note left : 正则表达式相关
 class NameMatchMethodPointcut
 abstract class StaticMethodMatcherPointcut #FF5000
 class TruePointcut
 
-AbstractExpressionPointcut <|-- AspectJExpressionPointcut
 AbstractRegexpMethodPointcut <|-- JdkRegexpMethodPointcut
 
 ExpressionPointcut <|.. AbstractExpressionPointcut

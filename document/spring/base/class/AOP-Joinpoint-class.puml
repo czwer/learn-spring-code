@@ -6,18 +6,23 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    Joinpoint最重要的功能是AOP的落地执行。
+    Joinpoint：织入操作的系统执行点
+        ---最重要的功能是执行Spring AOP的落地。
 end note
 
 interface Joinpoint
 Joinpoint : +Object proceed() throws Throwable
 class CglibMethodInvocation #FF5000
+note right #FF5000: Cglib通往Spring AOP的桥梁
 interface ConstructorInvocation
+ConstructorInvocation : +Constructor<?> getConstructor()
 interface Invocation
+Invocation : +Object[] getArguments()
 interface MethodInvocation
+MethodInvocation : +Method getMethod()
 interface ProxyMethodInvocation
 class ReflectiveMethodInvocation #FF5000
-note left #FF5000: AOP运行执行织入逻辑发挥了重要的作用
+note right #FF5000: AOP运行执行织入逻辑发挥了重要的作用
 
 
 Joinpoint <|-- Invocation

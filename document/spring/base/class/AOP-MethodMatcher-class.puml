@@ -7,7 +7,7 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
             ---简化版类图
-    MethodMatcher用于判断将目标方法是否匹配Pointcut。
+    MethodMatcher：描述符合织入逻辑方法的特征，验证当前方法是否匹配。
 end note
 
 interface MethodMatcher
@@ -17,7 +17,7 @@ MethodMatcher : +boolean matches(Method method, @Nullable Class<?> targetClass, 
 MethodMatcher : +MethodMatcher TRUE = TrueMethodMatcher.INSTANCE
 class AdviceExcludingMethodMatcher
 class ClassFilterAwareUnionMethodMatcher
-abstract class DynamicMethodMatcher #7FFFD4
+abstract class DynamicMethodMatcher
 interface IntroductionAwareMethodMatcher
 class IntersectionMethodMatcher
 abstract class StaticMethodMatcher #FF5000

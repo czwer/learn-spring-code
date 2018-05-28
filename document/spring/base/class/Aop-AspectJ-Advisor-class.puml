@@ -1,0 +1,50 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    Advisor中用于支持AspectJ的分支。
+end note
+
+interface Advisor
+abstract class AbstractPointcutAdvisor
+abstract class AbstractGenericPointcutAdvisor
+class AspectJExpressionPointcutAdvisor #7FFFD4
+note bottom #7FFFD4: AspectJ通过xml使用时
+class AspectJPointcutAdvisor
+note bottom : 个人理解为做标记用，标记bean为AspectJ类型
+class DeclareParentsAdvisor #7FFFD4
+note bottom #7FFFD4: AspectJ通过注解使用时
+interface IntroductionAdvisor
+note top : 只运用于类级别的拦截，只能用于Introduction型的Advice
+interface InstantiationModelAwarePointcutAdvisor
+class InstantiationModelAwarePointcutAdvisorImpl #7FFFD4
+note bottom #7FFFD4: AspectJ通过注解使用时
+interface PointcutAdvisor
+note top : 运用任何类型的Pointcut，差不多任何类型的Advice
+
+
+
+
+AbstractGenericPointcutAdvisor <|-- AspectJExpressionPointcutAdvisor
+
+AbstractPointcutAdvisor <|-- AbstractGenericPointcutAdvisor
+
+
+Advisor <|-- PointcutAdvisor
+Advisor <|-- IntroductionAdvisor
+
+
+IntroductionAdvisor <|-- DeclareParentsAdvisor
+
+InstantiationModelAwarePointcutAdvisor <|-- InstantiationModelAwarePointcutAdvisorImpl
+
+PointcutAdvisor <|.. AbstractPointcutAdvisor
+PointcutAdvisor <|.. AspectJPointcutAdvisor
+PointcutAdvisor <|-- InstantiationModelAwarePointcutAdvisor
+
+
+@enduml

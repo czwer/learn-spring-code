@@ -7,9 +7,9 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    1.Advice织入到Pointcut规定的Joinpoint处的横切逻辑。
-    2.per-class类型的Advice是指，该类型的Advice的实例可以在目标对象类的所有实例之间共享。
-    3.尽管通知定义有多种，实际实现时，我们都是基于环绕通知来实现的。
+    1.Advice：织入到Joinpoint处的横切逻辑。
+    <font color=red>2.per-class类型的Advice：该类型的Advice的实例可以在目标对象类的所有实例之间共享。</font>
+    <font color=red>3.尽管通知定义有多种，实际实现时，我们都是基于MethodInterceptor（环绕通知）来实现的。</font>
 end note
 
 interface Advice

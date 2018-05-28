@@ -6,12 +6,12 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    Advice实现了将被织入到Pointcut规定的Joinpoint处的横切逻辑。
-    per-instance类型的Advice不会在目标类所有对象实例之间共享，
-    而是会为不同的实例对象保存它们各自的状态以及相关逻辑。
-    在Spring AOP中Introduction是唯一的一种per-instance类型的Advice。
-    Introduction可以在不改动目标类定义的情况下，为目标类添加新的属性以
-    及行为。
+    1.Advice：织入到Joinpoint的横切逻辑。
+    2.per-instance类型的Advice不会在目标类所有对象实例之间共享，而是会为
+        不同的实例对象保存它们各自的状态以及相关逻辑。
+    3.在Spring AOP中Introduction是唯一的一种per-instance类型的Advice。
+        Introduction可以在不改动目标类定义的情况下，为目标类添加新的属性以
+        及行为。
 end note
 
 interface Advice
