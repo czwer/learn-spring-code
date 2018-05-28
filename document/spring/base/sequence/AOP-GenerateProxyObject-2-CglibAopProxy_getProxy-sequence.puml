@@ -25,7 +25,7 @@ activate CglibAopProxy #DarkSalmon
         note right of CglibAopProxy #aqua
             获得实现的接口,
                 ---在生成JDK代理时，如果接口没有在SpringProxy，Advised族中，
-                会添加该3个接口
+                会添加这2个接口
         end note
     AopProxyUtils-> CglibAopProxy:Class<?>[] proxiedInterfaces
     deactivate AopProxyUtils
@@ -33,10 +33,10 @@ activate CglibAopProxy #DarkSalmon
     note right of CglibAopProxy #aqua
         设置Enhancer属性
             a.设置产生的代理对象的父类
-            b.命名策略（防止与其他框架冲突
+            b.命名策略（防止与其他框架冲突）
             c.组装要用到的Callback数组，为ProxyCallbackFilter准备素材
-                ---这一步是因为ProxyCallbackFilter.accept(Method method)
-                返回的是int类型的index决定的
+                ---为符合Cglig规范，在调用ProxyCallbackFilter.accept(Method method)时，
+                返回方法匹配的Callback数组索引。
             d.设置方法回调过滤器
             e.设置callbackType
     end note
@@ -51,8 +51,9 @@ activate CglibAopProxy #DarkSalmon
         ObjenesisCglibAopProxy -> Enhancer : createClass()：创建待生成代理的Class对象
         activate Enhancer #DarkSalmon
             note right of Enhancer #aqua
-                1.返回方法适用的Callback索引，生成子类会用到
-                ---这里描述只突出了重点
+                1.通过ProxyCallbackFilter.accept()方法，
+                    返回方法适用的Callback索引
+                ---这里只描述了重点
             end note
 
             Enhancer -> ProxyCallbackFilter : accept()：
@@ -65,7 +66,7 @@ activate CglibAopProxy #DarkSalmon
 
         note right of SpringObjenesis #FF5000
             生成代理对象
-            ---Objenesis特性：不要求有构造参数
+            ---Objenesis特性：不要求有构造函数
         end note
 
         ObjenesisCglibAopProxy -> SpringObjenesis : newInstance()：
@@ -74,9 +75,8 @@ activate CglibAopProxy #DarkSalmon
         deactivate SpringObjenesis
 
         note right of ObjenesisCglibAopProxy #FF5000
-            1.如果没有创建成功，传统方式创建;
-            2.设置Callback到生成的代理对象中，
-                真正调用时才发挥真正作用
+            1.如果Objenesis方式没有创建成功，采用传统方式创建;
+            2.设置Callback到生成的代理对象中，真正调用时才发挥真正作用
         end note
 
 
@@ -90,13 +90,13 @@ deactivate CglibAopProxy
 
 note right of CglibAopProxy #FAEBD7
 *总结
-    1.通过Callback把Cglib和Spring AOP基础设施融合，以便后期代理运行时共享Spring AOP框架的基础设施；
-        ---在CglibAopProxy定义了多个内部类形式的Callback，它们都实现了Cglib的MethodInterceptor接口
-    2.准备一组标准件：不同的Callback,以适应不同的上下文：方法名，advised
-    3.通过enhancer中设置ProxyCallbackFilter，决定方法使用哪个Callback,分配的原则根据：方法信息+advised配置信息
+    1.通过Callback中包含advised，把Cglib和Spring AOP基础设施融合，以便后期代理运行时使用Spring AOP框架的基础设施；
+        ---在CglibAopProxy定义了多个内部类形式的Callback，它们都实现了Cglib的MethodInterceptor接口，
+        有的Callback可以提升系统性能；
+    2.通过enhancer中设置ProxyCallbackFilter，决定方法使用哪个Callback,分配的原则根据：方法信息+advised配置信息
         <font color=red>---使用时为每个方法确认过对应的织入调用链，并予以缓存，是Cglib的优化点之一</font>
         <font color=red>---JDK是代理对象第一次运行时才予以缓存，所以第一次访问会慢</font>
-        <font color=red>---以上也表明类级别与方法级别上的差距</font>
+        <font color=red>---以上也表明类级别与方法级别上的差距，颗粒度越细，性能越好</font>
 *备注
     1.x.class.getInterfaces：返回x所实现的接口
     2.WeakHashMap：将一对key, value放入到 WeakHashMap 里并不能避免该key值被GC回收，

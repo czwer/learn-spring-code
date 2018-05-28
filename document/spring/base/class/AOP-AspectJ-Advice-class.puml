@@ -12,10 +12,10 @@ interface Advice
 interface AfterAdvice
 interface AfterReturningAdvice
 interface MethodBeforeAdvice
-interface MethodInterceptor #7FFFD4
-note right : 相当于Around Advice
+interface MethodInterceptor #FF5000
+note top #FF5000: 相当于Around Advice
 
-abstract class AbstractAspectJAdvice #7FFFD4
+abstract class AbstractAspectJAdvice #FF5000
 class AspectJAfterAdvice
 class AspectJAfterReturningAdvice
 class AspectJAfterThrowingAdvice

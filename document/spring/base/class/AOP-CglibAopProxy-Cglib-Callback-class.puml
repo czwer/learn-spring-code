@@ -6,7 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    Callback：增强器回调，我们织入的业务逻辑以Callback形式接入Cglib。
+    Callback：增强器回调
+        ---我们织入的业务逻辑以Callback.advised属性整合到Cglib技术中。
     参考：
         https://www.cnblogs.com/shijiaqi1066/p/3429691.html
 end note
@@ -18,27 +19,27 @@ note bottom : Spring帮生成了equals方法
 interface Dispatcher
 note bottom : 每次访问延迟加载属性时都会触发代理类回调方法
 class DynamicAdvisedInterceptor #7FFFD4
-note top #7FFFD4: 与FixedChainStaticTargetInterceptor无实质不同，增加获取织入调用链逻辑
+note top #7FFFD4: 与FixedChainStaticTargetInterceptor无实质不同，只增加获取织入调用链逻辑
 class DynamicUnadvisedExposedInterceptor #7FFFD4
-note bottom #7FFFD4: 直接目标方法调用,需要从targetSource.getTarget(),当前代理对象绑定到ThreadLocal
+note bottom #7FFFD4: 直接调用目标方法,需要从targetSource.getTarget()获得目标对象,当前代理对象绑定到ThreadLocal
 class DynamicUnadvisedInterceptor #7FFFD4
-note bottom #7FFFD4: 直接目标方法调用,需要从targetSource.getTarget()
+note bottom #7FFFD4: 直接调用目标方法,需要从targetSource.getTarget()获得目标对象
 class FixedChainStaticTargetInterceptor #7FFFD4
-note bottom #7FFFD4: 包装后，间接调用ReflectiveMethodInvocation，调用链逻辑在生成代理时已设置
+note bottom #7FFFD4: 包装后，本身包含逻辑逻辑调用链，再使用Spring AOP基础设施调用
 class HashCodeInterceptor
 note top : Spring帮生成了hashcode方法
 interface MethodInterceptor
 MethodInterceptor : +Object intercept()
 note left : 能够满足任何的拦截需要，可以用于实现环绕通知
 interface NoOp
-note top : NoOp回调把对方法调用直接委派到这个方法在父类中的实现
+note right : 对方法调用委派到这个方法在父类中的实现
 class SerializableNoOp
 note bottom : 暂时理解为标记
 class StaticDispatcher
 class StaticUnadvisedInterceptor #7FFFD4
-note bottom #7FFFD4: 直接目标方法调用
+note bottom #7FFFD4: 直接调用目标方法
 class StaticUnadvisedExposedInterceptor #7FFFD4
-note bottom #7FFFD4: 直接目标方法调用，当前代理对象绑定到ThreadLocal
+note bottom #7FFFD4: 直接调用目标方法，并把当前代理对象绑定到ThreadLocal
 
 
 

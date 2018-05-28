@@ -17,7 +17,7 @@ activate JdkDynamicAopProxy #DarkSalmon
         note right of JdkDynamicAopProxy #aqua
             获得实现的接口,
                 ---在生成JDK代理时，如果接口没有在SpringProxy，Advised，DecoratingProxy族中，
-                会添加该3个接口
+                会添加这3个接口
         end note
     AopProxyUtils-> JdkDynamicAopProxy:Class<?>[] proxiedInterfaces
     deactivate AopProxyUtils
@@ -45,7 +45,7 @@ deactivate JdkDynamicAopProxy
 note right of JdkDynamicAopProxy #FAEBD7
 *总结
     1.JDK动态代理，可以看成JDK提供的的有限生成字节码的技术。与Cglib一样是都是生成字节码。
-    2.SpringAOP中JdkDynamicAopProxy在设置代理对象把自己(本身包含AdvisedSupport，包含了需要的信息)给设置进去了，比较有趣。
+    2.SpringAOP中JdkDynamicAopProxy在设置代理对象时把自己(本身包含AdvisedSupport，包含了需要的信息)给设置进去了，比较有趣。
 
 end note
 

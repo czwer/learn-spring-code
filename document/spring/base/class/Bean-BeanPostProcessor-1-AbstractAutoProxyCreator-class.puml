@@ -19,7 +19,7 @@ AbstractAutoProxyCreator : +Object postProcessBeforeInstantiation()
 AbstractAutoProxyCreator : #abstract Object[] getAdvicesAndAdvisorsForBean()
 note top #FF5000: 自动代理的核心
 class AnnotationAwareAspectJAutoProxyCreator #FF5000
-note bottom #FF5000 : 自动代理：对@AspectJ形式的Spring AOP支持,也支持传统的
+note bottom #FF5000 : 自动代理：对AspectJ注解定义的AOP规范支持,也支持传统Spring AOP的
 class AspectJAwareAdvisorAutoProxyCreator
 class BeanNameAutoProxyCreator
 class DefaultAdvisorAutoProxyCreator

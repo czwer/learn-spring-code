@@ -13,12 +13,11 @@ activate AbstractAutoProxyCreator #DarkSalmon
     activate AbstractAutoProxyCreator #DarkSalmon
 
         note right of AbstractAutoProxyCreator #aqua
-            不生成代理的逻辑：
+            I.先判断不生成代理的逻辑：
                 1.有名字，在已处理名单中包含了，直接返回原bean
-                    ---每个BeanPostProcess只处理一层代理，想要多层代理，就要单独定义
-                    InfrastructureAdvisorAutoProxyCreator类似实现
                 2.已核实过不需要处理的记录中包含了，直接返回原bean
                 3.beanClass是基础设施类型||bean属于需要跳过的部分，记录到advisedBeans，直接返回原bean
+            II.下面是生成代理的逻辑：
         end note
         AbstractAutoProxyCreator->AbstractAdvisorAutoProxyCreator : getAdvicesAndAdvisorsForBean()
         activate AbstractAdvisorAutoProxyCreator #DarkSalmon
@@ -86,10 +85,10 @@ activate AbstractAutoProxyCreator #DarkSalmon
             note right of AbstractAutoProxyCreator #aqua
                 创建代理；
                     1.当BeanFactory为类型ConfigurableListableBeanFactory时，
-                        在Bean定义中间接介记录原始beanClass
+                        在Bean定义中记录原始Class信息
                     2.创建ProxyFactory，并拷贝AbstractAutoProxyCreator的
                         ProxyConfig信息给ProxyFactory
-                    3.确定是用Cglib还是JDK方式生成代理,默认是Cglib：设置
+                    3.确定用Cglib还是JDK方式生成代理,默认是Cglib：设置
                         proxyTargetClass属性，如存在父接口，记录到当前proxyFactory
             end note
 
@@ -122,10 +121,13 @@ deactivate AbstractAutoProxyCreator
     note right of AbstractAutoProxyCreator #FAEBD7
         *总结
             1.BeanPostProcessor(具体为AbstractAutoProxyCreator)+ProxyFactory是
-                Spring IoC体系和 AOP体系打通的关键
-                ---AbstractAutoProxyCreator再具体是InfrastructureAdvisorAutoProxyCreator
+                Spring IoC和AOP体系打通的关键
+                ---AbstractAutoProxyCreator再具体下面二者之一：
+                    InfrastructureAdvisorAutoProxyCreator：传统方式
+                    AnnotationAwareAspectJAutoProxyCreator：使用AspectJ形式注解时，同时也支持传统方式
             2.与实例化之前生成代理逻辑大致相同，共用基础设施，把筛选匹配的Advisor通过动态代理生成；
                 ---这里直接用SingletonTargetSource来包装目标对象。
+                ---顺序在Spring体系里怎么强调都不为过，Advisor顺序很重要
         *备注：
             AbstractAutoProxyCreator属性含义
                 earlyProxyReferences：[提前暴露的代理对象引用]

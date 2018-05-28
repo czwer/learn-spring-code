@@ -13,7 +13,7 @@ note  as N1 #FAEBD7
 end note
 
 class AspectJExpressionPointcut #FF5000
-note bottom : Spring AOP中面向AspectJ的Pointcut的具体实现
+note bottom #FF5000: Spring AOP中面向AspectJ的Pointcut的具体实现
 interface Pointcut
 Pointcut : +ClassFilter getClassFilter()
 Pointcut : +MethodMatcher getMethodMatcher()

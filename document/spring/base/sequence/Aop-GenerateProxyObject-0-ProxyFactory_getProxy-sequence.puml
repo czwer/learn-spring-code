@@ -7,7 +7,7 @@ autonumber
 -> ProxyFactory : getProxy()
 activate ProxyFactory #DarkSalmon
     note left of ProxyFactory #FAEBD7
-        *介绍ProxyFactory获取AopProxy和生成代理对象
+        *介绍ProxyFactory生成代理对象的主要步骤
         ---这里只描述了主要步骤
     end note
 
@@ -43,7 +43,7 @@ activate ProxyFactory #DarkSalmon
     ProxyFactory -> AopProxy : getProxy()
     activate AopProxy #DarkSalmon
         note right of AopProxy #FF5000
-           具体由Cglib和JDK方式生成代理对象
+           具体由Jdk和Cglib方式生成代理对象
            ---单独时序图说明
         end note
     AopProxy-->ProxyFactory : proxyObject
@@ -58,7 +58,7 @@ note right of ProxyFactory #FAEBD7
         1.每个目标对象创建代理时，都会new ProxyFactory()，是不共享的。
         2.AopProxy是帮我们生成代理的渠道，并不是我们要使用的代理对象
     *备注
-        1.ObjenesisCglibAopProxy：是CglibAopProxy的子类，特性是无需构造函数必须存在
+        1.ObjenesisCglibAopProxy：是CglibAopProxy的子类，特性是构造函数非必须存在
 end note
 
 

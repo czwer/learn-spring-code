@@ -9,7 +9,7 @@ note  as N1 #FAEBD7
     AopProxy对不同的代理实现进行了适度的抽象，实现类用于生成代理对象。
 end note
 
-interface AopProxy #7FFFD4
+interface AopProxy
 AopProxy : +Object getProxy()
 AopProxy : +Object getProxy(@Nullable ClassLoader classLoader)
 class CglibAopProxy #FF5000
@@ -19,7 +19,7 @@ class JdkDynamicAopProxy #FF5000
 JdkDynamicAopProxy : +Object invoke(Object proxy, Method method, Object[] args)
 JdkDynamicAopProxy : -final AdvisedSupport advised
 class ObjenesisCglibAopProxy #FF5000
-note bottom : 不再要求目标类必须有无参构造函数
+note bottom  #FF5000: 不再要求目标类必须有无参构造函数
 
 
 

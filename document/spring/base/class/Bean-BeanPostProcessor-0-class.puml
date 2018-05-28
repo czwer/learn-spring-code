@@ -7,36 +7,18 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    了解BeanPostProcessor对Bean的影响，对于深入理解Spring核心功能的工作原理将会有很大的帮助。
-    很多Spring扩展插件或Spring子项目都是使用这些后处理器完成激动人心的功能的。
+    BeanPostProcessor：可以对Bean实例生成进行干预，比如Spring AOP就是
+    以此为桥梁实现的。
 end note
 
 interface BeanPostProcessor
-abstract class AbstractAdvisingBeanPostProcessor
-abstract class AbstractBeanFactoryAwareAdvisingPostProcessor
+abstract class AbstractAdvisingBeanPostProcessor #7FFFD4
 class ApplicationContextAwareProcessor #7FFFD4
-class ApplicationListenerDetector
-class AsyncAnnotationBeanPostProcessor
 class BeanValidationPostProcessor
-class CommonAnnotationBeanPostProcessor #7FFFD4
-interface DestructionAwareBeanPostProcessor
-class InitDestroyAnnotationBeanPostProcessor
+interface DestructionAwareBeanPostProcessor #7FFFD4
 interface InstantiationAwareBeanPostProcessor  #7FFFD4
 interface MergedBeanDefinitionPostProcessor #7FFFD4
-class MethodValidationPostProcessor
-class PersistenceAnnotationBeanPostProcessor
-class PersistenceExceptionTranslationPostProcessor
-class ScheduledAnnotationBeanPostProcessor
 class ServletContextAwareProcessor
-
-
-
-AbstractAdvisingBeanPostProcessor <|-- AbstractBeanFactoryAwareAdvisingPostProcessor
-
-AbstractBeanFactoryAwareAdvisingPostProcessor <|-- AsyncAnnotationBeanPostProcessor
-AbstractBeanFactoryAwareAdvisingPostProcessor <|-- MethodValidationPostProcessor
-AbstractBeanFactoryAwareAdvisingPostProcessor <|-- PersistenceExceptionTranslationPostProcessor
-
 
 
 BeanPostProcessor <|-- AbstractAdvisingBeanPostProcessor
@@ -47,17 +29,6 @@ BeanPostProcessor <|-- InstantiationAwareBeanPostProcessor
 BeanPostProcessor <|-- MergedBeanDefinitionPostProcessor
 BeanPostProcessor <|-- ServletContextAwareProcessor
 
-
-
-DestructionAwareBeanPostProcessor <|.. ApplicationListenerDetector
-DestructionAwareBeanPostProcessor <|.. InitDestroyAnnotationBeanPostProcessor
-DestructionAwareBeanPostProcessor <|.. PersistenceAnnotationBeanPostProcessor
-DestructionAwareBeanPostProcessor <|.. ScheduledAnnotationBeanPostProcessor
-
-InitDestroyAnnotationBeanPostProcessor <|-- CommonAnnotationBeanPostProcessor
-
-InstantiationAwareBeanPostProcessor <|.. CommonAnnotationBeanPostProcessor
-InstantiationAwareBeanPostProcessor <|.. PersistenceAnnotationBeanPostProcessor
 
 
 @enduml

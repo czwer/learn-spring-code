@@ -10,17 +10,16 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         ---这里只描述了主要步骤
     end note
 
-
-
     alt 不能从缓存获取BeanWrapper时
         note right of AbstractAutowireCapableBeanFactory #aqua
-            主要逻辑：可以理解为new个对象
-                1.优先从缓存中获取BeanWrapper,获取不到再创建有四种创建方式
+            主要逻辑：
+                优先从缓存中获取BeanWrapper,获取不到再创建有四种创建方式
                     a.Supplier.get();
                         ---Java8新语法
-                    b.bean定义中声明的工厂方法实例化
-                    c.自动装配：可以理解为用最符合要求的构造函数去实例化
+                    b.bean定义中声明的工厂方法实例化；
+                    c.自动装配：可以理解为用最符合要求的构造函数去实例化；
                     d.无参的构造函数实例化；
+                ---这四种可以理解为在new个对象(大部分属性还待填充)
         end note
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory: createBeanInstance() : 创建BeanWrapper
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
@@ -31,15 +30,15 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors()
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
             note right of AbstractAutowireCapableBeanFactory #aqua
-            主要逻辑：为bean定义属性填充做准备
-                1.运用MergedBeanDefinitionPostProcessor类型BeanPostProcessor
+            主要逻辑：
+                运用MergedBeanDefinitionPostProcessor类型BeanPostProcessor
                     a.CommonAnnotationBeanPostProcessor
                         ---@PostConstruct,@PreDestroy,@WebServiceRef,@EJB,@Resource
                     b.AutowiredAnnotationBeanPostProcessor
                         ---@Autowired
                     c.RequiredAnnotationBeanPostProcessor---未做处理
                     d.ApplicationListenerDetector---记录当前bean是否单例
-                    ---检查是否有注解，验证使用是否正确，标记结果
+                ---为bean实例属性填充做准备：检查是否有注解，验证使用是否正确，标记结果
             end note
             loop
                 AbstractAutowireCapableBeanFactory -> MergedBeanDefinitionPostProcessor:postProcessMergedBeanDefinition()
@@ -61,13 +60,14 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
     activate AbstractAutowireCapableBeanFactory #DarkSalmon
 
         note right of AbstractAutowireCapableBeanFactory #aqua
-            主要逻辑：Spring的自动装配开始之前，对给定的bean实例执行自定义字段注入的理想回调。
-                1.运用InstantiationAwareBeanPostProcessor类型BeanPostProcessor
+            主要逻辑：
+                运用InstantiationAwareBeanPostProcessor类型BeanPostProcessor
                     a.ImportAwareBeanPostProcessor---未做实质处理
                     b.InfrastructureAdvisorAutoProxyCreator---未做实质处理
                     c.CommonAnnotationBeanPostProcessor---未做实质处理
                     d.AutowiredAnnotationBeanPostProcessor---未做实质处理
                     e.RequiredAnnotationBeanPostProcessor---未做实质处理
+                ---提供的扩展点，自动装配开始之前，对给定的bean实例执行自定义字段注入回调。
         end note
 
         loop
@@ -78,13 +78,14 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         end
 
         note right of AbstractAutowireCapableBeanFactory #aqua
-            主要逻辑：bean属性中需要Spring填充或验证的进行处理
-                1.运用InstantiationAwareBeanPostProcessor类型BeanPostProcessor
+            主要逻辑：
+                运用InstantiationAwareBeanPostProcessor类型BeanPostProcessor
                     a.ImportAwareBeanPostProcessor---只是对EnhancedConfiguration类型bean注入BeanFactory
                     b.InfrastructureAdvisorAutoProxyCreator---未做实质处理
                     c.CommonAnnotationBeanPostProcessor---实现注解语义
                     d.AutowiredAnnotationBeanPostProcessor---实现注解语义
                     e.RequiredAnnotationBeanPostProcessor---记录验证通过的
+                ---bean属性中需要Spring填充或验证处理
         end note
 
         loop
@@ -121,8 +122,8 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsBeforeInitialization()
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
             note right of AbstractAutowireCapableBeanFactory #aqua
-                大部分是注入资源或什么也不做，根据各个BeanPostProcessor语义
-                    a.InitDestroyAnnotationBeanPostProcessor---调用初始化方法
+                大部分是注入资源或什么也不做，做事情的是以下这个：
+                    a.InitDestroyAnnotationBeanPostProcessor---调用标注@PostConstruct的方法
             end note
 
             loop
@@ -134,27 +135,31 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
 
         deactivate AbstractAutowireCapableBeanFactory
 
+        note right of AbstractAutowireCapableBeanFactory #aqua
+            调用实现了InitializingBean接口的afterPropertiesSet方法或自定义的初始化方法
+        end note
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory: invokeInitMethods()
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
         deactivate AbstractAutowireCapableBeanFactory
 
         AbstractAutowireCapableBeanFactory-> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsAfterInitialization()
         activate AbstractAutowireCapableBeanFactory #DarkSalmon
-            note right of AbstractAutowireCapableBeanFactory #FF5000
-                大部分是注入资源或什么也不做，根据各个BeanPostProcessor语义
-                    a.InfrastructureAdvisorAutoProxyCreator---生成代理对象
-                        ---单独描述,实际上委托给AbstractAutoProxyCreator处理
+            note right of AbstractAutowireCapableBeanFactory #aqua
+                大部分是注入资源或什么也不做，做事情的是以下几个：
+                    <font color=red>a.InfrastructureAdvisorAutoProxyCreator---生成代理对象</font>
+                        <font color=red>---单独时序图描述,实际上委托给AbstractAutoProxyCreator处理</font>
                     b.MethodValidationPostProcessor：
-                        DefaultPointcutAdvisor
-                            MethodValidationInterceptor
-                            AnnotationMatchingPointcut---类：@Validated
+                        ---支持@Validated，运行时实现校验语义
+                        Advisor组件：DefaultPointcutAdvisor
+                        Advice组件：MethodValidationInterceptor
+                        Pointcut组件：AnnotationMatchingPointcut
                     c.PersistenceExceptionTranslationPostProcessor：
-                        PersistenceExceptionTranslationAdvisor
-                            PersistenceExceptionTranslationInterceptor
-                            AnnotationMatchingPointcut---类：@Repository
                         ---转换数据库异常，即使不使用Spring事务，只要DAO层标注
-                            了@Repository，也可以使用数据层异常转换体系
-                    d.ApplicationListenerDetector：必要时加入到监听体系
+                        了@Repository，运行时也可以使用数据层异常转换体系
+                        Advisor组件：PersistenceExceptionTranslationAdvisor
+                        Advice组件：PersistenceExceptionTranslationInterceptor
+                        Pointcut组件：AnnotationMatchingPointcut
+                    d.ApplicationListenerDetector：必要时bean加入到监听体系
             end note
 
             loop
@@ -189,12 +194,13 @@ note right of AbstractAutowireCapableBeanFactory #FAEBD7
         1.创建的bean，通过BeanWrapper包装，然后属性填充，两种填充方式：
             a.BeanPostProcessor来填充及校验属性
             b.BeanWrapper通过DataBind方式填充数据；
-        2.初始化实例一般会通过SimpleInstantiationStrategy接口是普通的反射调用还是Cglib生成实例；
-            ---Cglib不仅仅在AOP动态代理中使用，对象实例化也用到了
-        3.对象初始化完成后，再通过BeanPostProcessor，在已有的Advisor是否存在，
-            符合应用当前bean的Advisor，存在时生成代理对象。
+        2.初始化实例一般会通过SimpleInstantiationStrategy进行实例化：普通的反射方式或Cglib生成子类方式；
+            ---Cglib不仅在AOP动态代理中使用，对象实例化也用到了
+        3.对象初始化完成后，再通过BeanPostProcessor，在已有的Advisor中是否存在符合应用当前bean的
+            Advisor，存在时生成代理对象。
+            ---BeanPostProcessor是通往AOP的桥梁
     *备注
-        不要混淆：
+        不要混淆以下方法，看起来长的像：
             postProcessBeforeInstantiation：实例化前处理
             postProcessBeforeInitialization：初始化前处理
             postProcessAfterInstantiation：实例后处理

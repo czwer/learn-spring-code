@@ -5,17 +5,16 @@ autonumber
 -> AbstractBeanFactory: getBean(String name)
 activate AbstractBeanFactory #DarkSalmon
     note right of AbstractBeanFactory #FAEBD7
-        介绍getBean()的主要逻辑
-        测试用例参：org.springframework.context.annotation.SimpleScanTests
+        介绍Bean实例生成的主要逻辑
     end note
 
     AbstractBeanFactory -> AbstractBeanFactory: doGetBean()
     activate AbstractBeanFactory #DarkSalmon
 
         note right of AbstractBeanFactory #aqua
-           由bean名称|别名获取bean名称
+           由bean名称|别名获取bean定义时的名称
         end note
-        AbstractBeanFactory -> AbstractBeanFactory: transformedBeanName():转换成bean的名称
+        AbstractBeanFactory -> AbstractBeanFactory: transformedBeanName()
         activate AbstractBeanFactory #DarkSalmon
         deactivate AbstractBeanFactory
 
@@ -24,7 +23,7 @@ activate AbstractBeanFactory #DarkSalmon
               1.如果缓存中已存在，直接返回缓存对象
               2.如果缓存中不存在，且当前未创建，看是否有半成品的bean（属性未赋值的bean）,
                  存在返回该半成品
-                 ---earlySingletonObjects与singletonFactories不同在于有没有调用.getObject()
+                 ---属性earlySingletonObjects与singletonFactories不同在于有没有调用.getObject()
                     调用可能是原bean，也能是代理后的
         end note
         AbstractBeanFactory -> DefaultSingletonBeanRegistry: getSingleton()
@@ -37,7 +36,7 @@ activate AbstractBeanFactory #DarkSalmon
                 主要逻辑：
                     1.要获取FactoryBean本身,当前缓存bean实例是NullBean直接返回；
                         ---NullBean可以看做已经走过获取FactoryBean逻辑，用于表示为null的情况
-                    2.要获取FactoryBean本身,当前缓存Bean实例非FactoryBean本身，则抛出异常：因与其期望不符
+                    2.要获取FactoryBean本身,当前缓存Bean实例非FactoryBean本身，则抛出异常：因生成与期望不符
                     3.要获取FactoryBean本身,当前缓存Bean实例是一个FactoryBean,直接反回;
                     4.要获取普通Bean实例，当前缓存Bean实例正好一个普通bean，直接返回；
                     5.<font color=red>要获取普通Bean实例，当前缓存为FactoryBean实例，则由FactoryBean去构建；</font>
@@ -60,7 +59,7 @@ activate AbstractBeanFactory #DarkSalmon
                         <font color=red>a.如果是当前Bean定义中作用域是Singleton，走Singleton类型Bean的创建逻辑</font>
                         b.如果是当前Bean定义中作用域是Prototype，走Prototype类型Bean的创建逻辑
                             ---创建前后，在prototypesCurrentlyInCreation字段中添加和删除标记
-                        c.如果是当前Bean定义中作用域是Prototype，走Prototype类型Bean的创建逻辑
+                        c.如果是当前Bean定义中作用域是其他作用域，走其他作用域类型Bean的创建逻辑
                     7.如果要求了返回类型，且Bean实例类型与其不符，进行类型转换
                         ---<font color=red>主要目的：实现BeanFactory的父子责任和Bean生命周期不同作用域的语义。</font>
             end note
@@ -76,7 +75,7 @@ activate AbstractBeanFactory #DarkSalmon
             alt 存在依赖的Bean定义
                 AbstractBeanFactory -> DefaultSingletonBeanRegistry : registerDependentBean()
                 activate DefaultSingletonBeanRegistry #DarkSalmon
-                DefaultSingletonBeanRegistry --> AbstractBeanFactory : bean
+                DefaultSingletonBeanRegistry --> AbstractBeanFactory
                 deactivate DefaultSingletonBeanRegistry
 
                 AbstractBeanFactory -> AbstractBeanFactory : getBean():先实例化依赖的Bean
@@ -139,7 +138,7 @@ activate AbstractBeanFactory #DarkSalmon
 
         AbstractBeanFactory -> TypeConverter : convertIfNecessary()
         activate TypeConverter #DarkSalmon
-        TypeConverter --> AbstractBeanFactory : bean
+        TypeConverter --> AbstractBeanFactory :
         deactivate TypeConverter
 
     end
@@ -149,8 +148,7 @@ deactivate AbstractBeanFactory
 
     note right of AbstractBeanFactory #FAEBD7
         *总结
-            围绕：
-                xml或注解描述的bean定义->BeanDefinition->BeanDefinition->BeanWrapper->bean或proxyBean
+            目标：BeanDefinition-->bean（普通bean或proxyBean）
             1.缓存中存在，则用缓存中的；
             2.如果需要FactoryBean来创建，就委托给FactoryBean来创建
             3.需要父BeanFactory创建时，委托父BeanFactory创建
@@ -160,12 +158,12 @@ deactivate AbstractBeanFactory
                 alreadyCreated：记录当前在创建或即将创建
                 prototypesCurrentlyInCreation：记录Prototype作用域创建的Bean
             2.DefaultSingletonBeanRegistry
-                earlySingletonObjects：<bean名称，提前返回办成品的bean实例或被代理过>
+                earlySingletonObjects：<bean名称，提前返回半成品的bean实例或被代理过>
                 dependentBeanMap：<bean名称，被依赖bean的名称>
                 dependenciesForBeanMap：<被依赖bean的名称，bean名称>
                 inCreationCheckExclusions：[创建过程中不需要检查的bean名称]
                 registeredSingletons：[以bean名称来记录实例化顺序]
-                singletonFactories：<bean名称，提前返回办成品的bean实例>
+                singletonFactories：<bean名称，提前返回半成品的bean实例>
                 singletonObjects：<bean名称，bean实例>
                 singletonsCurrentlyInCreation：[创建过程中的bean名称]，在创建标记，临时的
     end note

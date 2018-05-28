@@ -7,6 +7,7 @@ note  as N1 #FAEBD7
     黄色：可一般关注
     灰色：弃用 #C0C0C0
     ---简化版类图
+    ApplicationContext：在BeanFactory基础上扩展的容器，支持事件发布，国际化信息支持等。
 end note
 
 

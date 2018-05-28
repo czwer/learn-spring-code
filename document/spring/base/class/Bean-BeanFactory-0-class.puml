@@ -7,6 +7,7 @@ note  as N1 #FAEBD7
     黄色：可一般关注
     灰色：弃用 #C0C0C0
     ---简化版类图
+    BeanFactory：基础类型IoC容器，Spring核心接口。
 end note
 
 

@@ -5,7 +5,7 @@ autonumber
 -> AbstractAutowireCapableBeanFactory: createBean()
 activate AbstractAutowireCapableBeanFactory #DarkSalmon
     note right of AbstractAutowireCapableBeanFactory #FAEBD7
-        *介绍createBean进行创建Bean的主要步骤
+        *介绍创建Bean的主要步骤
         ---这里只描述了主要步骤
     end note
 
@@ -19,65 +19,62 @@ activate AbstractAutowireCapableBeanFactory #DarkSalmon
     AbstractBeanDefinition -->AbstractAutowireCapableBeanFactory
     deactivate AbstractBeanDefinition
 
-    alt
+    AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: resolveBeforeInstantiation():如条件允许，通过BeanPostProcessors返回代理
+    activate AbstractAutowireCapableBeanFactory #DarkSalmon
 
-        AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: resolveBeforeInstantiation():如条件允许，通过BeanPostProcessors返回代理
-        activate AbstractAutowireCapableBeanFactory #DarkSalmon
+    note right of AbstractAutowireCapableBeanFactory #aqua
+        I.非常规生成Bean途径（快速）：当同时满足以下条件时，生成代理bean
+            1.当beforeInstantiationResolved为true时，在bean定义中需要特殊指定，一般为false
+                ---所以不常用
+            2.当前bean定义非合成的，且上下文存在InstantiationAwareBeanPostProcessor
+            3.已确定最终生成bean的Class
+    end note
 
-        note right of AbstractAutowireCapableBeanFactory #aqua
-            当同时满足以下条件时，生成代理bean
-                1.当beforeInstantiationResolved为true时，在bean定义中需要特殊指定，一般为false
-                    ---所以不常用
-                2.当前bean定义非合成的，且上下文存在InstantiationAwareBeanPostProcessor
-                3.已确定最终生成bean的Class
-        end note
+    AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsBeforeInstantiation():
+    activate AbstractAutowireCapableBeanFactory #DarkSalmon
 
-        AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsBeforeInstantiation():
-        activate AbstractAutowireCapableBeanFactory #DarkSalmon
+        loop
+            AbstractAutowireCapableBeanFactory -> InstantiationAwareBeanPostProcessor:postProcessBeforeInstantiation()
+            activate InstantiationAwareBeanPostProcessor #DarkSalmon
+                note right of InstantiationAwareBeanPostProcessor #FF5000
+                    Spring生成代理对象的入口之一
+                        ---不常用
+                end note
+            InstantiationAwareBeanPostProcessor --> AbstractAutowireCapableBeanFactory:object
+            deactivate InstantiationAwareBeanPostProcessor
+        end
+    deactivate AbstractAutowireCapableBeanFactory
 
-            loop
-                AbstractAutowireCapableBeanFactory -> InstantiationAwareBeanPostProcessor:postProcessBeforeInstantiation()
-                activate InstantiationAwareBeanPostProcessor #DarkSalmon
-                    note right of InstantiationAwareBeanPostProcessor #FF5000
-                        Spring生成代理对象的入口之一
-                            ---不常用
-                    end note
-                InstantiationAwareBeanPostProcessor --> AbstractAutowireCapableBeanFactory:object
-                deactivate InstantiationAwareBeanPostProcessor
-            end
-        deactivate AbstractAutowireCapableBeanFactory
+    AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsAfterInitialization():
+    activate AbstractAutowireCapableBeanFactory #DarkSalmon
+        loop
+            AbstractAutowireCapableBeanFactory -> BeanPostProcessor:postProcessAfterInitialization()
+            activate BeanPostProcessor #DarkSalmon
+            BeanPostProcessor --> AbstractAutowireCapableBeanFactory:object
+            deactivate BeanPostProcessor
+        end
+    deactivate AbstractAutowireCapableBeanFactory
 
-        AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsAfterInitialization():
-        activate AbstractAutowireCapableBeanFactory #DarkSalmon
-            loop
-                AbstractAutowireCapableBeanFactory -> BeanPostProcessor:postProcessAfterInitialization()
-                activate BeanPostProcessor #DarkSalmon
-                BeanPostProcessor --> AbstractAutowireCapableBeanFactory:object
-                deactivate BeanPostProcessor
-            end
-        deactivate AbstractAutowireCapableBeanFactory
-
-        deactivate AbstractAutowireCapableBeanFactory
-
-    else
-
-        note right of AbstractAutowireCapableBeanFactory #FF5000
-            单独描述doCreateBean()时序图,因其比较复杂，里面也有Spring生成代理的逻辑
-        end note
-        AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: doCreateBean():如果未能创建代理bean，则进行实例化
-        activate AbstractAutowireCapableBeanFactory #DarkSalmon
-        deactivate AbstractAutowireCapableBeanFactory
+    deactivate AbstractAutowireCapableBeanFactory
+    alt 非常规生成Bean途径，生成了代理Bean，直接返回
+<-- AbstractAutowireCapableBeanFactory : bean
     end
 
-<-- AbstractAutowireCapableBeanFactory : 实例化后的bean
+    note right of AbstractAutowireCapableBeanFactory #FF5000
+        II.常规生成Bean途径：因其比较复杂，注意里面含有Spring生成代理的逻辑
+        ---单独时序图描述
+    end note
+    AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: doCreateBean():常规实例化
+    activate AbstractAutowireCapableBeanFactory #DarkSalmon
+    deactivate AbstractAutowireCapableBeanFactory
+
+<-- AbstractAutowireCapableBeanFactory : bean
 deactivate AbstractAutowireCapableBeanFactory
 
     note right of AbstractAutowireCapableBeanFactory #FAEBD7
         *总结
-            产生的对象分两种：
-                1.首先尝试生成代理后的对象，如果生成直接返回给调用方；
-                ---在这里生成代理的方式不常用，常用的是postProcessAfterInitialization方式
-                2.实例化对象；
+            可以理解有两种生成bean实例的途径，如果非常规生成Bean途径（快速）生成了，就走常规途径了。
+            ---大部分我们实际使用的Bean都是常规生成Bean途径来生成
     end note
 
 @enduml

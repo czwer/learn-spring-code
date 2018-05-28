@@ -6,9 +6,10 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    1.CallbackFilter：回调选择器，有选择的对一些方法使用回调
-    2.accept()根据不同的method返回不同的值i，这个值是在callbacks中callback对象的序号，
-    就是调用了callbacks[i]
+    1.CallbackFilter：回调选择器，确定方法使用的回调
+    2.accept()方法：根据上下文不同，对当前method返回不同的值i，
+    这个值是在callbacks中callback对象的序号，代理运行时使用选择的
+    callbacks[i]
 end note
 
 

@@ -2,17 +2,17 @@
 
 autonumber
 
--> DefaultSingletonBeanRegistry: createBean()
+-> DefaultSingletonBeanRegistry: getSingleton()
 activate DefaultSingletonBeanRegistry #DarkSalmon
 
     note right of DefaultSingletonBeanRegistry #FAEBD7
-        *介绍createBean进行创建Bean的主要步骤
+        *介绍getSingleton进行创建Bean的主要步骤
         ---这里只描述了主要步骤
     end note
 
     note right of DefaultSingletonBeanRegistry #aqua
         主要逻辑：
-            1.检查缓存中是否已经有创建好的单例了，有的化直接返回
+            1.检查缓存中是否已经有创建好的bean，有的话直接返回
             2.创建前进行检查：如果无法添加创建标记，抛出异常
             3.通过ObjectFactory.getObject()来创建实例
                 ---在这里是指AbstractAutowireCapableBeanFactory.createBean()
@@ -20,6 +20,9 @@ activate DefaultSingletonBeanRegistry #DarkSalmon
             5.创建成功更新缓存信息
     end note
 
+    note right of DefaultSingletonBeanRegistry #aqua
+       前置检查点
+    end note
     DefaultSingletonBeanRegistry -> DefaultSingletonBeanRegistry : beforeSingletonCreation()
     activate DefaultSingletonBeanRegistry #DarkSalmon
     deactivate DefaultSingletonBeanRegistry
@@ -33,10 +36,16 @@ activate DefaultSingletonBeanRegistry #DarkSalmon
     AbstractAutowireCapableBeanFactory --> DefaultSingletonBeanRegistry : singletonObject
     deactivate AbstractAutowireCapableBeanFactory
 
+    note right of DefaultSingletonBeanRegistry #aqua
+       后置检查点
+    end note
     DefaultSingletonBeanRegistry -> DefaultSingletonBeanRegistry : afterSingletonCreation()
     activate DefaultSingletonBeanRegistry #DarkSalmon
     deactivate DefaultSingletonBeanRegistry
 
+    note right of DefaultSingletonBeanRegistry #FF5000
+       缓存单例bean
+    end note
     DefaultSingletonBeanRegistry -> DefaultSingletonBeanRegistry : addSingleton()
     activate DefaultSingletonBeanRegistry #DarkSalmon
     deactivate DefaultSingletonBeanRegistry
@@ -47,8 +56,12 @@ deactivate DefaultSingletonBeanRegistry
 
     note right of DefaultSingletonBeanRegistry #FAEBD7
         *总结
-            1.整个方法是通过synchronized来实现线程安全，加上创建前后检查保证了singleton的语义
-            2.ObjectFactory.getObject()方式，增加了创建bean的扩展性；
+            1.逻辑主要保证singleton语义，真正创建在createBean()方法中
+            2.整个方法是通过synchronized来实现线程安全，加上创建前后检查点保证了singleton语义
+                ---synchronized持有的锁在singletonObjects上，检查在singletonsCurrentlyInCreation
+                中，中间会创建依赖bean，而为了防止依赖bean导致再次创建该bean发生循环依赖，所以
+                前后检查是必要的。
+            3.ObjectFactory.getObject()方式调用增加了扩展性；
 
 
     end note

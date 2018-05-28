@@ -19,9 +19,9 @@ abstract class AbstractRegexpMethodPointcut
 class AnnotationMatchingPointcut
 note bottom : 根据目标对象是否存在指定类型的注解来匹配
 class AspectJExpressionPointcut #FF5000
-note bottom : Spring AOP中面向AspectJ的Pointcut的具体实现
+note bottom #FF5000: Spring AOP中面向AspectJ的Pointcut的具体实现
 class ComposablePointcut
-note bottom : pointcut切点逻辑运算
+note bottom : 支持pointcut切点逻辑运算
 class ControlFlowPointcut
 interface ExpressionPointcut
 abstract class DynamicMethodMatcherPointcut #7FFFD4

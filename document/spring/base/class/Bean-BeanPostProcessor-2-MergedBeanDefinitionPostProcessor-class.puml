@@ -6,14 +6,14 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-        MergedBeanDefinitionPostProcessor运行时合并bean定义的后处理器回调接口
+        MergedBeanDefinitionPostProcessor：为bean实例属性填充做准备，
+        检查是否有注解，验证使用是否正确，标记结果
 end note
 
 interface MergedBeanDefinitionPostProcessor
 MergedBeanDefinitionPostProcessor : +void postProcessMergedBeanDefinition()
 class ApplicationListenerDetector
 class AutowiredAnnotationBeanPostProcessor #7FFFD4
-note bottom #7FFFD4: 与@Autowired注解有关
 interface BeanPostProcessor
 class CommonAnnotationBeanPostProcessor  #7FFFD4
 class InitDestroyAnnotationBeanPostProcessor
@@ -21,7 +21,6 @@ class JmsListenerAnnotationBeanPostProcessor
 class PersistenceAnnotationBeanPostProcessor
 class RequiredAnnotationBeanPostProcessor
 class ScheduledAnnotationBeanPostProcessor #7FFFD4
-note bottom #7FFFD4: @Scheduled注解有关
 
 
 BeanPostProcessor <|-- MergedBeanDefinitionPostProcessor

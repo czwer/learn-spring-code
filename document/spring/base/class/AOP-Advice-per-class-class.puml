@@ -9,7 +9,7 @@ note  as N1 #FAEBD7
         ---简化版类图
     1.Advice织入到Pointcut规定的Joinpoint处的横切逻辑。
     2.per-class类型的Advice是指，该类型的Advice的实例可以在目标对象类的所有实例之间共享。
-    3.xxx对等物的存在，使我们以MethodInterceptor统一的方式在AOP运行时进行方法调用
+    3.尽管通知定义有多种，实际实现时，我们都是基于环绕通知来实现的。
 end note
 
 interface Advice
@@ -21,12 +21,12 @@ interface Interceptor
 interface MethodInterceptor #FF5000
 note right #FF5000: 相当于Around Advice，具体的实现我们自己来做
 interface ThrowsAdvice
-class AfterReturningAdviceInterceptor #FF5000
-note bottom #FF5000: 可以理解为AfterReturningAdvice实现的对等物
-class MethodBeforeAdviceInterceptor #FF5000
-note bottom #FF5000: 可以理解为MethodBeforeAdvice实现的对等物
-class ThrowsAdviceInterceptor #FF5000
-note bottom #FF5000: 可以理解为ThrowsAdvice实现的对等物
+class AfterReturningAdviceInterceptor #7FFFD4
+note bottom #7FFFD4: 可以理解为AfterReturningAdvice实现的对等物
+class MethodBeforeAdviceInterceptor #7FFFD4
+note bottom #7FFFD4: 可以理解为MethodBeforeAdvice实现的对等物
+class ThrowsAdviceInterceptor #7FFFD4
+note bottom #7FFFD4: 可以理解为ThrowsAdvice实现的对等物
 
 
 
