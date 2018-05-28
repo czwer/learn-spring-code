@@ -1,0 +1,31 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    <font color=red>1.AdvisorAdapter：适配不同类型Advisor，把Advisor中的通知转换为</font>
+    <font color=red>环绕通知（MethodInterceptor）。</font>
+        <font color=red>---复用了基础设施</font>
+end note
+
+interface AdvisorAdapter
+AdvisorAdapter : + boolean supportsAdvice(Advice advice)
+AdvisorAdapter : + MethodInterceptor getInterceptor(Advisor advisor)
+class AfterReturningAdviceAdapter
+class MethodBeforeAdviceAdapter
+class ThrowsAdviceAdapter
+
+
+
+
+
+AdvisorAdapter <|.. AfterReturningAdviceAdapter
+AdvisorAdapter <|.. MethodBeforeAdviceAdapter
+AdvisorAdapter <|.. ThrowsAdviceAdapter
+
+
+
+@enduml
