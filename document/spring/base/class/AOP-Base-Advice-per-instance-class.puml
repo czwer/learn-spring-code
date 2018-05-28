@@ -16,15 +16,14 @@ end note
 
 interface Advice
 interface Interceptor
-interface IntroductionInterceptor #7FFFD4
-note top #7FFFD4: 用于执行Introduction逻辑
+interface IntroductionInterceptor
+note top : 用于执行Introduction逻辑
 interface MethodInterceptor
 interface DynamicIntroductionAdvice
-note right : 运行时判断当前Introduction可应用到的目标接口类型
-class DelegatePerTargetObjectIntroductionInterceptor
-note bottom : 会在内部对象与相应的Introduction逻辑实现类之间的映射关系
+note top : 运行时判断当前Introduction可应用到的目标接口类型
+class DelegatePerTargetObjectIntroductionInterceptor #7FFFD4
+note bottom #7FFFD4: 会在内部对象与相应的Introduction逻辑实现类之间的映射关系
 class DelegatingIntroductionInterceptor
-class ExposeBeanNameInterceptor
 
 interface IntroductionInfo
 note top : 实现类必须返回预定的目标接口类型
@@ -48,7 +47,6 @@ IntroductionInfoSupport <|-- DelegatingIntroductionInterceptor
 IntroductionInterceptor <|.. DelegatingIntroductionInterceptor
 IntroductionInterceptor <|.. DelegatePerTargetObjectIntroductionInterceptor
 
-MethodInterceptor <.. ExposeBeanNameInterceptor
 MethodInterceptor <|-- IntroductionInterceptor
 
 

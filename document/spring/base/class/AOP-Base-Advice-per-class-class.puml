@@ -19,6 +19,7 @@ interface BeforeAdvice
 interface MethodBeforeAdvice
 interface Interceptor
 interface MethodInterceptor #FF5000
+MethodInterceptor : +Object invoke(MethodInvocation invocation)
 note right #FF5000: 相当于Around Advice，具体的实现我们自己来做
 interface ThrowsAdvice
 class AfterReturningAdviceInterceptor #7FFFD4
