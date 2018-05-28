@@ -1,0 +1,35 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    1.Advisor：可以理解为对应AOP规范的Aspect的概念，包含了
+        织入逻辑（Advice）和Pointcut。
+        ---这里Pointcut具体到ClassFilter，因其用不需要方法匹配。
+    2.IntroductionAdvisor：可以理解为应用pre-instance类型Advice
+    （Introduction类型）。
+end note
+
+interface Advisor
+Advisor : + Advice getAdvice()
+Advisor : + boolean isPerInstance()
+class DefaultIntroductionAdvisor
+interface IntroductionAdvisor
+IntroductionAdvisor : +ClassFilter getClassFilter();
+IntroductionAdvisor : +void validateInterfaces();
+note right : 只运用于类级别的拦截，只能用于Introduction型的Advice
+
+
+
+
+
+Advisor <|-- IntroductionAdvisor
+
+
+IntroductionAdvisor <|-- DefaultIntroductionAdvisor
+
+
+@enduml

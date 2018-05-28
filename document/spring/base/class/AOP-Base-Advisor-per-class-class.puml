@@ -6,19 +6,25 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    Advisor：代表Spring中的Aspect。
+    1.Advisor：可以理解为对应AOP规范的Aspect的概念，包含了
+        织入逻辑（Advice）和Pointcut。
+    2.PointcutAdvisor：这一支，可以理解为应用pre-class类型
+        的Advice。运用任何类型的Pointcut，差不多任何类型的Advice
+       （Introduction类型除外）。
 end note
 
 interface Advisor
+Advisor : + Advice getAdvice()
+Advisor : + boolean isPerInstance()
 abstract class AbstractPointcutAdvisor
-abstract class AbstractBeanFactoryPointcutAdvisor
+abstract class AbstractBeanFactoryPointcutAdvisor #FF5000
+note top #FF5000: 事务，缓存的Advisor都是继承的这个
 abstract class AbstractGenericPointcutAdvisor
 class DefaultBeanFactoryPointcutAdvisor
-class DefaultPointcutAdvisor #FF5000
-note bottom #FF5000: 最常用的Advisor
+class DefaultPointcutAdvisor
 class NameMatchMethodPointcutAdvisor
 interface PointcutAdvisor
-note right : 运用任何类型的Pointcut，差不多任何类型的Advice
+PointcutAdvisor : +Pointcut getPointcut()
 class RegexpMethodPointcutAdvisor
 
 
