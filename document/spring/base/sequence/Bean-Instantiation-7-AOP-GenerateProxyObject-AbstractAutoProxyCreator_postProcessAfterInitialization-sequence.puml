@@ -23,55 +23,13 @@ activate AbstractAutoProxyCreator #DarkSalmon
         activate AbstractAdvisorAutoProxyCreator #DarkSalmon
 
             note right of AbstractAdvisorAutoProxyCreator #aqua
-                找到所有符合条件的Advisor,筛选能够运用
-                该bean的Advisor集合，并排序；
+                查找符合当前bean适用的Advisor；
+                ---单独时序图说明
             end note
 
-            AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findEligibleAdvisors():找到所有符合条件的Advisor
+            AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findEligibleAdvisors()
             activate AbstractAdvisorAutoProxyCreator #DarkSalmon
 
-                AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findCandidateAdvisors():
-                activate AbstractAdvisorAutoProxyCreator #DarkSalmon
-
-                    AbstractAdvisorAutoProxyCreator->BeanFactoryAdvisorRetrievalHelper : findAdvisorBeans()
-                    activate BeanFactoryAdvisorRetrievalHelper #DarkSalmon
-                         note right of BeanFactoryAdvisorRetrievalHelper #aqua
-                             1.首先尝试从缓存获取，获取不到，再在容器中查找
-                             2.从当前BeanFactory中获取所有的Advisor类型的bean名称，如果存在
-                             父容器，也继续找父容器中的。
-                             3.从BeanFactory中获取bean时，如果发现当前在创建该advisor则跳过
-                         end note
-                         alt 缓存中获取不到时
-                            BeanFactoryAdvisorRetrievalHelper -> BeanFactoryUtils : beanNamesForTypeIncludingAncestors()
-                            activate BeanFactoryUtils #DarkSalmon
-                            BeanFactoryUtils-->BeanFactoryAdvisorRetrievalHelper : String[] advisorNames
-                            deactivate BeanFactoryUtils
-
-                            loop String name : advisorNames
-                                BeanFactoryAdvisorRetrievalHelper ->BeanFactory : getBean(name, Advisor.class)
-                                activate BeanFactory #DarkSalmon
-                                BeanFactory-->BeanFactoryAdvisorRetrievalHelper : advisor
-                                deactivate BeanFactory
-                            end
-                         end
-                    BeanFactoryAdvisorRetrievalHelper -->AbstractAdvisorAutoProxyCreator : List<Advisor>
-                    deactivate BeanFactoryAdvisorRetrievalHelper
-
-                deactivate AbstractAdvisorAutoProxyCreator
-
-                AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : findAdvisorsThatCanApply()：寻找能够应用当前bean的Adisor
-                activate AbstractAdvisorAutoProxyCreator #DarkSalmon
-                deactivate AbstractAdvisorAutoProxyCreator
-
-                AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : extendAdvisors()：提供的扩展点，允许对获得的Advisor进行操作
-                activate AbstractAdvisorAutoProxyCreator #DarkSalmon
-                deactivate AbstractAdvisorAutoProxyCreator
-
-                alt 当获得的Advisors不为空时
-                    AbstractAdvisorAutoProxyCreator->AbstractAdvisorAutoProxyCreator : sortAdvisors()：对Advisor进行排序，排序依据：@Order和@Priority注解
-                    activate AbstractAdvisorAutoProxyCreator #DarkSalmon
-                    deactivate AbstractAdvisorAutoProxyCreator
-                end
 
             deactivate AbstractAdvisorAutoProxyCreator
 
@@ -120,14 +78,14 @@ activate AbstractAutoProxyCreator #DarkSalmon
 deactivate AbstractAutoProxyCreator
     note right of AbstractAutoProxyCreator #FAEBD7
         *总结
-            1.BeanPostProcessor(具体为AbstractAutoProxyCreator)+ProxyFactory是
+            1.整个逻辑是查找适用的Advisor，并通过ProxyFactory生成代理对象；
+            2.BeanPostProcessor(具体为AbstractAutoProxyCreator)+ProxyFactory是
                 Spring IoC和AOP体系打通的关键
                 ---AbstractAutoProxyCreator再具体下面二者之一：
                     InfrastructureAdvisorAutoProxyCreator：传统方式
                     AnnotationAwareAspectJAutoProxyCreator：使用AspectJ形式注解时，同时也支持传统方式
-            2.与实例化之前生成代理逻辑大致相同，共用基础设施，把筛选匹配的Advisor通过动态代理生成；
-                ---这里直接用SingletonTargetSource来包装目标对象。
-                ---顺序在Spring体系里怎么强调都不为过，Advisor顺序很重要
+            3.这里用SingletonTargetSource来包装目标对象。
+
         *备注：
             AbstractAutoProxyCreator属性含义
                 earlyProxyReferences：[提前暴露的代理对象引用]
