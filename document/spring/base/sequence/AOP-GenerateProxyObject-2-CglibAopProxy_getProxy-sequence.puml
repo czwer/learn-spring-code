@@ -66,7 +66,7 @@ activate CglibAopProxy #DarkSalmon
 
         note right of SpringObjenesis #FF5000
             生成代理对象
-            ---Objenesis特性：不要求有构造函数
+            ---Objenesis特性：无需构造函数
         end note
 
         ObjenesisCglibAopProxy -> SpringObjenesis : newInstance()：
@@ -91,23 +91,22 @@ deactivate CglibAopProxy
 note right of CglibAopProxy #FAEBD7
 *总结
     1.通过Callback中包含advised，把Cglib和Spring AOP基础设施融合，以便后期代理运行时使用Spring AOP框架的基础设施；
-        ---在CglibAopProxy定义了多个内部类形式的Callback，它们都实现了Cglib的MethodInterceptor接口，
-        有的Callback可以提升系统性能；
+        ---在CglibAopProxy定义了多个内部类形式的Callback，它们都实现了Cglib的MethodInterceptor接口。
+        <font color=red>当使用FixedChainStaticTargetInterceptor类型Callback时，在生成子类时已确定调用链，运行时无需匹配；</font>
     2.通过enhancer中设置ProxyCallbackFilter，决定方法使用哪个Callback,分配的原则根据：方法信息+advised配置信息
-        <font color=red>---使用时为每个方法确认过对应的织入调用链，并予以缓存，是Cglib的优化点之一</font>
-        <font color=red>---JDK是代理对象第一次运行时才予以缓存，所以第一次访问会慢</font>
-        <font color=red>---以上也表明类级别与方法级别上的差距，颗粒度越细，性能越好</font>
+
 *备注
-    1.x.class.getInterfaces：返回x所实现的接口
-    2.WeakHashMap：将一对key, value放入到 WeakHashMap 里并不能避免该key值被GC回收，
+    1.ObjenesisCglibAopProxy是CglibAopProxy子类；
+    2.x.class.getInterfaces：返回x所实现的接口；
+    3.WeakHashMap：将一对key, value放入到 WeakHashMap 里并不能避免该key值被GC回收，
         除非在 WeakHashMap 之外还有对该key的强引用。
-    3.TargetSource.isStatic(): 用于表明是否要返回同一个目标对象实例,true代表返回同一对象
-    4.advised.isExposeProxy(): 是否将当前代理对象绑定到ThreadLocal，默认为false
-    5.advised.isFrozen(): 代理对象生成的各项配置信息配置完成，是否容许更改,默认为false
-    6.advised.isOpaque(): 用于控制的代理类是否可以强制转换成Advised,默认为false,表示可以
-    7.net.sf.cglib.proxy.NoOp NoOp回调把对方法调用直接委派到这个方法在父类中的实现。
-    8.判断是否是CglibProxyClass依据是className中是否包含$$
-    9.<font color=red>注意两种不同MethodInterceptor，阅读代码时注意上下文，此时是后者</font>
+    4.TargetSource.isStatic(): 用于表明是否要返回同一个目标对象实例,true代表返回同一对象
+    5.advised.isExposeProxy(): 是否将当前代理对象绑定到ThreadLocal，默认为false
+    6.advised.isFrozen(): 代理对象生成的各项配置信息配置完成，是否容许更改,默认为false
+    7.advised.isOpaque(): 用于控制的代理类是否可以强制转换成Advised,默认为false,表示可以
+    8.net.sf.cglib.proxy.NoOp NoOp回调把对方法调用直接委派到这个方法在父类中的实现。
+    9.判断是否是CglibProxyClass依据是className中是否包含$$
+    10.<font color=red>注意两种不同MethodInterceptor，阅读代码时注意上下文，此时是后者</font>
         <font color=red>org.aopalliance.intercept.MethodInterceptor：环绕通知</font>
         <font color=red>org.springframework.cglib.proxy.MethodInterceptor：Cglib中Callback的子接口</font>
 *参考：
