@@ -6,7 +6,7 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    AopProxy对不同的代理实现进行了适度的抽象，实现类用于生成代理对象。
+    AopProxy：用于生成支持AOP的代理对象。
 end note
 
 interface AopProxy
@@ -19,7 +19,7 @@ class JdkDynamicAopProxy #FF5000
 JdkDynamicAopProxy : +Object invoke(Object proxy, Method method, Object[] args)
 JdkDynamicAopProxy : -final AdvisedSupport advised
 class ObjenesisCglibAopProxy #FF5000
-note bottom  #FF5000: 不再要求目标类必须有无参构造函数
+note bottom  #FF5000: 不要求有无参构造函数
 
 
 

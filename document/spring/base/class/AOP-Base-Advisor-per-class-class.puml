@@ -21,7 +21,7 @@ abstract class AbstractBeanFactoryPointcutAdvisor #FF5000
 note top #FF5000: 事务，缓存的Advisor都是继承的这个
 abstract class AbstractGenericPointcutAdvisor
 class DefaultBeanFactoryPointcutAdvisor
-class DefaultPointcutAdvisor
+class DefaultPointcutAdvisor #7FFFD4
 class NameMatchMethodPointcutAdvisor
 interface PointcutAdvisor
 PointcutAdvisor : +Pointcut getPointcut()

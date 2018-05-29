@@ -6,13 +6,13 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-        AdvisedSupport：实现了Advised继承了ProxyConfig，
-        目的是为代理生成或运行时提供AOP上下文环境；ProxyFactory
-        是常用的子类
+    ProxyFactory: 用于生成代理对象的工厂；
+        ---结果不限于是不是AOP代理对象，我们在Spring中
+        用到的是AOP代理对象；
 end note
 
-
-class AdvisedSupport #FF5000
+interface TargetClassAware
+TargetClassAware : +Class<?> getTargetClass()
 interface Advised
 Advised : +void setTargetSource(TargetSource targetSource)
 Advised : +TargetSource getTargetSource()
@@ -21,19 +21,22 @@ Advised : +void addAdvisor(Advisor advisor)
 Advised : +boolean removeAdvisor(Advisor advisor)
 Advised : +void addAdvice(Advice advice)
 Advised : +boolean removeAdvice(Advice advice)
-note left : 承载生成代理对象所需的必要信息，如目标类，Advice,Advisor等
+class AdvisedSupport
 class ProxyCreatorSupport
+class ProxyFactory #FF5000
+ProxyFactory : -AopProxyFactory aopProxyFactory
+ProxyFactory : #final synchronized AopProxy createAopProxy()
+ProxyFactory : +Object getProxy()
+note bottom #FF5000: 主要承担代理生成的责任，同时维护AOP上下文的责任
+class ProxyFactoryBean
+
+
 class ProxyConfig
 ProxyConfig : -boolean proxyTargetClass
 ProxyConfig : -boolean optimize
 ProxyConfig : -boolean opaque
 ProxyConfig : -boolean exposeProxy
-ProxyConfig : -boolean frozen
-note bottom : 代理对象生成时，采取哪些行为措施，可以理解为开关
-class ProxyFactory  #FF5000
-note bottom #FF5000: 除了承担代理生成的责任，同时还有维护AOP上下文的责任
-interface TargetClassAware
-TargetClassAware : +Class<?> getTargetClass()
+ProxyConfig : -private boolean frozen
 
 
 
@@ -41,13 +44,13 @@ Advised <|.. AdvisedSupport
 
 AdvisedSupport <|-- ProxyCreatorSupport
 
-
-
+ProxyCreatorSupport <|-- ProxyFactory
+ProxyCreatorSupport <|-- ProxyFactoryBean
 
 ProxyConfig <|-- AdvisedSupport
 
-ProxyCreatorSupport <|-- ProxyFactory
-
 TargetClassAware <|-- Advised
+
+
 
 @enduml
