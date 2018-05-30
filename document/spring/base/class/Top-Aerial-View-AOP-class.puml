@@ -14,31 +14,40 @@ note bottom : 要织入的业务逻辑
 interface MethodInterceptor
 note bottom : 前置，后置，异常通知统统转换为环绕通知
 
+interface Advised
+Advised : +void setTargetSource(TargetSource targetSource)
+Advised : +TargetSource getTargetSource()
+Advised : +Advisor[] getAdvisors()
+Advised : +void addAdvisor(Advisor advisor)
+Advised : +boolean removeAdvisor(Advisor advisor)
+Advised : +void addAdvice(Advice advice)
+Advised : +boolean removeAdvice(Advice advice)
+note top : 承载生成代理对象所需的必要信息，如目标类，Advice,Advisor等
+
 
 class AdvisedSupport
-AdvisedSupport : -Advisor[] advisorArray
-AdvisedSupport : -List<Advisor> advisors
-AdvisedSupport : ~TargetSource targetSource
-AdvisedSupport : +void addAdvisor(Advisor advisor)
-AdvisedSupport : +void addAdvice(Advice advice)
-note bottom : 承载生成代理对象所需的必要信息，如目标类，Advice,Advisor等
 
 interface Advisor
-note top : 包含Advice,Pointcut
+note right : 包含Advice,Pointcut
 
 
 interface AopProxy
 AopProxy : +Object getProxy()
 AopProxy : +Object getProxy(@Nullable ClassLoader classLoader)
-note top : 对不同的代理实现进行了适度的抽象，实现类用于生成代理对象。
-
+note top : 创建支持AOP的动态代理对象
+class CglibAopProxy
+CglibAopProxy : -final AdvisedSupport advised
+class JdkDynamicAopProxy
+JdkDynamicAopProxy : +Object invoke(Object proxy, Method method, Object[] args)
+JdkDynamicAopProxy : -final AdvisedSupport advised
+class ObjenesisCglibAopProxy
 
 interface AopProxyFactory
 AopProxyFactory : +AopProxy createAopProxy(AdvisedSupport config)
-note top : 根据AdvisedSupport用来决定生成什么类型的AopProxy。
+note top : 根据AdvisedSupport用来决定使用什么类型的AopProxy
 
 interface Joinpoint
-note bottom : 执行点
+note top : 执行点
 class ReflectiveMethodInvocation
 note bottom : 执行点，具体执行织入逻辑和目标对象方法
 
@@ -46,21 +55,55 @@ note bottom : 执行点，具体执行织入逻辑和目标对象方法
 interface Pointcut
 note bottom : 用于描述执行点集合
 
+
+class ProxyCreatorSupport
+class ProxyConfig
+ProxyConfig : -boolean proxyTargetClass
+ProxyConfig : -boolean optimize
+ProxyConfig : -boolean opaque
+ProxyConfig : -boolean exposeProxy
+ProxyConfig : -boolean frozen
+note bottom : 代理对象生成时，采取哪些行为措施，可以理解为开关
+class ProxyFactory
+note bottom : 除了承担代理生成的责任，同时还有维护AOP上下文的责任
+
+
+
 Advice <|-- MethodInterceptor
 
+Advised <|.. AdvisedSupport
+
+AdvisedSupport <|-- ProxyCreatorSupport
 AdvisedSupport --> Advisor
 
 Advisor --> Advice
 Advisor --> Pointcut
 
 
-AopProxy ..> Joinpoint
+AopProxy <|.. CglibAopProxy
+AopProxy <|.. JdkDynamicAopProxy
+
 
 AopProxyFactory ..> AopProxy
 AopProxyFactory ..> AdvisedSupport
 
+CglibAopProxy <|-- ObjenesisCglibAopProxy
+CglibAopProxy ..> ReflectiveMethodInvocation
+CglibAopProxy ..> AdvisedSupport
+
+
+JdkDynamicAopProxy ..> ReflectiveMethodInvocation
+JdkDynamicAopProxy ..> AdvisedSupport
+
 Joinpoint <|.. ReflectiveMethodInvocation
 
+ProxyConfig <|-- AdvisedSupport
+
+ProxyCreatorSupport <|-- ProxyFactory
+
 ReflectiveMethodInvocation --> Advice
+
+
+
 
 @enduml

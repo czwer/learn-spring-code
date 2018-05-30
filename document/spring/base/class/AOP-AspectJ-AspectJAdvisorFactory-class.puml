@@ -6,12 +6,15 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    AspectJAdvisorFactory在支持Aspect类型AOP中发挥了重要的作用。
+    AspectJAdvisorFactory：由Aspect元数据构建Advisor和Advice
 end note
 
 interface AspectJAdvisorFactory
 AspectJAdvisorFactory : +List<Advisor> getAdvisors()
+AspectJAdvisorFactory : +Advisor getAdvisor()
 AspectJAdvisorFactory : +Advice getAdvice ();
+AspectJAdvisorFactory : +boolean isAspect(Class<?> clazz)
+AspectJAdvisorFactory : +void validate(Class<?> aspectClass)
 abstract class AbstractAspectJAdvisorFactory
 class ReflectiveAspectJAdvisorFactory #FF5000
 

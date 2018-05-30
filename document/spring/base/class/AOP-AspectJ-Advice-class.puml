@@ -6,22 +6,29 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
+    AbstractAspectJAdvice：织入的业务逻辑
 end note
 
-interface Advice
-interface MethodInterceptor #FF5000
-note top #FF5000: 相当于Around Advice
-class ExposeInvocationInterceptor
-note bottom : 确认下在AspectJ中起的作用？其排序为0
-
 abstract class AbstractAspectJAdvice
-class AspectJAfterAdvice
-class AspectJAfterReturningAdvice
-class AspectJAfterThrowingAdvice
-class AspectJAroundAdvice #FF5000
-class AspectJMethodBeforeAdvice
+interface Advice
+class AspectJAfterAdvice #7FFFD4
+class AspectJAfterReturningAdvice #7FFFD4
+class AspectJAfterThrowingAdvice #7FFFD4
+class AspectJAroundAdvice #7FFFD4
+class AspectJMethodBeforeAdvice #7FFFD4
+interface AspectJPrecedenceInformation
+AspectJPrecedenceInformation : +String getAspectName()
+AspectJPrecedenceInformation : +int getDeclarationOrder()
+AspectJPrecedenceInformation : +boolean isBeforeAdvice()
+AspectJPrecedenceInformation : +boolean isAfterAdvice()
+interface MethodInterceptor
 
+interface AfterReturningAdvice
 
+interface MethodBeforeAdvice
+
+interface Ordered
+Ordered : +int getOrder()
 
 
 
@@ -34,14 +41,20 @@ AbstractAspectJAdvice <|-- AspectJMethodBeforeAdvice
 
 Advice <|.. AbstractAspectJAdvice
 
+AfterReturningAdvice <.. AspectJAfterReturningAdvice
 
+
+AspectJPrecedenceInformation <.. AbstractAspectJAdvice
+
+
+MethodBeforeAdvice <.. AspectJMethodBeforeAdvice
 
 MethodInterceptor <|.. AspectJAfterAdvice
 MethodInterceptor <|.. AspectJAfterThrowingAdvice
 MethodInterceptor <|.. AspectJAroundAdvice
-MethodInterceptor <|.. ExposeInvocationInterceptor
 
 
+Ordered <|-- AspectJPrecedenceInformation
 
 
 

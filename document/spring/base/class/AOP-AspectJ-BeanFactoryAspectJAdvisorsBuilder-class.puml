@@ -1,0 +1,23 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    BeanFactoryAspectJAdvisorsBuilder：在BeanFactory中检索使用@AspectJ
+    注解的bean并基于它们构建Spring Advisor，以用于自动代理。
+        ---BeanFactoryAspectJAdvisorsBuilder整合AspectJAdvisorFactory和
+        AspectInstanceFactory。
+
+end note
+
+class BeanFactoryAspectJAdvisorsBuilder
+BeanFactoryAspectJAdvisorsBuilder : +List<Advisor> buildAspectJAdvisors()
+BeanFactoryAspectJAdvisorsBuilder : #boolean isEligibleBean(String beanName)
+class BeanFactoryAspectJAdvisorsBuilderAdapter #7FFFD4
+
+BeanFactoryAspectJAdvisorsBuilder <|-- BeanFactoryAspectJAdvisorsBuilderAdapter
+
+@enduml

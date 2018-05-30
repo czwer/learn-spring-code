@@ -7,33 +7,33 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
             ---简化版类图
-    Spring中面向AspectJ的Pointcut的具体实现。
-    AspectJExpressionPointcut扮演者众多角色。
-
+    AspectJExpressionPointcut：AspectJ类型的注解Pointcut声明
+    在Spring中表示形式。
 end note
 
 class AspectJExpressionPointcut #FF5000
-note bottom #FF5000: Spring AOP中面向AspectJ的Pointcut的具体实现
 interface Pointcut
 Pointcut : +ClassFilter getClassFilter()
 Pointcut : +MethodMatcher getMethodMatcher()
 Pointcut : +Pointcut TRUE = TruePointcut.INSTANCE
 abstract class AbstractExpressionPointcut
+AbstractExpressionPointcut : +String getExpression()
+AbstractExpressionPointcut : +void setExpression(@Nullable String expression)
 interface ExpressionPointcut
+ExpressionPointcut : +String getExpression()
 
-interface Aware
-interface BeanFactoryAware
 
 interface ClassFilter
+ClassFilter : +boolean matches(Class<?> clazz)
 
 interface MethodMatcher
+MethodMatcher : +boolean isRuntime()
+MethodMatcher : +boolean matches()
 interface IntroductionAwareMethodMatcher
+IntroductionAwareMethodMatcher : +boolean matches()
 
 AbstractExpressionPointcut <|-- AspectJExpressionPointcut
 
-Aware <|-- BeanFactoryAware
-
-BeanFactoryAware <|.. AspectJExpressionPointcut
 
 ClassFilter <|.. AspectJExpressionPointcut
 

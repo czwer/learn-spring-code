@@ -1,0 +1,38 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    AspectInstanceFactory：个人理解更多是为操作AspectJ切面元数据信息
+end note
+
+
+interface AspectInstanceFactory
+AspectInstanceFactory : +Object getAspectInstance()
+AspectInstanceFactory : +ClassLoader getAspectClassLoader()
+class BeanFactoryAspectInstanceFactory #FF5000
+class LazySingletonAspectInstanceFactoryDecorator
+interface MetadataAwareAspectInstanceFactory #7FFFD4
+MetadataAwareAspectInstanceFactory : +AspectMetadata getAspectMetadata()
+MetadataAwareAspectInstanceFactory : +Object getAspectCreationMutex()
+class PrototypeAspectInstanceFactory
+
+
+
+
+
+AspectInstanceFactory <|-- MetadataAwareAspectInstanceFactory
+
+BeanFactoryAspectInstanceFactory <|-- PrototypeAspectInstanceFactory
+
+
+MetadataAwareAspectInstanceFactory <.. BeanFactoryAspectInstanceFactory
+MetadataAwareAspectInstanceFactory <.. LazySingletonAspectInstanceFactoryDecorator
+
+
+
+@enduml

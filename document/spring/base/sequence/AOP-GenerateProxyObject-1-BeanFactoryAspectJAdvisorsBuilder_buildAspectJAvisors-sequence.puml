@@ -1,0 +1,114 @@
+@startuml
+
+autonumber
+
+-> BeanFactoryAspectJAdvisorsBuilder : buildAspectJAdvisors()
+activate BeanFactoryAspectJAdvisorsBuilder #DarkSalmon
+
+    note right of BeanFactoryAspectJAdvisorsBuilder #FAEBD7
+        *查找AspectJ声明的所有Advisor
+            ---这里只描述了主要步骤
+    end note
+    note right of BeanFactoryAspectJAdvisorsBuilder #aqua
+        主要逻辑：
+            1.获取所有实现Object类型的beanName，如果当前容器含父BeanFactory，
+                同时也从父BeanFactory获取,取两者的并集。
+            2.Spring在这里给我们提供了一个扩展点:isEligibleBean()，可以对指定
+                Advisor置为失效
+            3.获取这些beanName的Class信息，判断是否含有Aspect.class注解，
+                且Class名称不以ajc$开头
+            4.实例化Advisor，注意一个Aspect中可以定义多个Advisor
+                a.解析方法上的@AspectJ注解，转换成：InstantiationModelAwarePointcutAdvisorImpl
+                b.解析字段上使用@DeclareParents注解(引介注解)，转换成：DeclareParentsAdvisor
+            5.相应结果缓存List<Advisor>和AspectInstanceFactory
+    end note
+
+    BeanFactoryAspectJAdvisorsBuilder -> ReflectiveAspectJAdvisorFactory : getAdvisors()
+    activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+
+        note right of ReflectiveAspectJAdvisorFactory #aqua
+            a.解析方法上的@AspectJ注解，转换成：InstantiationModelAwarePointcutAdvisorImpl
+        end note
+
+        loop Method method : getAdvisorMethods():未标注@Ponitcut的方法
+
+            ReflectiveAspectJAdvisorFactory -> ReflectiveAspectJAdvisorFactory: getAdvisor():advisor
+            activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+
+                ReflectiveAspectJAdvisorFactory -> ReflectiveAspectJAdvisorFactory: getPointcut()：AspectJExpressionPointcut
+                activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+
+                    ReflectiveAspectJAdvisorFactory -> AbstractAspectJAdvisorFactory: findAspectJAnnotationOnMethod()
+                    activate AbstractAspectJAdvisorFactory #DarkSalmon
+                        note right of AbstractAspectJAdvisorFactory #aqua
+                            获取方法标注的以下注解信息：
+                                @Before，@Around，@After，
+                                @AfterReturning，@AfterThrowing，
+                                @Pointcut
+                        end note
+                    AbstractAspectJAdvisorFactory --> ReflectiveAspectJAdvisorFactory
+                    deactivate AbstractAspectJAdvisorFactory
+
+                deactivate ReflectiveAspectJAdvisorFactory
+
+                ReflectiveAspectJAdvisorFactory -> InstantiationModelAwarePointcutAdvisorImpl : new InstantiationModelAwarePointcutAdvisorImpl()
+                activate InstantiationModelAwarePointcutAdvisorImpl #DarkSalmon
+
+                    InstantiationModelAwarePointcutAdvisorImpl -> InstantiationModelAwarePointcutAdvisorImpl:instantiateAdvice()
+                    activate InstantiationModelAwarePointcutAdvisorImpl #DarkSalmon
+
+                        InstantiationModelAwarePointcutAdvisorImpl -> ReflectiveAspectJAdvisorFactory:getAdvice()
+                        activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+
+                            ReflectiveAspectJAdvisorFactory -> AbstractAspectJAdvisorFactory: findAspectJAnnotationOnMethod()
+                            activate AbstractAspectJAdvisorFactory #DarkSalmon
+                                note right of AbstractAspectJAdvisorFactory #aqua
+                                    获取方法标注的以下注解信息：
+                                        @Before，@Around，@After，
+                                        @AfterReturning，@AfterThrowing，
+                                        @Pointcut
+                                end note
+                            AbstractAspectJAdvisorFactory --> ReflectiveAspectJAdvisorFactory
+                            deactivate AbstractAspectJAdvisorFactory
+
+                            note right of ReflectiveAspectJAdvisorFactory #aqua
+                                1.根据当前使用的注解类型分别转换成对应的Advice,如AspectJAroundAdvice
+                                2.记录Advice的Aspect名称，和声明的顺序
+                            end note
+
+                        ReflectiveAspectJAdvisorFactory --> InstantiationModelAwarePointcutAdvisorImpl : Advice
+                        deactivate ReflectiveAspectJAdvisorFactory
+
+                    deactivate InstantiationModelAwarePointcutAdvisorImpl
+
+                InstantiationModelAwarePointcutAdvisorImpl --> ReflectiveAspectJAdvisorFactory
+                deactivate InstantiationModelAwarePointcutAdvisorImpl
+
+            deactivate ReflectiveAspectJAdvisorFactory
+
+        end
+
+        note right of ReflectiveAspectJAdvisorFactory #aqua
+            b.解析字段上使用@DeclareParents注解(引介注解)，转换成：DeclareParentsAdvisor
+        end note
+        loop Field field : aspectClass.getDeclaredFields()
+
+            ReflectiveAspectJAdvisorFactory -> ReflectiveAspectJAdvisorFactory : getDeclareParentsAdvisor()
+            activate ReflectiveAspectJAdvisorFactory #DarkSalmon
+            deactivate ReflectiveAspectJAdvisorFactory
+
+        end
+
+    ReflectiveAspectJAdvisorFactory --> BeanFactoryAspectJAdvisorsBuilder : List<Advisor>
+    deactivate ReflectiveAspectJAdvisorFactory
+
+<--BeanFactoryAspectJAdvisorsBuilder : List<Advisor>
+deactivate BeanFactoryAspectJAdvisorsBuilder
+
+note right of BeanFactoryAspectJAdvisorsBuilder #FAEBD7
+*总结
+    整个过程可以理解为：把方法,字段上的@AspectJ注解转换为Spring AOP相应概念。
+    ---AspectJ真正运行是在类或方法匹配的时候。
+end note
+
+@enduml
