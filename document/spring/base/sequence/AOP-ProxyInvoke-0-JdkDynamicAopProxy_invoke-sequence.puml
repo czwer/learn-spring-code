@@ -72,7 +72,7 @@ deactivate JdkDynamicAopProxy
 note right of JdkDynamicAopProxy #FAEBD7
 *总结
     1.尽可能的简单处理，不得已的时候再进行真正含织入逻辑的调用。
-    <font color=red>2.代理对象在第一次方法运行获取织入逻辑链后，予以缓存；</font>
+    <font color=red>2.代理对象在第一次方法运行获取织入逻辑链后，予以缓存，提高了性能；</font>
         <font color=red>---Spring性能优化点之一</font>
 
 *备注

@@ -5,27 +5,26 @@ autonumber
 -> proxyObject: 代理对象方法调用
 
 note right of proxyObject #FAEBD7
-    *介绍CglibAopProxy生成的代理类，执行方法的调用过程
+    *介绍CglibAopProxy生成的代理类，执行方法时用
+         FixedChainStaticTargetInterceptor类型的Callback调用过程;
         ---这里只描述了主要步骤
-        ---CglibAopProxy.DynamicAdvisedInterceptor这个内部类更常用
-     单元测试参：CglibProxyTests
 end note
 activate proxyObject #DarkSalmon
 
     proxyObject -> FixedChainStaticTargetInterceptor : intercept()
     activate FixedChainStaticTargetInterceptor #DarkSalmon
         note right of FixedChainStaticTargetInterceptor #aqua
-            把上下文信息包装成CglibMethodInvocation。
+            把上下文信息转换为CglibMethodInvocation
         end note
 
         FixedChainStaticTargetInterceptor -> CglibMethodInvocation : proceed()
         activate CglibMethodInvocation #DarkSalmon
-            CglibMethodInvocation -> ReflectiveMethodInvocation : proceed()，实际调用父类中方法
+            CglibMethodInvocation -> ReflectiveMethodInvocation : proceed()
             activate ReflectiveMethodInvocation #DarkSalmon
                 note right of ReflectiveMethodInvocation #FF5000
-                    1.这里和JDK动态代理运行时共用同样的逻辑。
-                    2.在最终调用目标方法时使用CglibMethodInvocation.invokeJoinpoint(),
-                        以提高性能
+                    这里和JDK动态代理运行时共用同样的基础设施，仅在最终调用
+                    目标方法时使用CglibMethodInvocation.invokeJoinpoint(),以
+                    提高性能
                 end note
             CglibMethodInvocation --> ReflectiveMethodInvocation
             deactivate ReflectiveMethodInvocation
@@ -41,15 +40,16 @@ activate proxyObject #DarkSalmon
 deactivate proxyObject
 
 note right of proxyObject #FAEBD7
-*总结
-    1.生成代理时：通过把要织入的业务逻辑放入到Callback与Cglib技术整合；
-        ---这是在生成代理对象时做好了，
-    2.代理对象执行时：把当前Callback(实际是FixedChainStaticTargetInterceptor)转换为CglibMethodInvocation，
-        而CglibMethodInvocation本身是ReflectiveMethodInvocation子类，所以我们可以直接调用
-        ReflectiveMethodInvocation.proceed()方法，达到和JDK动态代理一样的方式共享Spring AOP
-        框架基础设施，运行并返回结果。
-        ---FixedChainStaticTargetInterceptor不需要重新获取织入逻辑调用链，是其优点
-        ---注意这只是Cglib动态代理一种调用方式
+    *总结
+        <font color=red>1.代理对象执行时：把当前Callback(实际是FixedChainStaticTargetInterceptor)转换为CglibMethodInvocation，</font>
+            <font color=red>而CglibMethodInvocation本身是ReflectiveMethodInvocation子类，所以我们可以直接调用</font>
+            <font color=red>ReflectiveMethodInvocation.proceed()方法，以达到和JDK动态代理一样的方式共享Spring AOP</font>
+            <font color=red>框架基础设施；</font>
+            <font color=red>---FixedChainStaticTargetInterceptor在生成代理时就已经确定了织入逻辑调用链，运行时直接使用，是其优点；</font>
+        <font color=red>2.代理对象在第一次运行获取织入逻辑链后，予以缓存，提高了性能；</font>
+            <font color=red>---以上Spring的优化点</font>
+    *备注
+        1.CglibMethodInvocation是ReflectiveMethodInvocation子类，是Cglib通往Spring AOP的桥梁。
 end note
 
 @enduml
