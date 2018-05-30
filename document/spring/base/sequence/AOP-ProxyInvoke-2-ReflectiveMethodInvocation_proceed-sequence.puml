@@ -1,9 +1,9 @@
 @startuml
--> ReflectiveMethodInvocation: proceed() :执行点逻辑运行
+-> ReflectiveMethodInvocation: proceed()
 activate ReflectiveMethodInvocation #DarkSalmon
 
-note left of ReflectiveMethodInvocation #FAEBD7
-    *介绍织入逻辑调用链调用，并最终执行目标方法调用
+note right of ReflectiveMethodInvocation #FAEBD7
+    *介绍如何织入逻辑调用链，并最终执行目标方法的
         ---这里只描述了主要步骤
 end note
     alt 检完成查织入逻辑调用链是否执行完了,执行完了，执行目标方法
@@ -12,7 +12,7 @@ end note
             ReflectiveMethodInvocation -> AopUtils : invokeJoinpointUsingReflection()
             activate AopUtils #DarkSalmon
                 note right of AopUtils #FF5000
-                    最终通过method.invoke(target, args)来执行目标方法
+                    已执行完织入逻辑，最终通过method.invoke(target, args)来执行目标方法
                 end note
             AopUtils --> ReflectiveMethodInvocation : result
             deactivate AopUtils
@@ -20,35 +20,52 @@ end note
         deactivate ReflectiveMethodInvocation
     end
 
-    alt 检查当前织入类型是否是interceptorOrInterceptionAdvice
+    note right of ReflectiveMethodInvocation #FF5000
+        ReflectiveMethodInvocation.currentInterceptorIndex先自增加1后得到索引值，
+        然后从织入逻辑数组中获取待执行的织入逻辑。
+    end note
+
+    alt 检查当前织入类型是否是InterceptorAndDynamicMethodMatcher
         alt 检查方法参数是否满足织入条件
-            ReflectiveMethodInvocation -> MethodInterceptor :invoke()
+            ReflectiveMethodInvocation -> MethodInterceptor :invoke(this)
             activate MethodInterceptor #DarkSalmon
+
                 note right of MethodInterceptor #FF5000
-                    执行织入逻辑,并递归调用ReflectiveMethodInvocation.proceed()，直至调用链执行完毕
+                    核心逻辑：
+                        1.通过MethodInterceptor.invoke(this)执行织入逻辑
+                        2.在织入逻辑中会调用当前ReflectiveMethodInvocation.proceed()
+                        这样，我们就可以递归调用下一个织入逻辑，形成了有始有终的链条
+                            ---注意我们是this作为参数传递给MethodInterceptor.invoke(this)，
+                            所以内部可以调用ReflectiveMethodInvocation.proceed()
                 end note
+                MethodInterceptor -> ReflectiveMethodInvocation :proceed()
+                activate ReflectiveMethodInvocation #DarkSalmon
+                ReflectiveMethodInvocation --> MethodInterceptor
+                deactivate ReflectiveMethodInvocation
+
             MethodInterceptor --> ReflectiveMethodInvocation
-
-            MethodInterceptor -> ReflectiveMethodInvocation :proceed()
-            activate ReflectiveMethodInvocation #DarkSalmon
-            ReflectiveMethodInvocation --> MethodInterceptor
-            deactivate ReflectiveMethodInvocation
-
             deactivate MethodInterceptor
-        else
+        else 说明方法不匹配
 
-
+            note right of ReflectiveMethodInvocation #FF5000
+                说明方法不匹配，递归调用下一个织入逻辑
+            end note
             ReflectiveMethodInvocation -> ReflectiveMethodInvocation :proceed()
             activate ReflectiveMethodInvocation #DarkSalmon
-
             deactivate ReflectiveMethodInvocation
         end
 
     else 转换成 MethodInterceptor并调用具体织入逻辑
-        ReflectiveMethodInvocation -> MethodInterceptor :invoke()
+        ReflectiveMethodInvocation -> MethodInterceptor :invoke(this)
         activate MethodInterceptor #DarkSalmon
+
             note right of MethodInterceptor #FF5000
-                执行织入逻辑,并递归调用ReflectiveMethodInvocation.proceed()，直至调用链执行完毕
+                核心逻辑：
+                    1.通过MethodInterceptor.invoke(this)执行织入逻辑
+                    2.在织入逻辑中会调用当前ReflectiveMethodInvocation.proceed()
+                    这样，我们就可以递归调用下一个织入逻辑，形成了有始有终的链条
+                        ---注意我们是this作为参数传递给MethodInterceptor.invoke(this)，
+                        所以内部可以调用ReflectiveMethodInvocation.proceed()
             end note
 
             MethodInterceptor -> ReflectiveMethodInvocation :proceed()
@@ -59,11 +76,14 @@ end note
         MethodInterceptor --> ReflectiveMethodInvocation
         deactivate MethodInterceptor
     end
+
 <-- ReflectiveMethodInvocation : result
 deactivate ReflectiveMethodInvocation
 note right of ReflectiveMethodInvocation #FAEBD7
 *总结
-    1.整个方法通过递归调用执行：织入逻辑调用链和目标方法设计的比较巧妙。
+    <font color=red>1.整个方法通过递归调用执行：织入逻辑调用链和目标方法设计的水平很高。</font>
+    <font color=red>---这里可以理解为AOP的心脏</font>
+    <font color=red>2.不管是Jdk版动态代理和Cglib版动态代理，都共用这部分逻辑，又突显设计水平之高</font>
 *其它
     MethodInterceptor: 理解为环绕通知
     MethodInvocation: 可以理解为方法调用的上下文信息

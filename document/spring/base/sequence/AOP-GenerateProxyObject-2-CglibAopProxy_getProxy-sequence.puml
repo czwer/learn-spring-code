@@ -103,7 +103,7 @@ note right of CglibAopProxy #FAEBD7
     4.TargetSource.isStatic(): 用于表明是否要返回同一个目标对象实例,true代表返回同一对象
     5.advised.isExposeProxy(): 是否将当前代理对象绑定到ThreadLocal，默认为false
     6.advised.isFrozen(): 代理对象生成的各项配置信息配置完成，是否容许更改,默认为false
-    7.advised.isOpaque(): 用于控制的代理类是否可以强制转换成Advised,默认为false,表示可以
+    7.advised.isOpaque(): 用于控制的代理类是否可以强制转换成Advised,默认为false,表示可以转换
     8.net.sf.cglib.proxy.NoOp NoOp回调把对方法调用直接委派到这个方法在父类中的实现。
     9.判断是否是CglibProxyClass依据是className中是否包含$$
     10.<font color=red>注意两种不同MethodInterceptor，阅读代码时注意上下文，此时是后者</font>

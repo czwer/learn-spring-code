@@ -2,56 +2,66 @@
 -> AdvisedSupport : getInterceptorsAndDynamicInterceptionAdvice()
 activate AdvisedSupport #DarkSalmon
 
-note left of AdvisedSupport #FAEBD7
-    *介绍获得要织入的横切逻辑调用链
+note right of AdvisedSupport #FAEBD7
+    *介绍方法获得要织入的逻辑(Advice)
     ---这里只描述了主要步骤
 end note
     alt 缓存获取不到时，才重新组装
         AdvisedSupport -> DefaultAdvisorChainFactory : getInterceptorsAndDynamicInterceptionAdvice()
         activate DefaultAdvisorChainFactory #DarkSalmon
-            DefaultAdvisorChainFactory -> DefaultAdvisorChainFactory : hasMatchingIntroductions()：确定是否存在匹配的IntroductionAdvisor
+            DefaultAdvisorChainFactory -> DefaultAdvisorChainFactory : hasMatchingIntroductions()：首先确定是否存在匹配的IntroductionAdvisor
             activate DefaultAdvisorChainFactory #DarkSalmon
             deactivate DefaultAdvisorChainFactory
 
             loop Advisor advisor : config.getAdvisors()
-                note right of DefaultAdvisorChainFactory #aqua
-                    获取能用在当前方法织入逻辑Interceptor，添加到返回横切逻辑调用链中
-                        ---注意有可能把MethodInterceptor转换成InterceptorAndDynamicMethodMatcher
-                            视MethodMatcher.isRuntime()来决定
-                end note
 
                 alt advisor是PointcutAdvisor类型实例
-                    DefaultAdvisorChainFactory -> DefaultAdvisorAdapterRegistry :getInterceptors()
-                    activate DefaultAdvisorAdapterRegistry #DarkSalmon
-                        note right of DefaultAdvisorAdapterRegistry #aqua
-                            获取advisor中的MethodInterceptor，不同类型的Advisor由xxxAdvisorAdapter来协助把内部Advice转换成统一的MethodInterceptor
-                                AfterReturningAdviceAdapter -> AfterReturningAdvice -> AfterReturningAdviceInterceptor -> MethodInterceptor
-                                MethodBeforeAdviceAdapter -> MethodBeforeAdvice -> MethodBeforeAdviceInterceptor -> MethodInterceptor
-                                ThrowsAdviceAdapter -> ThrowsAdvice -> ThrowsAdviceInterceptor -> MethodInterceptor
 
-                        end note
-                    DefaultAdvisorAdapterRegistry --> DefaultAdvisorChainFactory :MethodInterceptor[] interceptors
-                    deactivate DefaultAdvisorAdapterRegistry
+                    alt 如果允许跳过ClassFilter匹配或ClassFilter匹配结果是通过的
 
-                    DefaultAdvisorChainFactory -> MethodMatchers :matches()
-                    activate MethodMatchers #DarkSalmon
-                        note right of MethodMatchers #aqua
-                            最终委托MethodMatcher实现类来匹配，注意里面对IntroductionAwareMethodMatcher和
-                            普通MethodMatcher分开处理的。
-                        end note
-                    MethodMatchers --> DefaultAdvisorChainFactory :boolean
-                    deactivate MethodMatchers
+                        DefaultAdvisorChainFactory -> DefaultAdvisorAdapterRegistry :getInterceptors()
+                        activate DefaultAdvisorAdapterRegistry #DarkSalmon
+                            note right of DefaultAdvisorAdapterRegistry #FF5000
+                                获取advisor中的MethodInterceptor，不同类型的Advisor由xxxAdvisorAdapter来协助把内部xxxAdvice
+                                转换成统一的MethodInterceptor接口类型
+                                    AfterReturningAdviceAdapter -> AfterReturningAdvice -> AfterReturningAdviceInterceptor -> MethodInterceptor
+                                    MethodBeforeAdviceAdapter -> MethodBeforeAdvice -> MethodBeforeAdviceInterceptor -> MethodInterceptor
+                                    ThrowsAdviceAdapter -> ThrowsAdvice -> ThrowsAdviceInterceptor -> MethodInterceptor
+                                    ---Spring设计亮点
+                            end note
+                        DefaultAdvisorAdapterRegistry --> DefaultAdvisorChainFactory :MethodInterceptor[] interceptors
+                        deactivate DefaultAdvisorAdapterRegistry
+
+                        DefaultAdvisorChainFactory -> MethodMatchers :matches()
+                        activate MethodMatchers #DarkSalmon
+                            note right of MethodMatchers #aqua
+                                最终委托MethodMatcher实现类来匹配
+                            end note
+                        MethodMatchers --> DefaultAdvisorChainFactory :boolean
+                        deactivate MethodMatchers
+
+                        alt 如果MethodMatchers匹配结果是通过的
+                            note right of DefaultAdvisorChainFactory #aqua
+                                添加到返回结果中，注意对IntroductionAwareMethodMatcher和
+                                普通MethodMatcher分开处理的。
+                            end note
+                        end
+
+                    end
 
                 else advisor是IntroductionAdvisor类型实例
-                    note right of DefaultAdvisorAdapterRegistry #aqua
-                        确定当前PointcutAdvisor适用该Class类型：如有必要只进行类型匹配
-                    end note
+
+                    alt 如果允许跳过ClassFilter匹配或ClassFilter匹配结果是通过的
+                        note right of DefaultAdvisorChainFactory #aqua
+                            添加到返回结果中
+                        end note
+                    end
+
                 else 默认处理行为
-                    note right of DefaultAdvisorAdapterRegistry #aqua
-                        默认当前advisor的Intercepter都是适用的
+                    note right of DefaultAdvisorChainFactory #aqua
+                        默认当前advisor的Intercepter都是适用的，添加到返回结果中
                     end note
                 end
-
 
             end
 
@@ -60,14 +70,13 @@ end note
 
     end
 
-<-- AdvisedSupport: List<Object>，其中Object类型为MethodInterceptor
+<-- AdvisedSupport: List<Object>
 deactivate AdvisedSupport
 
 note right of AdvisedSupport #FAEBD7
 *总结
-    1.确定是否存在匹配的IntroductionAdvisor，并适用该类，此时在for循环前调用，避免在后面for循环重复运行
+    1.在确定是否存在匹配的IntroductionAdvisor时，是在for循环前调用，避免在后面for循环中重复运行
     2.我们发现相应不管是前置，后置，异常通知，都能转换成MethodInterceptor的形式，便于框架统一的方式处理
-    3.通过MethodMatcher.isRuntime来确定是否是DynamicMethodMather类型，是则需要包装成InterceptorAndDynamicMethodMatcher
 
 *备注
     1.IntroductionAdvisor: 只运用于类级别的拦截，只能用于Introduction型的Advice
