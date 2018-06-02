@@ -1,0 +1,45 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    SQLExceptionTranslator：把SQLException异常规范转换
+    为DataAccessException异常。
+end note
+
+
+interface SQLExceptionTranslator
+SQLExceptionTranslator : +DataAccessException translate(String task, @Nullable String sql, SQLException ex)
+abstract class AbstractFallbackSQLExceptionTranslator
+AbstractFallbackSQLExceptionTranslator : -SQLExceptionTranslator fallbackTranslator
+AbstractFallbackSQLExceptionTranslator : #abstract DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex)
+AbstractFallbackSQLExceptionTranslator : +SQLExceptionTranslator getFallbackTranslator()
+AbstractFallbackSQLExceptionTranslator : +void setFallbackTranslator(@Nullable SQLExceptionTranslator fallback)
+class SQLErrorCodeSQLExceptionTranslator
+SQLErrorCodeSQLExceptionTranslator : #DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex)
+note bottom : 根据ErrorCode进行异常转义(精确度好些)
+class SQLExceptionSubclassTranslator
+SQLExceptionSubclassTranslator : #DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex)
+note bottom : 支持JDBC4版本中新定义异常转换
+class SQLStateSQLExceptionTranslator
+SQLStateSQLExceptionTranslator : #DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex)
+note bottom : SQLState进行异常转义
+
+
+
+AbstractFallbackSQLExceptionTranslator <|-- SQLErrorCodeSQLExceptionTranslator
+AbstractFallbackSQLExceptionTranslator <|-- SQLExceptionSubclassTranslator
+AbstractFallbackSQLExceptionTranslator <|-- SQLStateSQLExceptionTranslator
+
+
+SQLErrorCodeSQLExceptionTranslator --> SQLExceptionSubclassTranslator
+
+SQLExceptionSubclassTranslator --> SQLStateSQLExceptionTranslator
+
+SQLExceptionTranslator <.. AbstractFallbackSQLExceptionTranslator
+
+@enduml

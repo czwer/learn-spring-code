@@ -1,0 +1,53 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    DataAccessException：数据访问异常的根类。
+end note
+
+
+abstract class DataAccessException #7FFFD4
+class BadSqlGrammarException
+class ConcurrencyFailureException
+class DataAccessResourceFailureException
+class DeadlockLoserDataAccessException
+class InvalidDataAccessResourceUsageException
+abstract class NestedRuntimeException
+abstract class NonTransientDataAccessException
+class NonTransientDataAccessResourceException
+class QueryTimeoutException
+class RuntimeException
+abstract class TransientDataAccessException
+
+
+
+ConcurrencyFailureException <|-- PessimisticLockingFailureException
+
+DataAccessException <|-- NonTransientDataAccessException
+DataAccessException <|-- TransientDataAccessException
+
+
+InvalidDataAccessResourceUsageException <|-- BadSqlGrammarException
+
+
+NestedRuntimeException <|-- DataAccessException
+
+
+NonTransientDataAccessException <|-- InvalidDataAccessResourceUsageException
+NonTransientDataAccessException <|-- NonTransientDataAccessResourceException
+
+NonTransientDataAccessResourceException <|-- DataAccessResourceFailureException
+
+PessimisticLockingFailureException <|-- DeadlockLoserDataAccessException
+
+RuntimeException <|-- NestedRuntimeException
+
+TransientDataAccessException <|-- ConcurrencyFailureException
+TransientDataAccessException <|-- QueryTimeoutException
+
+@enduml

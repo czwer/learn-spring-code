@@ -1,0 +1,86 @@
+@startuml
+-> SQLErrorCodeSQLExceptionTranslator: doTranslate()
+activate SQLErrorCodeSQLExceptionTranslator #DarkSalmon
+
+    note right of SQLErrorCodeSQLExceptionTranslator #FAEBD7
+        *介绍SQLException转DataAccessException过程
+            ---以SQLErrorCodeSQLExceptionTranslator为例
+            ---这里只描述了主要步骤
+    end note
+
+    note right of SQLErrorCodeSQLExceptionTranslator #aqua
+        主要逻辑：
+            I.如果是BatchUpdateException类型异常且可以获得更详细的异常，提取更详细的异常；
+            II.以下是处理异常时可能走的不同路径：
+                1.如果子类重写了自定义异常转换，尝试转换；
+                    ---SQLErrorCodeSQLExceptionTranslator子类，扩展点之一
+                2.如果系统有注册自定义SQLExceptionTranslator实现类，尝试转换；
+                    ---SQLExceptionTranslator实现类，扩展点之一
+                3.如果系统有注册CustomSQLErrorCodesTranslation，尝试转换；
+                    ---CustomSQLErrorCodesTranslation数组，扩展点之一
+                4.确认ErrorCode所在的具体异常类型：只要确认到就构建具体响应异常；
+                    ---如Arrays.binarySearch(this.sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0
+                5.返回null，通过其他异常转义工具处理；
+                    ---扩展点之一
+    end note
+
+    SQLErrorCodeSQLExceptionTranslator -> SQLErrorCodeSQLExceptionTranslator : customTranslate():
+    activate SQLErrorCodeSQLExceptionTranslator #DarkSalmon
+    deactivate SQLErrorCodeSQLExceptionTranslator
+
+    alt 如果SQLErrorCodeSQLExceptionTranslator子类能够处理转换
+<-- SQLErrorCodeSQLExceptionTranslator: DataAccessException
+    end
+
+    alt 如果系统有注册自定义SQLExceptionTranslator实现类
+
+        SQLErrorCodeSQLExceptionTranslator -> SQLExceptionTranslator : translate()
+        activate SQLExceptionTranslator #DarkSalmon
+        SQLExceptionTranslator --> SQLErrorCodeSQLExceptionTranslator
+        deactivate SQLExceptionTranslator
+
+       alt 能够处理转换
+<-- SQLErrorCodeSQLExceptionTranslator: DataAccessException
+        end
+
+    end
+
+    alt 如果系统有注册CustomSQLErrorCodesTranslation
+
+        alt 能够处理转换
+<-- SQLErrorCodeSQLExceptionTranslator: DataAccessException
+        end
+
+    end
+
+    == 确认ErrorCode所在的具体异常类型：只要确认到就构建响应异常 ==
+
+    SQLErrorCodeSQLExceptionTranslator -> SQLErrorCodes : getXxxCodes()
+    activate SQLErrorCodes #DarkSalmon
+    SQLErrorCodes --> SQLErrorCodeSQLExceptionTranslator : String[]
+    deactivate SQLErrorCodes
+
+    SQLErrorCodeSQLExceptionTranslator -> Arrays : binarySearch()
+    activate Arrays #DarkSalmon
+    Arrays --> SQLErrorCodeSQLExceptionTranslator : boolean
+    deactivate Arrays
+
+    alt 确认到具体异常类型
+
+<-- SQLErrorCodeSQLExceptionTranslator: DataAccessException
+
+    end
+
+    ==  ==
+
+
+<-- SQLErrorCodeSQLExceptionTranslator: null：通过其他异常转义工具处理
+deactivate SQLErrorCodeSQLExceptionTranslator
+
+note right of SQLErrorCodeSQLExceptionTranslator #FAEBD7
+    *总结
+        在异常转换中Spring提供了诸多扩展点，提供了足够的灵活性。
+        ---工作中遇到复杂判断的情况，值得参考
+end note
+
+@enduml
