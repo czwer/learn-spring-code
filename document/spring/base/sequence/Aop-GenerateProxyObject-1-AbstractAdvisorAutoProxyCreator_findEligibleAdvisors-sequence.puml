@@ -66,7 +66,7 @@ activate AbstractAdvisorAutoProxyCreator #DarkSalmon
 
                         note right of AopUtils #aqua
                             主要逻辑：
-                               1.先在类上匹配，类通不过就不需要继续匹配了
+                               1.先看类是否在不匹配的集合中，是的话，直接返回false
                                   ---提高性能
                                2.如果MethodMatcher为MethodMather.True就不用判断了，直接返回true
                                   ---提高性能
@@ -146,7 +146,8 @@ note right of AbstractAdvisorAutoProxyCreator #FAEBD7
     *总结
         1.Advisor作为普通的Bean来处理的，复用了Spring容器功能；
             ---顺序在Spring体系里怎么强调都不为过，Advisor顺序很重要
-        2.实现Pointcut语义,能在范围大的Class层次上确定，就不用要处理范围小的method层次
+        2.实现Pointcut语义,能在范围大的Class层次上确定(在不适用的集合内)，就不用要处理范围小的
+            method层次
             ---减少不必要的工作量，越懒，越有价值
 
     *备注

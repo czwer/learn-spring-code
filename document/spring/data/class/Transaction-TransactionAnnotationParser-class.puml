@@ -1,0 +1,26 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    TransactionAnnotationParser：用于解析注解中的元数据，
+    不同技术栈的事务属性定义，统一转换为TransactionAttribute。
+end note
+
+
+interface TransactionAnnotationParser
+TransactionAnnotationParser : +TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae)
+class Ejb3TransactionAnnotationParser
+class JtaTransactionAnnotationParser
+class SpringTransactionAnnotationParser #FF5000
+
+
+
+TransactionAnnotationParser <.. Ejb3TransactionAnnotationParser
+TransactionAnnotationParser <.. JtaTransactionAnnotationParser
+TransactionAnnotationParser <.. SpringTransactionAnnotationParser
+
+@enduml

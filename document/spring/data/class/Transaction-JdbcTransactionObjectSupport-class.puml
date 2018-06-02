@@ -1,0 +1,42 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    JdbcTransactionObjectSupport：主要对保存点生命周期管理。
+end note
+
+abstract class JdbcTransactionObjectSupport
+JdbcTransactionObjectSupport : -ConnectionHolder connectionHolder
+JdbcTransactionObjectSupport : -Integer previousIsolationLevel
+class DataSourceTransactionObject #7FFFD4
+interface Flushable
+Flushable : +void flush()
+class HibernateTransactionObject #7FFFD4
+class JpaTransactionObject
+interface SavepointManager
+SavepointManager : +Object createSavepoint()
+SavepointManager : +void rollbackToSavepoint(Object savepoint)
+SavepointManager : +void releaseSavepoint(Object savepoint)
+interface SmartTransactionObject
+SmartTransactionObject : +boolean isRollbackOnly()
+SmartTransactionObject : +void flush()
+
+
+Flushable <|-- SmartTransactionObject
+
+JdbcTransactionObjectSupport <|-- DataSourceTransactionObject
+JdbcTransactionObjectSupport <|-- HibernateTransactionObject
+JdbcTransactionObjectSupport <|-- JpaTransactionObject
+
+
+SavepointManager <.. JdbcTransactionObjectSupport
+
+SmartTransactionObject <.. JdbcTransactionObjectSupport
+
+
+@enduml

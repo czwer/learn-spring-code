@@ -6,9 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    PlatformTransactionManager是Spring事务抽象架构的核心接口，它主要作用是为应用
-        程序提供事务界定的统一方式。
-    Spring的事务框架设计理念的基本原则是：让事务管理的关注点和数据访问关注点相分离。
+    PlatformTransactionManager：事务管理的顶层抽象，
+    Spring事务抽象架构的核心接口。
 end note
 
 interface PlatformTransactionManager

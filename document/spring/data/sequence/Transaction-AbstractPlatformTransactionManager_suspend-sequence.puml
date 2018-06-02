@@ -2,17 +2,19 @@
 -> AbstractPlatformTransactionManager: suspend(Object transaction)
 activate AbstractPlatformTransactionManager #DarkSalmon
 
-note left of AbstractPlatformTransactionManager #FAEBD7
+note right of AbstractPlatformTransactionManager #FAEBD7
     *暂定(挂起)给定的事务
         ---模板方法调用实现以DataSourceTransactionManager为例
         ---这里只描述了主要步骤
 end note
 
-    alt 当前线程存在事务同步处理类
+    alt 当前线程存在事务同步处理
         note right of AbstractPlatformTransactionManager #aqua
-            1.获取当前线程绑定的TransactionSynchronization，并逐一执行其suspend()进行挂起
-            2.从当前线程中解除给定键的资源绑定及其他描述信息（事务名称，只读表示，隔离级别等），
-                并包装成SuspendedResourcesHolder返回
+            1.获取当前线程绑定的TransactionSynchronization，并逐一执行其
+                suspend()进行挂起;
+            2.挂起当前事务：解除线程中绑定的ConnectionHolder(含数据库连接)，
+            3.当前线程中解除事务上下文（事务名称，只读表示，隔离级别等），
+                同ConnectionHolder包装成SuspendedResourcesHolder返回
         end note
 
         alt 存在事务
@@ -27,11 +29,12 @@ end note
             DataSourceTransactionManager --> AbstractPlatformTransactionManager : Object
             deactivate DataSourceTransactionManager
         end
+<-- AbstractPlatformTransactionManager: suspendedResourcesHolder
 
-    else 存在事务，且不需要同步
+    else 存在事务
         note right of AbstractPlatformTransactionManager #aqua
-            1.绑定的资源置为null。
-            2.从当前线程中解除给定键的资源绑定，并包装成SuspendedResourcesHolder返回
+            1.挂起当前事务：解除线程中绑定的ConnectionHolder(含数据库连接)
+            2.ConnectionHolder包装成SuspendedResourcesHolder返回
         end note
 
         AbstractPlatformTransactionManager -> DataSourceTransactionManager : doSuspend()
@@ -44,21 +47,18 @@ end note
 
         DataSourceTransactionManager --> AbstractPlatformTransactionManager : Object
         deactivate DataSourceTransactionManager
-    else
+<-- AbstractPlatformTransactionManager: suspendedResourcesHolder
+    else 不存在事务就什么都不用处理
 <-- AbstractPlatformTransactionManager: null
     end
 
 
-<-- AbstractPlatformTransactionManager: suspendedResourcesHolder
 deactivate AbstractPlatformTransactionManager
 
 note right of AbstractPlatformTransactionManager #FAEBD7
     *总结
         1.挂起的意味着，从当前线程中解除绑定资源(connectionHolder)，就提交不了事务，达到了挂起的目的
         2.SuspendedResourcesHolder替代ThreadLocal,作为资源的持有者，返回给方法调用方
-    *其它
-        TransationSynchronization：Spring事务同步处理类
-
 end note
 
 @enduml

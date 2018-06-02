@@ -1,0 +1,77 @@
+@startuml
+
+-> BaseExecutor: getConnection()
+activate BaseExecutor #DarkSalmon
+
+note right of BaseExecutor #FAEBD7
+    *介绍Mybatis是如何使用Spring来获取数据库连接
+        ---这里只描述了主要步骤
+        <font color=red>---以下是Mybatis中类：</font>
+            <font color=red>BaseExecutor</font>
+            <font color=red>SpringManagedTransaction</font>
+end note
+
+BaseExecutor -> SpringManagedTransaction : getConnection()
+activate SpringManagedTransaction #DarkSalmon
+
+    SpringManagedTransaction -> SpringManagedTransaction : openConnection()
+    activate SpringManagedTransaction #DarkSalmon
+
+         note right of SpringManagedTransaction #aqua
+             获取数据库连接
+         end note
+         SpringManagedTransaction -> DataSourceUtils : getConnection()
+         activate DataSourceUtils #DarkSalmon
+
+             note right of DataSourceUtils #aqua
+                 Mybatis通过使用DataSourceUtils来获取连接。DataSourceUtils
+                 再通过TransactionSynchronizationManager从ThreadLocal来获
+                 取。线程安全的根本原因是通过ThreadLocal达到资源隔离来实现的。
+                 ---获取的连接经过Spring事务管理设置了属性：事务提交属性，超时
+                 ---注意：为突出重点，这里时序图是缩减的
+             end note
+
+             DataSourceUtils -> DataSourceUtils : doGetConnection()
+             activate DataSourceUtils #DarkSalmon
+
+                 DataSourceUtils -> TransactionSynchronizationManager : getResource()
+                 activate TransactionSynchronizationManager #DarkSalmon
+
+                     TransactionSynchronizationManager -> TransactionSynchronizationManager : doGetResource()
+                     activate TransactionSynchronizationManager #DarkSalmon
+
+                         TransactionSynchronizationManager -> ThreadLocal : get()
+                         activate ThreadLocal #DarkSalmon
+                         ThreadLocal --> TransactionSynchronizationManager : map
+                         deactivate ThreadLocal
+
+                     deactivate TransactionSynchronizationManager
+
+                 TransactionSynchronizationManager --> DataSourceUtils : connectionHolder
+                 deactivate TransactionSynchronizationManager
+
+                 DataSourceUtils -> ConnectionHolder : getConnection()
+                 activate ConnectionHolder #DarkSalmon
+                 ConnectionHolder --> DataSourceUtils : connection
+                 deactivate ConnectionHolder
+
+             deactivate DataSourceUtils
+
+         DataSourceUtils --> SpringManagedTransaction : connection
+         deactivate DataSourceUtils
+
+    deactivate SpringManagedTransaction
+
+SpringManagedTransaction --> BaseExecutor : connection
+deactivate SpringManagedTransaction
+
+
+<-- BaseExecutor
+deactivate BaseExecutor
+
+note right of BaseExecutor #FAEBD7
+    *总结
+        Mybatis通过使用Spring基础设施融入到了Spring事务框架中。
+end note
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    BeanFactoryTransactionAttributeSourceAdvisor：为接入AOP体系，
+    Advisor接口的实现类。
+
+end note
+
+
+class BeanFactoryTransactionAttributeSourceAdvisor #FF5000
+BeanFactoryTransactionAttributeSourceAdvisor : -TransactionAttributeSource transactionAttributeSource
+abstract class AbstractBeanFactoryPointcutAdvisor
+abstract class AbstractPointcutAdvisor
+interface Advisor
+Advisor : Advice getAdvice()
+interface PointcutAdvisor
+PointcutAdvisor : Pointcut getPointcut()
+
+
+AbstractBeanFactoryPointcutAdvisor <|-- BeanFactoryTransactionAttributeSourceAdvisor
+
+AbstractPointcutAdvisor <|-- AbstractBeanFactoryPointcutAdvisor
+
+Advisor <|-- PointcutAdvisor
+
+PointcutAdvisor <.. AbstractPointcutAdvisor
+@enduml

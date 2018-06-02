@@ -6,7 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    基于<tx:annotation-driven>全视角类图
+    顶层鸟瞰事务相关类之间关系
+        ---基于<tx:annotation-driven>方式启动事务
 end note
 
 
@@ -14,13 +15,22 @@ class AnnotationDrivenBeanDefinitionParser
 note top :注册基础设施
 
 class AnnotationTransactionAttributeSource
-note left : 基础设施：用于获取TransactionAttribute属性：应用AOP起重要作用
+note left : 基础设施：用于获取TransactionAttribute属性
 
 class BeanFactoryTransactionAttributeSourceAdvisor
-note top : 基础设施：融入Spring AOP体系扮演Advisor角色，Spring全局扫描所有Advisor时会找到它
+note top : 基础设施：融入Spring AOP体系扮演Advisor角色
+
+abstract class DataSourceUtils
+note top : 获取数据库连接
+
+abstract class JdbcTransactionObjectSupport
+note bottom : 主要对保存点生命周期管理
 
 interface PlatformTransactionManager
 note top : 事务管理的根基
+
+abstract class ResourceHolderSupport
+note right : 封装持有的资源
 
 class SpringTransactionAnnotationParser
 note bottom : 真正扫描解析@Transactional注解的类
@@ -48,7 +58,7 @@ interface TransactionStatus
 note bottom : 描述事务状态，提供有限的事务管理
 
 abstract class TransactionSynchronizationManager
-note bottom : ThreadLocal中绑定资源：如数据库连接
+note right : ThreadLocal中绑定资源到线程，保证线程安全
 
 AnnotationDrivenBeanDefinitionParser ..> AnnotationTransactionAttributeSource
 AnnotationDrivenBeanDefinitionParser ..> BeanFactoryTransactionAttributeSourceAdvisor
@@ -61,11 +71,18 @@ BeanFactoryTransactionAttributeSourceAdvisor --> AnnotationTransactionAttributeS
 BeanFactoryTransactionAttributeSourceAdvisor --> TransactionInterceptor
 BeanFactoryTransactionAttributeSourceAdvisor --> TransactionAttributeSourcePointcut
 
+DataSourceUtils ..> TransactionSynchronizationManager
 
+JdbcTransactionObjectSupport ..> ResourceHolderSupport
 
 PlatformTransactionManager ..> TransactionDefinition
 PlatformTransactionManager ..> TransactionStatus
 PlatformTransactionManager ..> TransactionSynchronizationManager
+
+
+ResourceHolderSupport --> Connection
+ResourceHolderSupport --> Session
+
 
 SpringTransactionAnnotationParser ...> Transactional
 
@@ -79,6 +96,8 @@ TransactionInterceptor --|> TransactionAspectSupport
 
 TransactionAttributeSourcePointcut ..> AnnotationTransactionAttributeSource
 
+
+TransactionStatus ..> JdbcTransactionObjectSupport
 
 TxNamespaceHandler ..> AnnotationDrivenBeanDefinitionParser
 

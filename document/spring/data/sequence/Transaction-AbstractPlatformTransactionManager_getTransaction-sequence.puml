@@ -2,8 +2,8 @@
 -> AbstractPlatformTransactionManager: getTransaction(TransactionDefinition definition)
 activate AbstractPlatformTransactionManager #DarkSalmon
 
-note left of AbstractPlatformTransactionManager #FAEBD7
-    *介绍获取事务状态的方法
+note right of AbstractPlatformTransactionManager #FAEBD7
+    *介绍获取事务的主要过程
         ---模板方法调用实现，以DataSourceTransactionManager为例
         ---这里只描述了主要步骤
 end note
@@ -11,7 +11,10 @@ end note
     AbstractPlatformTransactionManager -> DataSourceTransactionManager : doGetTransaction()
     activate DataSourceTransactionManager #DarkSalmon
         note right of DataSourceTransactionManager #aqua
-            获取绑定的资源，包装后返回。
+            获取绑定的资源（如数据库连接，不一定存在）
+            ，包装后成各个技术栈的对象返回。
+            ---包装：这里是支持多种ORM技术栈的的基础，
+            自己清楚自己的物件。
         end note
 
     DataSourceTransactionManager --> AbstractPlatformTransactionManager : dataSourceTransactionObject
@@ -20,6 +23,7 @@ end note
     alt definition == null
         note right of AbstractPlatformTransactionManager #aqua
             创建一个默认的事务定义数据
+            ---使用默认的隔离级别和传播行为
         end note
     end
 
@@ -30,18 +34,19 @@ end note
         end note
     DataSourceTransactionManager --> AbstractPlatformTransactionManager
     deactivate DataSourceTransactionManager
-
+== 存在事务，实现事务传播行为的语义 ==
     alt 存在事务
         note right of AbstractPlatformTransactionManager #aqua
-            存在事务时，创建一个TransactionStatus。
-            PROPAGATION_NEVER：抛出异常
-            PROPAGATION_NOT_SUPPORTED：当前事务挂起
-            PROPAGATION_REQUIRES_NEW：当前事务挂起，创建新事务
-            PROPAGATION_NESTED：在当前事务，开启一个嵌套事务
-                ---嵌套事务默认基于Savepoint实现，其他JTA
-            PROPAGATION_SUPPORTS：加入当前事务
-            PROPAGATION_REQUIRED：加入当前事务
-            ---存在事务时，实现事务传播行为的语义
+            当前存在事务时，创建一个TransactionStatus。
+                PROPAGATION_NEVER：抛出异常
+                PROPAGATION_NOT_SUPPORTED：当前事务挂起
+                PROPAGATION_REQUIRES_NEW：当前事务挂起，创建新事务
+                PROPAGATION_NESTED：在当前事务，开启一个嵌套事务
+                    ---嵌套事务默认基于Savepoint实现，其他JTA
+                PROPAGATION_SUPPORTS：加入当前事务
+                PROPAGATION_REQUIRED：加入当前事务
+            下面的时序图是简化了的，与不存在事务时，处理流程大致一致，仅
+            多了挂起时入参transaction是否为null而已。
         end note
 
         AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : handleExistingTransaction()
@@ -50,24 +55,20 @@ end note
 <-- AbstractPlatformTransactionManager: transactionStatus
     end
 
-    note right of AbstractPlatformTransactionManager #aqua
-        ---不存在事务时，实现事务传播行为的语义
-    end note
+== 不存在事务时，实现事务传播行为的语义 ==
 
     alt 当前事务传播行为是PROPAGATION_MANDATORY：强制要求当前存在一个事务，如不存在抛出异常
         note right of AbstractPlatformTransactionManager #aqua
-            ---当前是不存在事务：
+            当前不存在事务：
                 PROPAGATION_MANDATORY：强制要求当前存在一个事务，如果不存在，则抛出异常
-                ---实现了该语义
         end note
         <-- AbstractPlatformTransactionManager: throw new IllegalTransactionStateException()
     else 如果当前事务传播行为属于其中之一：PROPAGATION_REQUIRED，PROPAGATION_REQUIRES_NEW，PROPAGATION_NESTED
         note right of AbstractPlatformTransactionManager #aqua
-            ---当前是不存在事务：
+            当前不存在事务：
                 PROPAGATION_REQUIRED：创建一个新的事务
                 PROPAGATION_REQUIRES_NEW：当前事务挂起，并创建一个新的事务
                 PROPAGATION_NESTED：创建一个新的事务
-                    ---实现了该语义
         end note
 
         AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : suspend():暂停事务
@@ -80,52 +81,69 @@ end note
 
         AbstractPlatformTransactionManager -> DataSourceTransactionManager : doBegin()：根据事务定义创建新的事务
         activate DataSourceTransactionManager #DarkSalmon
-            note right of DataSourceTransactionManager #aqua
-                主要做的是获取连接，标记事务相关参数，绑定到ThreadLocal中
+            note right of DataSourceTransactionManager #FF5000
+                主要逻辑：
+                    1.获取数据库连接
+                    2.标记资源与事务同步
+                    3.如果事务元数据设置只读，设置连接为只读
+                    4.如果事务元数据设置非默认隔离级别，设置连接隔离级别
+                    5.设置自动提交为false
+                    6.设置连接超时时间
+                    7.通过ThreadLocal绑定ConnectionHolder到线程中
+                        ---通过ThreadLocal使资源隔离，保证了线程安全性
             end note
+
+            DataSourceTransactionManager -> DataSource : getConnection()
+            activate DataSource #DarkSalmon
+            DataSource --> DataSourceTransactionManager : connection
+            deactivate DataSource
+
+            DataSourceTransactionManager -> TransactionSynchronizationManager : bindResource()
+            activate TransactionSynchronizationManager #DarkSalmon
+
+                TransactionSynchronizationManager -> ThreadLocal : set()
+                activate ThreadLocal #DarkSalmon
+                ThreadLocal --> TransactionSynchronizationManager
+                deactivate ThreadLocal
+
+            TransactionSynchronizationManager --> DataSourceTransactionManager
+            deactivate TransactionSynchronizationManager
+
         DataSourceTransactionManager --> AbstractPlatformTransactionManager
         deactivate DataSourceTransactionManager
 
-        AbstractPlatformTransactionManager -> DataSourceTransactionManager : prepareSynchronization()：根据需要初始化事务同步
+        AbstractPlatformTransactionManager -> DataSourceTransactionManager : prepareSynchronization()：更新线程绑定的事务信息
         activate DataSourceTransactionManager #DarkSalmon
         DataSourceTransactionManager --> AbstractPlatformTransactionManager
         deactivate DataSourceTransactionManager
+<-- AbstractPlatformTransactionManager: transactionStatus
     else
         note right of AbstractPlatformTransactionManager #aqua
-            ---当前是不存在事务：
+            当前不存在事务：
                 PROPAGATION_NEVER：永远不需要当前存在事务
                 PROPAGATION_NOT_SUPPORTED：不支持当前事务，而是在没有事务的情况下执行
                 PROPAGATION_SUPPORTS：直接执行
-                ---实现了该语义
         end note
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : prepareTransactionStatus():创建事务状态
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : prepareTransactionStatus():创建事务状态,主要作为上下文使用
         activate AbstractPlatformTransactionManager #DarkSalmon
         deactivate AbstractPlatformTransactionManager
+<-- AbstractPlatformTransactionManager: transactionStatus
 
     end
 
-<-- AbstractPlatformTransactionManager: transactionStatus
 deactivate AbstractPlatformTransactionManager
 
 note right of AbstractPlatformTransactionManager #FAEBD7
     *总结
-        1.实现了事务传播行为的语义；
-        2.挂起的意味着，从当前线程中解除绑定资源，就提交不了事务，达到了挂起的目的；
-        3.如业务中存在挂起的行为，返回的对象中包含了挂起的前的所有信息；
-        4.为了方便理解代码，我们先假设在调用上下文中第一次开始事务，同时考虑多件事难度大些；
-
-    *事务的传播行为
-        PROPAGATION_MANDATORY：强制要求当前存在一个事务，如果不存在，则抛出异常；
-        PROPAGATION_NESTED：如果存在当前事务，则在当前事务的一个嵌套事务中执行，否则创建新的事务；
-            ---内部子事务
-        PROPAGATION_NEVER：永远不需要当前存在事务，如果存在事务，则抛出异常；
-        PROPAGATION_NOT_SUPPORTED：不支持当前事务，而是在没有事务的情况下执行。如果当前存在事务，当前事务挂起；
-        PROPAGATION_SUPPORTS：如果当前存在事务，则加入当前事务。如果当前不存在事务，则直接执行；
-        PROPAGATION_REQUIRED：如果当前存在事务，则加入当前事务。如果不存在任何事务，则创建一个新的事务；
-        PROPAGATION_REQUIRES_NEW：不管当前是否存在事务，都会创建新的事务。如果当前存在事务，会将当前事务挂起；
-            ---平级关系
-    *savepoint：
-        它是当前事务中的一个点，可以从Connection.rollback方法引用。 当事务回滚到保存点时，保存点后所做的所有更改都将被撤消。
+        1.以上主要实现了事务传播行为的语义和获取数据库连接（视具体传播行为要不要获取）；
+        2.挂起的意味着，从当前线程中解除绑定资源，就提交不了事务，达到了挂起的目的。如业务中存在挂起的行为，
+            返回的对象DefaultTransactionStatus中包含了挂起前的所有信息；
+    *备注
+        1.SuspendedResourcesHolder：在获取事务时，保存挂起的前一事务上下文信息
+            ---suspendedResources：ConnectionHolder对象（含数据库连接）
+        2.DefaultTransactionStatus：当前事务的状态
+            ---transaction：主要包含xxxTransactionObject对象（含ConnectionHolder对象）
+            <font color=red>---suspendedResourcesHolder：前一事务上下文信息</font>
 end note
 
 @enduml

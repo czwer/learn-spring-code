@@ -1,0 +1,92 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+        这张类图图介绍AbstractPlatformTransactionManager，
+        DefaultTransactionStatus和资源之间的关系。
+
+end note
+interface PlatformTransactionManager
+PlatformTransactionManager : +TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+PlatformTransactionManager : +commit(TransactionStatus status)
+abstract class AbstractPlatformTransactionManager
+AbstractPlatformTransactionManager : +final TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
+AbstractPlatformTransactionManager : #abstract void doBegin(Object transaction, TransactionDefinition definition)
+AbstractPlatformTransactionManager : #abstract Object doGetTransaction()
+AbstractPlatformTransactionManager : +final void commit(TransactionStatus status)
+AbstractPlatformTransactionManager : #abstract void doCommit(DefaultTransactionStatus status)
+class DataSourceTransactionManager
+DataSourceTransactionManager : #void doBegin(Object transaction, TransactionDefinition definition)
+DataSourceTransactionManager : #Object doGetTransaction()
+DataSourceTransactionManager : #void doCommit(DefaultTransactionStatus status)
+class HibernateTransactionManager
+HibernateTransactionManager : #void doBegin(Object transaction, TransactionDefinition definition)
+HibernateTransactionManager : #Object doGetTransaction()
+HibernateTransactionManager : #void doCommit(DefaultTransactionStatus status)
+
+interface Connection
+
+class DefaultTransactionStatus #FF5000
+DefaultTransactionStatus : -final Object transaction
+
+abstract class JdbcTransactionObjectSupport
+JdbcTransactionObjectSupport : -ConnectionHolder connectionHolder
+class DataSourceTransactionObject #7FFFD4
+class HibernateTransactionObject #7FFFD4
+HibernateTransactionObject : -SessionHolder sessionHolder
+
+
+abstract class ResourceHolderSupport
+class ConnectionHolder #7FFFD4
+ConnectionHolder : -ConnectionHandle connectionHandle
+ConnectionHolder : -Connection currentConnection
+class SessionHolder #7FFFD4
+SessionHolder : -final Session session
+
+interface Session
+
+
+abstract class TransactionSynchronizationManager #FF5000
+
+
+
+AbstractPlatformTransactionManager <|-- DataSourceTransactionManager
+AbstractPlatformTransactionManager <|-- HibernateTransactionManager
+
+ConnectionHolder --> Connection
+
+DataSourceTransactionManager ..> DataSourceTransactionObject
+
+
+DataSourceTransactionObject --> ConnectionHolder
+
+DefaultTransactionStatus -->  DataSourceTransactionObject
+DefaultTransactionStatus -->  HibernateTransactionObject
+
+
+JdbcTransactionObjectSupport <|-- DataSourceTransactionObject
+JdbcTransactionObjectSupport <|-- HibernateTransactionObject
+
+
+HibernateTransactionManager ..> HibernateTransactionObject
+
+
+HibernateTransactionObject --> SessionHolder
+
+
+PlatformTransactionManager <.. AbstractPlatformTransactionManager
+
+ResourceHolderSupport <|-- ConnectionHolder
+ResourceHolderSupport <|-- SessionHolder
+
+TransactionSynchronizationManager ..> ConnectionHolder
+TransactionSynchronizationManager ..> SessionHolder
+
+SessionHolder --> Session
+
+@enduml

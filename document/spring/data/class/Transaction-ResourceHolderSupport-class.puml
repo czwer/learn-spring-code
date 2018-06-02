@@ -1,0 +1,45 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    ResourceHolderSupport：主要封装持有的资源。
+end note
+
+
+interface Connection
+
+abstract class ResourceHolderSupport
+class ConnectionHolder #7FFFD4
+ConnectionHolder : -final ConnectionHandle connectionHandle
+ConnectionHolder : -final Connection currentConnection
+ConnectionHolder : -boolean transactionActive
+ConnectionHolder : -Boolean savepointsSupported
+ConnectionHolder : -int savepointCounter
+interface ResourceHolder
+ResourceHolder : +void reset()
+ResourceHolder : +void unbound()
+ResourceHolder : +boolean isVoid()
+class SessionHolder #7FFFD4
+SessionHolder : -final Session session
+SessionHolder : -Transaction transaction
+
+
+interface Session
+
+
+ConnectionHolder --> Connection
+
+ResourceHolder <.. ResourceHolderSupport
+
+
+ResourceHolderSupport <|-- ConnectionHolder
+ResourceHolderSupport <|-- SessionHolder
+
+SessionHolder --> Session
+
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+-> TransactionAttributeSourcePointcut: matches()
+activate TransactionAttributeSourcePointcut #DarkSalmon
+
+    note right of TransactionAttributeSourcePointcut #FAEBD7
+        *介绍TransactionAttributeSourcePointcut是如何进行方法匹配的
+            ---这里只描述了主要步骤
+    end note
+    TransactionAttributeSourcePointcut -> BeanFactoryTransactionAttributeSourceAdvisor : getTransactionAttributeSource()
+    activate BeanFactoryTransactionAttributeSourceAdvisor #DarkSalmon
+    BeanFactoryTransactionAttributeSourceAdvisor --> TransactionAttributeSourcePointcut : transactionAttributeSource
+    deactivate BeanFactoryTransactionAttributeSourceAdvisor
+
+    note right of TransactionAttributeSourcePointcut #aqua
+        主要逻辑：
+            1.如果TransactionAttributeSource为null，意味着不需要解析注解，返回true
+            2.需要解析注解信息,结果为存在注解，返回true
+               a.先从缓存中获取，获取不到再解析。
+               b.解析时在方法上先尝试，获取不到再在类上尝试
+            3.其他情况，返回false
+    end note
+    TransactionAttributeSourcePointcut -> AbstractFallbackTransactionAttributeSource : getTransactionAttribute()
+    activate AbstractFallbackTransactionAttributeSource #DarkSalmon
+
+        AbstractFallbackTransactionAttributeSource -> AbstractFallbackTransactionAttributeSource : computeTransactionAttribute()
+        activate AbstractFallbackTransactionAttributeSource #DarkSalmon
+            note right of AbstractFallbackTransactionAttributeSource #aqua
+                这里有所简化，源代码中分别对下面四种分别进行了确认：
+                    a.具体方法：假如当前方法为接口中方法，目标类为实现类，就获取目标类实现方法；
+                    b.具体方法所在类
+                    c.当前方法
+                    d.当前方法所在类
+            end note
+
+            AbstractFallbackTransactionAttributeSource -> AnnotationTransactionAttributeSource:findTransactionAttribute()
+            activate AnnotationTransactionAttributeSource #DarkSalmon
+
+                AnnotationTransactionAttributeSource -> AnnotationTransactionAttributeSource : determineTransactionAttribute()
+                activate AnnotationTransactionAttributeSource #DarkSalmon
+
+                    loop TransactionAnnotationParser annotationParser : this.annotationParsers
+                        note right of AnnotationTransactionAttributeSource #aqua
+                            @Transactional由SpringTransactionAnnotationParser
+                            来解析
+                        end note
+                        AnnotationTransactionAttributeSource -> TransactionAnnotationParser : parseTransactionAnnotation()
+                        activate TransactionAnnotationParser #DarkSalmon
+                        TransactionAnnotationParser -> AnnotationTransactionAttributeSource : transactionAttribute
+                        deactivate TransactionAnnotationParser
+                    end
+
+                deactivate AnnotationTransactionAttributeSource
+
+            AnnotationTransactionAttributeSource --> AbstractFallbackTransactionAttributeSource : transactionAttribute
+            deactivate AnnotationTransactionAttributeSource
+
+        deactivate AbstractFallbackTransactionAttributeSource
+
+    AbstractFallbackTransactionAttributeSource --> TransactionAttributeSourcePointcut : transactionAttribute
+    deactivate AbstractFallbackTransactionAttributeSource
+
+<-- TransactionAttributeSourcePointcut: boolean
+deactivate TransactionAttributeSourcePointcut
+
+note right of TransactionAttributeSourcePointcut #FAEBD7
+    *总结
+        确认是否存在@Transactional注解，以及把注解信息转换成TransactionAttribute。
+end note
+
+@enduml

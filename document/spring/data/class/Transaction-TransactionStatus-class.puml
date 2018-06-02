@@ -6,8 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    TransactionStatus表示整个事务处理过程中的事务状态，更多时候是在
-    编程式事务中使用该接口。
+    TransactionStatus表示整个事务处理过程中的事务状态，
+    我们能够通过它对事务提交进行干预。
 end note
 
 

@@ -1,0 +1,25 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    TransactionSynchronizationManager：管理线程事务上下文，保证资源的线程安全。
+    ---Spring事务管理的重要组件。
+end note
+
+
+abstract class TransactionSynchronizationManager #FF5000
+TransactionSynchronizationManager : -static final ThreadLocal<Map<Object, Object>> resources
+TransactionSynchronizationManager : -static final ThreadLocal<Set<TransactionSynchronization>> synchronizations
+TransactionSynchronizationManager : -static final ThreadLocal<String> currentTransactionName
+TransactionSynchronizationManager : -static final ThreadLocal<Boolean> currentTransactionReadOnly
+TransactionSynchronizationManager : -static final ThreadLocal<Integer> currentTransactionIsolationLevel
+TransactionSynchronizationManager : -static final ThreadLocal<Boolean> actualTransactionActive
+
+
+
+@enduml

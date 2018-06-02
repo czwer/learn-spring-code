@@ -2,60 +2,55 @@
 -> AbstractPlatformTransactionManager: commit()
 activate AbstractPlatformTransactionManager #DarkSalmon
 
-note left of AbstractPlatformTransactionManager #FAEBD7
-    *提交事务
+note right of AbstractPlatformTransactionManager #FAEBD7
+    *介绍正常提交事务
         ---模板方法调用实现以DataSourceTransactionManager为例
         ---这里只描述了主要步骤
 end note
 
     note right of AbstractPlatformTransactionManager #aqua
-        1.必要时在transaction中绑定新获得的数据库连接
+        I.事务提交前的检查逻辑：
+            1.检查是否已提交，如已提交抛出异常，返回；
+            2.如已标记本地回滚，走回滚流程，返回；
+            2.如已标记全局回滚，走回滚流程，返回；
+        II.以下是提交逻辑：
     end note
-
-    alt 已将提交或回滚，不能重复操作
-<-- AbstractPlatformTransactionManager : throw new IllegalTransactionStateException
-    end
-
-    alt 标记本地回滚
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : processRollback()
-        activate AbstractPlatformTransactionManager #DarkSalmon
-        deactivate AbstractPlatformTransactionManager
-<-- AbstractPlatformTransactionManager
-    end
-
-    alt 标记全局回滚
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : processRollback()
-        activate AbstractPlatformTransactionManager #DarkSalmon
-        deactivate AbstractPlatformTransactionManager
-<-- AbstractPlatformTransactionManager
-    end
 
     AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : processCommit()
     activate AbstractPlatformTransactionManager #DarkSalmon
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : prepareForCommit()：准备提交---扩展点
+
+        note right of AbstractPlatformTransactionManager #aqua
+            准备提交---扩展点
+        end note
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : prepareForCommit()
         activate AbstractPlatformTransactionManager #DarkSalmon
         deactivate AbstractPlatformTransactionManager
 
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerBeforeCommit()：触发提交前同步回调
+        note right of AbstractPlatformTransactionManager #aqua
+            触发提交前同步回调。
+            ---事务同步相关事件
+        end note
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerBeforeCommit()
         activate AbstractPlatformTransactionManager #DarkSalmon
         deactivate AbstractPlatformTransactionManager
 
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerBeforeCompletion()：触发提交前同步回调完成
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerBeforeCompletion()
         activate AbstractPlatformTransactionManager #DarkSalmon
         deactivate AbstractPlatformTransactionManager
 
-        alt 存在保存点
+        alt 如果存在保存点
             note right of AbstractPlatformTransactionManager #aqua
-                释放保存点，当前是嵌套事务，由外面的事务统一提交。
+                释放保存点
+                ---当前是嵌套事务，由外面的事务统一提交
             end note
 
-        else 新的事务
+        else 如果存在新的事务
             AbstractPlatformTransactionManager -> DataSourceTransactionManager:doCommit()
             activate DataSourceTransactionManager #DarkSalmon
 
                 DataSourceTransactionManager -> Connection : commit()
                 activate Connection #DarkSalmon
-                    note right of Connection #aqua
+                    note right of Connection #FF5000
                         提交事务
                     end note
                 Connection --> DataSourceTransactionManager
@@ -65,27 +60,46 @@ end note
             deactivate DataSourceTransactionManager
         end
 
-        alt 始终检查如果全局标记为回滚，则抛出异常
-<-- AbstractPlatformTransactionManager : throw new UnexpectedRollbackException
-        end
-
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCommit()：触发提交后同步回调
-        activate AbstractPlatformTransactionManager #DarkSalmon
-        deactivate AbstractPlatformTransactionManager
-
-        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCompletion()：触发提交后同步回调完成
-        activate AbstractPlatformTransactionManager #DarkSalmon
-        deactivate AbstractPlatformTransactionManager
+        note right of AbstractPlatformTransactionManager #aqua
+            1.检查异常回滚表示，如果为true，抛出异常；
+            ---这里还未理解到，暂且理解为事务前后
+            ---植入异常的入口(干预事务)。
+            2.时序图未反应，异常的情况，详情见源码
+        end note
 
         note right of AbstractPlatformTransactionManager #aqua
-            1.标记已提交
-            2.回复数据库连接原来的信息：自动提交标识
-            3.解除线程绑定资源
-            4.还原数据库连接之前的配置，释放连接
-            5.还原因事务挂起的资源
+            触发提交后同步回调
+            ---事务同步相关事件
         end note
+
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCommit()
+        activate AbstractPlatformTransactionManager #DarkSalmon
+        deactivate AbstractPlatformTransactionManager
+
+        AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : triggerAfterCompletion()
+        activate AbstractPlatformTransactionManager #DarkSalmon
+        deactivate AbstractPlatformTransactionManager
+
+
         AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : cleanupAfterCompletion()：提交后资源清理
         activate AbstractPlatformTransactionManager #DarkSalmon
+            note right of AbstractPlatformTransactionManager #aqua
+                主要逻辑
+                    1.标记已提交
+                    2.清空绑定在线程中的事务上下文信息
+                    3.释放数据库连接资源
+                        a.解除线程中绑定的数据库连接
+                        b.恢复数据库连接：事务自动提交/隔离级别/只读属性
+                        c.归还数据库连接
+                    4.线程绑定前一事务数据库连接
+                    5.线程绑定前一事务上下文信息
+            end note
+
+            AbstractPlatformTransactionManager -> TransactionSynchronizationManager: clear()
+            activate TransactionSynchronizationManager #DarkSalmon
+            TransactionSynchronizationManager --> AbstractPlatformTransactionManager
+            deactivate TransactionSynchronizationManager
+
 
             AbstractPlatformTransactionManager -> DataSourceTransactionManager : doCleanupAfterCompletion()
             activate DataSourceTransactionManager #DarkSalmon
@@ -103,6 +117,10 @@ end note
             DataSourceTransactionManager --> AbstractPlatformTransactionManager
             deactivate DataSourceTransactionManager
 
+            AbstractPlatformTransactionManager -> AbstractPlatformTransactionManager : resume()
+            activate AbstractPlatformTransactionManager #DarkSalmon
+            deactivate AbstractPlatformTransactionManager
+
         deactivate AbstractPlatformTransactionManager
 
 
@@ -113,10 +131,7 @@ deactivate AbstractPlatformTransactionManager
 
 note right of AbstractPlatformTransactionManager #FAEBD7
     *总结
-        1.真正提交前进行严格的检查，真正的提交还是交给了具体的实现类，运用了模板方法设计模式；
-    备注：
-        1.上述回滚描述篇幅略；
-        2.具体数据库连接如何归还给连接池，由具体连接池实现方实现，Spring只是触发调用实现方；
+        真正提交前进行严格的检查，真正的提交还是交给了具体的实现类，运用了模板方法设计模式；
 end note
 
 @enduml

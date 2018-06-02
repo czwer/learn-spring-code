@@ -6,7 +6,9 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    TransactionDefinition负责定义事务相关属性，包括隔离级别，传播行为等
+    TransactionDefinition负责定义事务相关属性，包括隔离级别，
+    传播行为等，是事务管理元数据
+
 end note
 
 interface TransactionDefinition
@@ -14,16 +16,14 @@ TransactionDefinition : +int getPropagationBehavior()
 TransactionDefinition : +int getIsolationLevel()
 TransactionDefinition : +int getTimeout()
 TransactionDefinition : +int isReadOnly()
-class DefaultTransactionAttribute  #FF5000
+class DefaultTransactionAttribute #7FFFD4
 class DefaultTransactionDefinition #7FFFD4
 abstract class DelegatingTransactionAttribute
 abstract class DelegatingTransactionDefinition
-class RuleBasedTransactionAttribute
+class RuleBasedTransactionAttribute #FF5000
 interface TransactionAttribute #7FFFD4
 TransactionAttribute : + boolean rollbackOn(Throwable ex)
-note bottom #7FFFD4: 主要面向Spring AOP进行声明式事务管理
 class TransactionTemplate
-note bottom : 提供编程式事务管理的模板方法类
 
 
 interface TransactionOperations

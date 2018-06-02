@@ -6,20 +6,19 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    TransactionAttributeSource用于获取事务管理元数据信息。
+    TransactionAttributeSource：用于获取事务管理元数据。
+    其委托给TransactionAnnotationParser来真正进行解析。
 end note
 
 
 interface TransactionAttributeSource
+TransactionAttributeSource : +TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass)
 abstract class AbstractFallbackTransactionAttributeSource
 class AnnotationTransactionAttributeSource #FF5000
-note bottom #FF5000: 直接从源代码中的注解中获取对应每个业务方法的事务管理信息
 class CompositeTransactionAttributeSource
 class MatchAlwaysTransactionAttributeSource
 class MethodMapTransactionAttributeSource
-note bottom : 以方法Method实例作为映射信息的key，来存储元数据对应的映射信息
 class NameMatchTransactionAttributeSource
-note bottom : 以方法名作为映射信息的key，来存储元数据对应的映射信息
 
 
 AbstractFallbackTransactionAttributeSource <|-- AnnotationTransactionAttributeSource
