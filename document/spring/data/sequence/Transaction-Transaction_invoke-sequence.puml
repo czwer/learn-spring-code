@@ -3,7 +3,7 @@
 activate TransactionInterceptor #DarkSalmon
 
 note right of TransactionInterceptor #FAEBD7
-    *介绍代理对象运行时，AOP如何生效的
+    *介绍代理对象运行时事务是如何生效的
         ---我们以@Transactional声明方式使用进行说明
         ---这里只描述了主要步骤
 end note

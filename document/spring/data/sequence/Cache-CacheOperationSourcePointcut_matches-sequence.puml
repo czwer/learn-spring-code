@@ -1,0 +1,74 @@
+@startuml
+-> CacheOperationSourcePointcut: matches()
+activate CacheOperationSourcePointcut #DarkSalmon
+
+    note right of CacheOperationSourcePointcut #FAEBD7
+        *介绍CacheOperationSourcePointcut是如何进行方法匹配的
+            ---这里只描述了主要步骤
+    end note
+    CacheOperationSourcePointcut -> BeanFactoryCacheOperationSourceAdvisor : getTransactionAttributeSource()
+    activate BeanFactoryCacheOperationSourceAdvisor #DarkSalmon
+    BeanFactoryCacheOperationSourceAdvisor --> CacheOperationSourcePointcut : transactionAttributeSource
+    deactivate BeanFactoryCacheOperationSourceAdvisor
+
+    note right of CacheOperationSourcePointcut #aqua
+    主要逻辑：
+         1.如果cacheOperationSource为null，返回false
+         2.需要解析注解信息,结果为存在注解，返回true
+             a.先从缓存中获取，获取不到再解析。
+             b.解析时在方法上先尝试，获取不到再在类上尝试，解析结果会放入缓存
+    end note
+    CacheOperationSourcePointcut -> AbstractFallbackCacheOperationSource : getCacheOperations()
+    activate AbstractFallbackCacheOperationSource #DarkSalmon
+
+        AbstractFallbackCacheOperationSource -> AbstractFallbackCacheOperationSource : computeCacheOperations()
+        activate AbstractFallbackCacheOperationSource #DarkSalmon
+
+            note right of AbstractFallbackCacheOperationSource #aqua
+                这里有所简化，源代码中分别对下面四种分别进行了确认：
+                    a.具体方法：假如当前方法为接口中方法，目标类为实现类，就获取目标类实现方法；
+                    b.具体方法所在类
+                    c.当前方法
+                    d.当前方法所在类
+            end note
+
+            AbstractFallbackCacheOperationSource -> AnnotationCacheOperationSource : findCacheOperations()
+            activate AnnotationCacheOperationSource #DarkSalmon
+
+                AnnotationCacheOperationSource -> AnnotationCacheOperationSource : determineCacheOperations()
+                activate AnnotationCacheOperationSource #DarkSalmon
+
+                    note right of AnnotationCacheOperationSource #aqua
+                        由SpringCacheAnnotationParser来解析注解：
+                        @Cacheable，@CacheEvict，@CachePut，@Caching
+                    end note
+
+                    loop CacheAnnotationParser annotationParser : this.annotationParsers
+
+                        AnnotationCacheOperationSource -> CacheAnnotationParser : getCacheOperations()
+                        activate AnnotationCacheOperationSource #DarkSalmon
+                        CacheAnnotationParser --> AnnotationCacheOperationSource : Collection<CacheOperation>
+                        deactivate AnnotationCacheOperationSource
+
+                    end
+
+                deactivate AnnotationCacheOperationSource
+
+            AnnotationCacheOperationSource --> AbstractFallbackCacheOperationSource :Collection<CacheOperation>
+            deactivate AnnotationCacheOperationSource
+
+        deactivate AbstractFallbackCacheOperationSource
+
+    AbstractFallbackCacheOperationSource --> CacheOperationSourcePointcut : Collection<CacheOperation>
+    deactivate AbstractFallbackCacheOperationSource
+
+<-- CacheOperationSourcePointcut: boolean
+deactivate CacheOperationSourcePointcut
+
+note right of CacheOperationSourcePointcut #FAEBD7
+    *总结
+        确认是否存在缓存注解，以及把注解信息转换成CacheOperation。
+        ---这里和事务确认方法是否匹配十分类似
+end note
+
+@enduml

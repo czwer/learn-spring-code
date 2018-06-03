@@ -7,8 +7,9 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    Cache类似Map的数据结构，一个缓存集，
+    Cache类似Map的数据结构，管理具体缓存的生命周期，
     一个Cache仅能被一个CacheManager拥有。
+    <font color=red>RedisCache：该类在spring-data-redis项目中</font>
 end note
 
 
@@ -19,11 +20,27 @@ Cache : +void put(Object key, @Nullable Object value)
 Cache : +void evict(Object key)
 Cache : +void clear()
 abstract class AbstractValueAdaptingCache
-class ConcurrentMapCache
+AbstractValueAdaptingCache : +ValueWrapper get(Object key)
+AbstractValueAdaptingCache : +T get(Object key, @Nullable Class<T> type)
+AbstractValueAdaptingCache : #abstract Object lookup(Object key)
 class EhCacheCache #FF5000
+EhCacheCache : +String getName()
+EhCacheCache : +T get(Object key, @Nullable Class<T> type)
+EhCacheCache : +void put(Object key, @Nullable Object value)
+EhCacheCache : +void evict(Object key)
+EhCacheCache : +void clear()
 class JCacheCache #7FFFD4
+JCacheCache : +String getName()
+JCacheCache : #Object lookup(Object key)
+JCacheCache : +void put(Object key, @Nullable Object value)
+JCacheCache : +void evict(Object key)
+JCacheCache : +void clear()
 class RedisCache #FF5000
-note bottom #FF5000:该类在spring-data-redis.jar中
+RedisCache : +String getName()
+RedisCache : #Object lookup(Object key)
+RedisCache : +void put(Object key, @Nullable Object value)
+RedisCache : +void evict(Object key)
+RedisCache : +void clear()
 class TransactionAwareCacheDecorator
 
 
@@ -33,7 +50,6 @@ Cache <|.. TransactionAwareCacheDecorator
 
 
 
-AbstractValueAdaptingCache <|-- ConcurrentMapCache
 AbstractValueAdaptingCache <|-- JCacheCache
 AbstractValueAdaptingCache <|-- RedisCache
 

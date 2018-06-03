@@ -1,0 +1,22 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    ValueWrapper：用于包装从缓存中获取的值。
+end note
+
+
+interface ValueWrapper
+ValueWrapper : +Object get()
+class SimpleValueWrapper #7FFFD4
+SimpleValueWrapper : -final Object value
+SimpleValueWrapper : +Object get()
+
+
+ValueWrapper <.. SimpleValueWrapper
+
+@enduml

@@ -6,7 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    CacheOperationSource：用于获取缓存管理元数据信息。
+    CacheOperationSource：用于获取缓存操作元数据。
+    其委托给SpringCacheAnnotationParser来真正进行解析。
 end note
 
 

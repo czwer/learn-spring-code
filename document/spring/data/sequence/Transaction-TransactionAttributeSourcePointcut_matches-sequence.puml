@@ -16,7 +16,7 @@ activate TransactionAttributeSourcePointcut #DarkSalmon
             1.如果TransactionAttributeSource为null，意味着不需要解析注解，返回true
             2.需要解析注解信息,结果为存在注解，返回true
                a.先从缓存中获取，获取不到再解析。
-               b.解析时在方法上先尝试，获取不到再在类上尝试
+               b.解析时在方法上先尝试，获取不到再在类上尝试，解析结果会放入缓存
             3.其他情况，返回false
     end note
     TransactionAttributeSourcePointcut -> AbstractFallbackTransactionAttributeSource : getTransactionAttribute()
@@ -37,12 +37,12 @@ activate TransactionAttributeSourcePointcut #DarkSalmon
 
                 AnnotationTransactionAttributeSource -> AnnotationTransactionAttributeSource : determineTransactionAttribute()
                 activate AnnotationTransactionAttributeSource #DarkSalmon
-
+                    note right of AnnotationTransactionAttributeSource #aqua
+                        由SpringTransactionAnnotationParser来解析注解：
+                        @Transactional
+                    end note
                     loop TransactionAnnotationParser annotationParser : this.annotationParsers
-                        note right of AnnotationTransactionAttributeSource #aqua
-                            @Transactional由SpringTransactionAnnotationParser
-                            来解析
-                        end note
+
                         AnnotationTransactionAttributeSource -> TransactionAnnotationParser : parseTransactionAnnotation()
                         activate TransactionAnnotationParser #DarkSalmon
                         TransactionAnnotationParser -> AnnotationTransactionAttributeSource : transactionAttribute

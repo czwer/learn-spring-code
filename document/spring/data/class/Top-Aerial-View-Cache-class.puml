@@ -6,7 +6,8 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    基于<cache:annotation-driven>全视角类图
+    顶层鸟瞰缓存相关类之间关系
+        基于<cache:annotation-driven>全视角类图
 end note
 
 
@@ -19,7 +20,7 @@ class AnnotationDrivenCacheBeanDefinitionParser
 note top :注册基础设施
 
 class BeanFactoryCacheOperationSourceAdvisor
-note top : 基础设施：融入Spring AOP体系扮演Advisor角色，Spring全局扫描所有Advisor时会找到它
+note top : 基础设施：融入Spring AOP体系扮演Advisor角色
 
 interface Cache
 note bottom : 类似Map的数据结构，一个缓存集
@@ -38,7 +39,7 @@ note top :xml解析时，支持cache命名空间解析，注册xxxBeanDefinition
 
 
 abstract class CacheOperation
-note bottom : 用于描述要执行什么样的缓存操作
+note bottom : 描述要执行什么样的缓存操作
 
 abstract class CacheOperationSourcePointcut
 note top : 基础设施：融入Spring AOP体系扮演Pointcut，在Advior中以匿名内部类方式提供

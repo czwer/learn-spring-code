@@ -3,9 +3,8 @@
 activate CacheInterceptor #DarkSalmon
 
 note right of CacheInterceptor #FAEBD7
-    *介绍织入缓存逻辑作为环绕通知是如何执行的
-        ---我们以@Cacheable，@CachePut，@CacheEvict使用方式进行说明
-        ---某些步骤对指定注解是适用
+    *介绍代理运行时缓存是如何生效
+        ---@CacheXxx是对该注解语义的实现
         ---这里只描述了主要步骤
 end note
 
@@ -21,7 +20,7 @@ end note
             CacheAspectSupport -> CacheAspectSupport : execute()
             activate CacheAspectSupport #DarkSalmon
 
-                alt 需要处理线程安全性
+                alt 如果需要保证线程安全性
 
                     alt 上下文条件满足使用缓存
                         CacheAspectSupport -> Cache : get(Object key, Callable<T> valueLoader)
@@ -30,6 +29,7 @@ end note
                                 1.get方法较特殊：先从缓存中获取，
                                 如果获取不到，再从数据源获取。
                                 2.由子类来保证线程安全性
+                                ---@Cacheable
                             end note
                         Cache --> CacheAspectSupport : result
                         deactivate Cache
@@ -43,23 +43,38 @@ end note
                         deactivate MethodInvocation
                     end
 
-                else
+                else 不需要保证线程安全性
                     note right of CacheAspectSupport #aqua
                         如需要删除对应缓存，执行删除
                         ---方法执行前
+                        ---@CacheEvict
                     end note
                     CacheAspectSupport -> CacheAspectSupport : processCacheEvicts()
                     activate CacheAspectSupport #DarkSalmon
+
+                        CacheAspectSupport -> Cache : evict(key)或clear():视入参决定
+                        activate Cache #DarkSalmon
+                            note right of Cache #FF5000
+                                删除缓存
+                            end note
+                        Cache -> CacheAspectSupport
+                        deactivate Cache
+
                     deactivate CacheAspectSupport
 
 
                     CacheAspectSupport -> CacheAspectSupport : findCachedItem()
                     activate CacheAspectSupport #DarkSalmon
 
+                        note right of CacheAspectSupport #aqua
+                            如果需要获取缓存，尝试从缓存中获取
+                            ---@Cacheable
+                        end note
+
                         CacheAspectSupport -> Cache : get(key);
                         activate Cache #DarkSalmon
                             note right of Cache #FF5000
-                                尝试从缓存中获取
+                                缓存中获取
                             end note
                         Cache -> CacheAspectSupport
                         deactivate Cache
@@ -67,21 +82,21 @@ end note
                     deactivate CacheAspectSupport
 
                     note right of CacheAspectSupport #aqua
-                        如果缓存中没有获取到，构建CachePutRequest对象，
+                        如果需要获取缓存，但未命中，构建CachePutRequest对象，
                         以用于后面放入缓存操作
+                        ---@Cacheable
                     end note
-                    alt 缓存中没有获取到
+                    alt 如果需要获取缓存，但未命中
                         CacheAspectSupport -> CacheAspectSupport : collectPutRequests()
                         activate CacheAspectSupport #DarkSalmon
                         deactivate CacheAspectSupport
                     end
 
                     note right of CacheAspectSupport #aqua
-                        如果获取到缓存并上下文判断后可以使用，则取出缓存的内容，
+                        如果需要获取缓存，且命中，并上下文判断后可以使用，则取出缓存的内容，
                         否则调用链的下一个，从数据源获得返回值
                     end note
-                    alt 需要从数据源获取
-
+                    alt 如果需要从数据源获取
                         CacheAspectSupport -> MethodInvocation: proceed()
                         activate MethodInvocation #DarkSalmon
                             note right of MethodInvocation #aqua
@@ -93,13 +108,15 @@ end note
 
                     note right of CacheAspectSupport #aqua
                         获取@声明的@CachePut注解，转化成CachePutRequest对象
+                        ---@CachePut
                     end note
                     CacheAspectSupport -> CacheAspectSupport : collectPutRequests()
                     activate CacheAspectSupport #DarkSalmon
                     deactivate CacheAspectSupport
 
                     note right of CacheAspectSupport #aqua
-                       处理任何收集到的放置请求，无论是@CachePut需要，还是@Cacheable未命中导致
+                       处理收集到的CachePutRequest放置请求，放入缓存；
+                       ---可能是@CachePut需求，也可能是@Cacheable未命中导致
                     end note
                     loop cachePutRequest : cachePutRequests
                         CacheAspectSupport -> CachePutRequest:apply()
@@ -120,9 +137,20 @@ end note
                     note right of CacheAspectSupport #aqua
                         如需要删除对应缓存，执行删除
                         ---方法执行后
+                        ---@CacheEvict
                     end note
                     CacheAspectSupport -> CacheAspectSupport : processCacheEvicts()
                     activate CacheAspectSupport #DarkSalmon
+
+                        CacheAspectSupport -> Cache : evict(key)或clear():视入参决定
+                        activate Cache #DarkSalmon
+                            note right of Cache #FF5000
+                                删除缓存
+                                ---常用
+                            end note
+                        Cache -> CacheAspectSupport
+                        deactivate Cache
+
                     deactivate CacheAspectSupport
 
                 end
@@ -148,15 +176,18 @@ deactivate CacheInterceptor
 
 note right of CacheInterceptor #FAEBD7
     *总结
-        1.CacheInterceptor其实现了MethodInterceptor接口，使其能共享Spring AOP的基础设施。
-        2.根据注解信息，执行不同的业务逻辑；
+        1.CacheInterceptor其实现了MethodInterceptor接口，使其能共享Spring AOP的基础设施；
+        2.cache的名称会作为缓存到实际缓存key的一部分，如books::1,其中books为name，1为Id；
+            ---大家在实现自定义缓存框架时，记得要用cache的name，不然相同Id时有覆盖的风险
     *备注
-        1.Joinpoint.getThis():可以理解返回代理对象
+        1.Joinpoint.getThis()：可以理解返回代理对象；
         2.相关注解
-            @Cacheable：现在缓存中查找数据，如果没有则执行方法并缓存结果，然后返回数据
-            @CachePut：首先执行方法，然后将返回值放入缓存
-            @CacheEvict：从给定的缓存中移除一个值
-        3.缓存使用的Advisor：BeanFactoryCacheOperationSourceAdvisor
+            @Cacheable：现在缓存中查找数据，如果没有则执行方法并缓存结果，然后返回数据；
+            @CachePut：首先执行方法，然后将返回值放入缓存；
+            @CacheEvict：从给定的缓存中移除一个值；
+            @Caching：一个组注解，可以为一个方法定义提供基于@Cacheable,@CacheEvict,@CachePut
+                注解的数组；
+        3.缓存使用的Advisor：BeanFactoryCacheOperationSourceAdvisor；
 end note
 
 @enduml

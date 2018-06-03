@@ -7,7 +7,8 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    CacheManager：管理Cache。
+    CacheManager：用于管理Cache的生命周期。
+    <font color=red>RedisCacheManager：该类在spring-data-redis项目中</font>
 end note
 
 
@@ -15,12 +16,23 @@ interface CacheManager
 CacheManager : +Cache getCache(String name)
 CacheManager : +Collection<String> getCacheNames()
 abstract class AbstractCacheManager
+AbstractCacheManager : -final ConcurrentMap<String, Cache> cacheMap
+AbstractCacheManager : #abstract Collection<? extends Cache> loadCaches()
+AbstractCacheManager : +Cache getCache(String name)
+AbstractCacheManager : #Cache getMissingCache(String name)
+AbstractCacheManager : +Collection<String> getCacheNames()
 abstract class AbstractTransactionSupportingCacheManager
-class CompositeCacheManager #7FFFD4
+class CompositeCacheManager
 class ConcurrentMapCacheManager
 class EhCacheCacheManager #FF5000
+EhCacheCacheManager : #Collection<RedisCache> loadCaches()
+EhCacheCacheManager : #Cache getMissingCache(String name)
 class JCacheCacheManager #7FFFD4
+JCacheCacheManager : #Collection<RedisCache> loadCaches()
+JCacheCacheManager : #Cache getMissingCache(String name)
 class RedisCacheManager #FF5000
+RedisCacheManager : #Collection<RedisCache> loadCaches()
+RedisCacheManager : #Cache getMissingCache(String name)
 class TransactionAwareCacheManagerProxy
 
 

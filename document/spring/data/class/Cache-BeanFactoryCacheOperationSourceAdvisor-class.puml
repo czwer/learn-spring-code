@@ -7,15 +7,14 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    BeanFactoryTransactionAttributeSourceAdvisor：为接入AOP体系，
+    BeanFactoryCacheOperationSourceAdvisor：为接入AOP体系，
     Advisor接口的实现类。
-
 end note
 
 
-class BeanFactoryTransactionAttributeSourceAdvisor #FF5000
-BeanFactoryTransactionAttributeSourceAdvisor : -TransactionAttributeSource transactionAttributeSource
-BeanFactoryTransactionAttributeSourceAdvisor : -final TransactionAttributeSourcePointcut pointcut
+class BeanFactoryCacheOperationSourceAdvisor #FF5000
+BeanFactoryCacheOperationSourceAdvisor : -CacheOperationSource cacheOperationSource
+BeanFactoryCacheOperationSourceAdvisor : -final CacheOperationSourcePointcut pointcut
 abstract class AbstractBeanFactoryPointcutAdvisor
 abstract class AbstractPointcutAdvisor
 interface Advisor
@@ -24,7 +23,7 @@ interface PointcutAdvisor
 PointcutAdvisor : Pointcut getPointcut()
 
 
-AbstractBeanFactoryPointcutAdvisor <|-- BeanFactoryTransactionAttributeSourceAdvisor
+AbstractBeanFactoryPointcutAdvisor <|-- BeanFactoryCacheOperationSourceAdvisor
 
 AbstractPointcutAdvisor <|-- AbstractBeanFactoryPointcutAdvisor
 

@@ -6,17 +6,17 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    CacheOperation对缓存操作的封装
+    CacheOperation：表示缓存操作元数据。具体子类代表
+    不同缓存操作，具体的实现可以理解为是注解的内存表示。
 end note
 
 
 abstract class CacheOperation
 interface BasicOperation
 BasicOperation : +Set<String> getCacheNames()
-note left : 操作的基本接口，getCacheNames()返回所有的Cache名称
-class CacheEvictOperation
-class CachePutOperation
-class CacheableOperation
+class CacheEvictOperation #7FFFD4
+class CachePutOperation #7FFFD4
+class CacheableOperation #7FFFD4
 
 
 
