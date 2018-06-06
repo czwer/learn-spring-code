@@ -4,13 +4,18 @@ autonumber
 -> RequestMappingHandlerMapping: afterPropertiesSet()
 activate RequestMappingHandlerMapping #DarkSalmon
 
-note left of RequestMappingHandlerMapping #FAEBD7
-    *介绍初始化时注册所有Handler的过程。
+note right of RequestMappingHandlerMapping #FAEBD7
+    *介绍RequestMappingHandlerMapping初始化时
+    注册所有Handler的过程。
         ---这里只描述了主要步骤
 end note
     note right of RequestMappingHandlerMapping #aqua
-        1.构建上下文信息：设置urlPathHelper，pathMatcher从继承类中获得及其他默认设置
-        2.调用继承类的afterPropertiesSet()
+        主要逻辑：
+            1.构建上下文信息
+                a.设置UrlPathHelper：用于URL路径匹配
+                b.设置AntPathMatcher：支持Ant路径匹配
+                c.设置ContentNegotiationManager：确定请求媒体类型
+            2.调用父类的afterPropertiesSet()
     end note
 
     RequestMappingHandlerMapping -> AbstractHandlerMethodMapping : afterPropertiesSet()
@@ -25,7 +30,7 @@ end note
 
             loop String beanName : beanNames
                 note right of AbstractHandlerMethodMapping #aqua
-                    过滤scopedTarget.开头的bean名称
+                    注意：过滤scopedTarget.开头的bean名称
                 end note
                 AbstractHandlerMethodMapping -> AbstractBeanFactory : getType() :获取class信息
                 activate AbstractBeanFactory #DarkSalmon
@@ -40,14 +45,40 @@ end note
                 RequestMappingHandlerMapping --> AbstractHandlerMethodMapping
                 deactivate RequestMappingHandlerMapping
 
-                alt 包含@Controller或@RequestMapping注解
+                alt 如果包含@Controller或@RequestMapping注解
 
                     note right of AbstractHandlerMethodMapping #aqua
-                        1.获取这个类中所有含@RequestMapping注解的方法，组装成RequestMappingInfo(含有匹配路径，HttpMethod类型)
-                        2.遍历获取每个方法Method（便于后面反射调用），最终包含在HandlerMethod中使用
+                        主要逻辑：
+                            1.获取当前类中含@RequestMapping注解的方法，
+                                并把注解转换成RequestMappingInfo；
+                            2.注册HandlerMethod；
                     end note
                     AbstractHandlerMethodMapping -> AbstractHandlerMethodMapping : detectHandlerMethods()
                     activate AbstractHandlerMethodMapping #DarkSalmon
+
+                        loop
+
+                            AbstractHandlerMethodMapping -> RequestMappingHandlerMapping : getMappingForMethod()
+                            activate RequestMappingHandlerMapping #DarkSalmon
+
+                                RequestMappingHandlerMapping -> RequestMappingHandlerMapping : createRequestMappingInfo(method)：info
+                                activate RequestMappingHandlerMapping #DarkSalmon
+                                deactivate RequestMappingHandlerMapping
+
+                                RequestMappingHandlerMapping -> RequestMappingHandlerMapping : createRequestMappingInfo(handlerType)：typeInfo
+                                activate RequestMappingHandlerMapping #DarkSalmon
+                                deactivate RequestMappingHandlerMapping
+
+                                note right of RequestMappingHandlerMapping #aqua
+                                    这里会合并方法和类上的注解信息，合并后
+                                    RequestMappingInfo主要包含：含有匹配
+                                    路径，HttpMethod类型
+                                end note
+
+                            RequestMappingHandlerMapping --> AbstractHandlerMethodMapping : requestMappingInfo
+                            deactivate RequestMappingHandlerMapping
+
+                        end
 
                         loop
                             AbstractHandlerMethodMapping -> AbstractHandlerMethodMapping : registerHandlerMethod()
@@ -56,10 +87,10 @@ end note
                                 AbstractHandlerMethodMapping -> MappingRegistry : register()
                                 activate MappingRegistry #DarkSalmon
                                     note right of MappingRegistry #FF5000
-                                        1.组装HandlerMethod：含有beanName,BeanFactory,method
-                                        2.同时注册其他辅助信息，便于查找匹配
-                                        3.最终注册为MappingRegistration：含有RequestMappingInfo，
-                                            HandlerMethod,匹配路径，简化的名称(类名中大写字母#方法名)
+                                        1.组装HandlerMethod，其含有：beanName，
+                                            BeanFactory,method；
+                                        2.注册HandlerMethod，同时注册其他辅助信息，
+                                            便于查找匹配；
                                     end note
                                 MappingRegistry --> AbstractHandlerMethodMapping
                                 deactivate MappingRegistry
@@ -68,6 +99,15 @@ end note
                         end
 
                     deactivate AbstractHandlerMethodMapping
+
+                    note right of AbstractHandlerMethodMapping #aqua
+                        可以实现handlerMethodsInitialized()方法，作进一步操作
+                        ---扩展点之一
+                    end note
+                    AbstractHandlerMethodMapping -> AbstractHandlerMethodMapping:handlerMethodsInitialized()
+                    activate AbstractHandlerMethodMapping  #DarkSalmon
+                    deactivate AbstractHandlerMethodMapping
+
                 end
 
             end
@@ -85,11 +125,17 @@ deactivate RequestMappingHandlerMapping
 note right of RequestMappingHandlerMapping #FAEBD7
     *总结
         主要就是准备素材：获取所有标注@Controller或@RequestMapping注解的bean，
-            把里面的方法含@RequestMapping注解的方法，转换成HandlerMethod，并注册。
-            ---注意是注册到AbstractHandlerMethodMapping中MappingRegistry字段中，非容器中
+            把里面方法含@RequestMapping注解的方法，转换成HandlerMethod，并注册。
+            ---注意是注册到AbstractHandlerMethodMapping中MappingRegistry属性中，非容器中
     *备注
         1.MethodIntrospector：方法的工具类
-
+        2.MappingRegistry属性：
+            mappingLookup：<RequestMappingInfo,HandlerMethod>
+            urlLookup：<url路径，RequestMappingInfo>
+            nameLookup：<url路径别称,List<HandlerMethod>>
+            corsLookup：<HandlerMethod,跨域信息>
+            registry：<RequestMappingInfo,new MappingRegistration<>(RequestMappingInfo,
+                handlerMethod, url路径, url路径别称)>
 end note
 
 @enduml

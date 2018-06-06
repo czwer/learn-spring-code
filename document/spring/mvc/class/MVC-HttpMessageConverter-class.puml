@@ -6,10 +6,16 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    HttpMessageConverter：策略接口，指定可以转换HTTP请求和响应的转换器。
+    HttpMessageConverter：它负责将请求信息转换为一个对象（类型为T）
+    或将对象（类型为T）输出为响应信息。
 end note
 
 interface HttpMessageConverter<T>
+HttpMessageConverter : +boolean canRead()
+HttpMessageConverter : +boolean canWrite()
+HttpMessageConverter : +List<MediaType> getSupportedMediaTypes()
+HttpMessageConverter : +T read()
+HttpMessageConverter : +void write()
 abstract class AbstractGenericHttpMessageConverter<T>
 abstract class AbstractHttpMessageConverter<T>
 abstract class AbstractJackson2HttpMessageConverter

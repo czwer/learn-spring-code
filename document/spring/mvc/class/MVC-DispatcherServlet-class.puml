@@ -7,7 +7,8 @@ note  as N1 #FAEBD7
         黄色：可一般关注
         灰色：弃用 #C0C0C0
         ---简化版类图
-    DispatcherServlet负责接收所有Web请求，进行请求分发。
+    DispatcherServlet负责接收所有Web请求，进行请求分发，
+    可以认为是SpringMVC的心脏
 end note
 
 class DispatcherServlet #FF5000
@@ -19,41 +20,37 @@ abstract class HttpServletBean
 interface FlashMapManager
 
 
-interface HandlerAdapter
+interface HandlerAdapter #FF5000
 
 
-interface HandlerExceptionResolver
+interface HandlerExceptionResolver #FF5000
 
-interface HandlerMapping
-note bottom : Web请求的处理协调者
+interface HandlerMapping #FF5000
 
 abstract class HttpServlet
 
 interface LocaleResolver
-note bottom : 用于支持国际化
 
 interface MultipartResolver
-note bottom : 用于处理文件上传
 
 interface RequestToViewNameTranslator
 
 
 interface ThemeResolver
-note bottom : 用于支持主题相关
 
 
 interface ViewResolver
 
 
-DispatcherServlet ..> FlashMapManager
-DispatcherServlet ..> HandlerAdapter
-DispatcherServlet ..> HandlerExceptionResolver
-DispatcherServlet ..> HandlerMapping
-DispatcherServlet ..> LocaleResolver
-DispatcherServlet ..> MultipartResolver
-DispatcherServlet ..> RequestToViewNameTranslator
-DispatcherServlet ..> ThemeResolver
-DispatcherServlet ..> ViewResolver
+DispatcherServlet --> FlashMapManager
+DispatcherServlet --> HandlerAdapter
+DispatcherServlet --> HandlerExceptionResolver
+DispatcherServlet --> HandlerMapping
+DispatcherServlet --> LocaleResolver
+DispatcherServlet --> MultipartResolver
+DispatcherServlet --> RequestToViewNameTranslator
+DispatcherServlet --> ThemeResolver
+DispatcherServlet --> ViewResolver
 
 
 FrameworkServlet <|-- DispatcherServlet

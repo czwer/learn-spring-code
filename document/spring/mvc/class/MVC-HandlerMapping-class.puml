@@ -17,8 +17,7 @@ abstract class AbstractHandlerMethodMapping<T> #FF5000
 AbstractHandlerMethodMapping : -MappingRegistry mappingRegistry = new MappingRegistry()
 note left  #FF5000: HandlerMethod注册在mappingRegistry变量中
 abstract class AbstractUrlHandlerMapping
-class BeanNameUrlHandlerMapping #7FFFD4
-note bottom #7FFFD4: 根据URL与Controller的bean定义的名称进行匹配。
+class BeanNameUrlHandlerMapping
 interface MatchableHandlerMapping
 class RequestMappingHandlerMapping  #FF5000
 note bottom #FF5000: 常用

@@ -6,12 +6,18 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    HandlerMethod：可以理解为最终Web层处理业务逻辑方法的包装。
+    HandlerMethod：可以理解为Controller方法包装,它就是常说的Handler。
 end note
 
-class HandlerMethod
+class HandlerMethod #FF5000
+note top #FF5000: 与url匹配时，先获得该HandlerMethod
+HandlerMethod : -final Object bean
+HandlerMethod : -final Class<?> beanType
+HandlerMethod : -final Method method
+HandlerMethod : -final MethodParameter[] parameters
 class InvocableHandlerMethod
 class ServletInvocableHandlerMethod #FF5000
+note bottom #FF5000: 方法调用时使用，拷贝HandlerMethod属性到自身，再调用Controller方法
 class SyncInvocableHandlerMethod
 
 

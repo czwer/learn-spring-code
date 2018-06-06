@@ -5,24 +5,24 @@ autonumber
 activate InvocableHandlerMethod #DarkSalmon
 
     note left of InvocableHandlerMethod #FAEBD7
-        *介绍Web调用JSON数据绑定。
+        *介绍文件上传数据绑定。
             ---这里只描述了主要步骤
+    end note
+
+    note right of InvocableHandlerMethod #aqua
+        获取当前方法所有参数
     end note
 
     InvocableHandlerMethod -> HandlerMethod : getMethodParameters():获得方法参数信息
     activate HandlerMethod #DarkSalmon
     HandlerMethod --> InvocableHandlerMethod : MethodParameter[]
     deactivate HandlerMethod
-    note right of InvocableHandlerMethod #aqua
-        获取当前接口方法所有参数，从请求中键值对，对它们进行赋值
-        ---这里参数可能是个Vo，也可能是Integer类型字段，我们暂且理解为Vo
-    end note
+
     loop
         note right of InvocableHandlerMethod #aqua
-            1.HandlerMethodArgumentResolverComposite中获取支持当前参数的
-                HandlerMethodArgumentResolver进行参数解析；
+            1.获取支持当前参数的HandlerMethodArgumentResolver进行参数解析；
                 ---用到RequestParamMethodArgumentResolver
-            2.前面其实已经解析了，这里只是取出来；
+            2.接收到请求时其实已经解析了，这里只是取出来；
             3.通过DataBinderFactory构建WebDataBinder；
                 ---用到ServletRequestDataBinderFactory
                 ---用到ExtendedServletRequestDataBinder

@@ -4,45 +4,49 @@ autonumber
 -> InvocableHandlerMethod: getMethodArgumentValues()
 activate InvocableHandlerMethod #DarkSalmon
 
-    note left of InvocableHandlerMethod #FAEBD7
-        *介绍Web调用Form数据绑定。
+    note right of InvocableHandlerMethod #FAEBD7
+        *介绍Web请求时Form数据绑定。
             ---这里只描述了主要步骤
+    end note
+
+    note right of InvocableHandlerMethod #aqua
+        获取当前方法所有参数
+        ---我们暂理解为Vo
     end note
 
     InvocableHandlerMethod -> HandlerMethod : getMethodParameters():获得方法参数信息
     activate HandlerMethod #DarkSalmon
     HandlerMethod --> InvocableHandlerMethod : MethodParameter[]
     deactivate HandlerMethod
-    note right of InvocableHandlerMethod #aqua
-        获取当前接口方法所有参数，从请求中键值对，对它们进行赋值
-        ---这里参数可能是个Vo，也可能是Integer类型字段，我们暂且理解为Vo
-    end note
+
     loop
         note right of InvocableHandlerMethod #aqua
-            1.HandlerMethodArgumentResolverComposite中获取支持当前参数的
-                HandlerMethodArgumentResolver进行参数解析；
-                ---用到ServletModelAttributeMethodProcessor
-            2.实例化参数对象，里面的值都是空的；
-            ---如果是HttpServletRequest,可以理解直接用，不用实例化，跳过以下步骤
-            3.通过BeanUtils根据Class信息实例化Vo
-            4.通过DataBinderFactory构建WebDataBinder；
-                ---用到ServletRequestDataBinderFactory
-                ---用到ExtendedServletRequestDataBinder
-            5.如果是MultipartRequest类型，获取文件，统一放到MutablePropertyValues
-            6.最终通过BeanWrapperImpl来绑定参数到Vo中，BeanWrapperImpl也是最终
-                通过反射来完成；
-                ---只要匹配通过循环参数尽可能的都设置到Vo内
-            7.如有必要调用验证框架进行验证
+            主要业务逻辑：
+                1.获取支持当前参数的HandlerMethodArgumentResolver进行参数解析；
+                    ---用到ServletModelAttributeMethodProcessor
+                2.通过BeanUtils根据Class信息实例化对象
+                3.通过DataBinderFactory构建WebDataBinder；
+                    ---用到ServletRequestDataBinderFactory
+                    ---用到ExtendedServletRequestDataBinder
+                4.最终通过BeanWrapperImpl来绑定参数到Vo中，BeanWrapperImpl也是最终
+                    通过反射来完成；
+                    ---只要匹配通过循环参数尽可能的都设置到Vo内
+                5.如有必要调用验证框架进行验证
+                ---时序图简化的较多
         end note
 
 
         InvocableHandlerMethod -> HandlerMethodArgumentResolverComposite: resolveArgument()：解析参数
         activate HandlerMethodArgumentResolverComposite #DarkSalmon
 
+            HandlerMethodArgumentResolverComposite -> HandlerMethodArgumentResolverComposite: getArgumentResolver()：
+            activate HandlerMethodArgumentResolverComposite #DarkSalmon
+            deactivate HandlerMethodArgumentResolverComposite
+
             HandlerMethodArgumentResolverComposite -> ServletModelAttributeMethodProcessor: resolveArgument()
             activate ServletModelAttributeMethodProcessor #DarkSalmon
 
-                ServletModelAttributeMethodProcessor -> ServletModelAttributeMethodProcessor : constructAttribute()
+                ServletModelAttributeMethodProcessor -> ServletModelAttributeMethodProcessor : createAttribute()：实例化对象
                 activate ServletModelAttributeMethodProcessor #DarkSalmon
                 deactivate ServletModelAttributeMethodProcessor
 
@@ -55,7 +59,7 @@ activate InvocableHandlerMethod #DarkSalmon
                         DataBinder -> BeanWrapperImpl :setPropertyValues()
                         activate BeanWrapperImpl #DarkSalmon
                             note right of BeanWrapperImpl #FF5000
-                               反射调用设置值
+                               数据类型转换，反射调用设置值
                             end note
 
                         BeanWrapperImpl --> DataBinder
@@ -95,16 +99,10 @@ deactivate InvocableHandlerMethod
 note right of InvocableHandlerMethod #FAEBD7
     *总结
         1.简单理解是获取接口中参数和请求的参数进行匹配，匹配成功的通过反射进行赋值。
-        ---可能涉及两层for循环。
         2.Web请求参数绑定和Bean参数绑定通过BeanWrapperImpl复用了基础设施。
     *备注
         1.ServletModelAttributeMethodProcessor
             ---Form表单提交
-        2.ServletRequestMethodArgumentResolver
-            ---HttpServletRequest,可以理解直接用
-        2.ServletResponseMethodArgumentResolver
-            ---HttpServletResponse,可以理解直接用
-
 end note
 
 @enduml

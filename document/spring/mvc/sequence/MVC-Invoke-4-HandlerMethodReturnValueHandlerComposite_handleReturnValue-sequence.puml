@@ -4,23 +4,23 @@ autonumber
 -> HandlerMethodReturnValueHandlerComposite: handleReturnValue()
 activate HandlerMethodReturnValueHandlerComposite #DarkSalmon
 
-    note left of HandlerMethodReturnValueHandlerComposite #FAEBD7
-        *介绍调用完接口，处理返回值的过程
+    note right of HandlerMethodReturnValueHandlerComposite #FAEBD7
+        *介绍处理返回值
             ---这里只描述了主要步骤
     end note
 
     note right of HandlerMethodReturnValueHandlerComposite #aqua
-        1.HandlerMethodArgumentResolverComposite中获取支持当前参数的
-            HandlerMethodReturnValueHandler；
-            ---用到RequestResponseBodyMethodProcessor
-        2.根据请求的MediaType类型和能够处理接口返回数据支持MediaType类型进行对比，
-            找出兼容两者的MediaType;
-        3.兼容的MediaType进行排序，选出最符合的：明确的，比如没有*
-        4.获取能够处理该MediaType类型的HttpMessageConverter
-            ---用到MappingJackson2HttpMessageConverter
-        5.如有必要应用ResponseBodyAdvice对返回值进行进一步处理
-            ---提供的扩展点，可以干预返回结果
-        6.最终我们通过ObjectWriter把数据转换写到响应里，并设置响应头
+        主要逻辑：
+            1.获取支持当前参数的HandlerMethodReturnValueHandler；
+                ---用到RequestResponseBodyMethodProcessor
+            2.根据请求的MediaType类型，从支持MediaType类型中筛选出
+                有效的MediaType;
+            3.有效的MediaType进行排序，选出最符合的：明确的，比如没有*
+            4.获取能够处理该MediaType类型的HttpMessageConverter
+                ---用到MappingJackson2HttpMessageConverter
+            5.如有必要应用ResponseBodyAdvice对返回值进行进一步处理
+                ---提供的扩展点，可以干预返回结果
+            6.最终我们通过ObjectWriter把数据转换写到响应里，并设置响应头
     end note
 
     HandlerMethodReturnValueHandlerComposite -> HandlerMethodReturnValueHandlerComposite : selectHandler()
@@ -34,7 +34,8 @@ activate HandlerMethodReturnValueHandlerComposite #DarkSalmon
         activate AbstractMessageConverterMethodProcessor #DarkSalmon
 
             note right of RequestResponseBodyAdviceChain #FF5000
-                提供的扩展点，可以干预返回结果
+                可以干预返回结果
+                ---扩展点之一
             end note
             AbstractMessageConverterMethodProcessor -> RequestResponseBodyAdviceChain :processBody()
             activate RequestResponseBodyAdviceChain #DarkSalmon
@@ -42,7 +43,8 @@ activate HandlerMethodReturnValueHandlerComposite #DarkSalmon
             deactivate RequestResponseBodyAdviceChain
 
             note right of MappingJackson2HttpMessageConverter #FF5000
-                ObjectWriter把数据转换写到响应里
+                ObjectWriter把数据转换后，
+                输出到响应
             end note
             AbstractMessageConverterMethodProcessor -> MappingJackson2HttpMessageConverter :write()
             activate MappingJackson2HttpMessageConverter #DarkSalmon
@@ -64,13 +66,10 @@ note right of HandlerMethodReturnValueHandlerComposite #FAEBD7
     *总结
         处理输出时，委托给具体的HandlerMethodReturnValueHandler来处理。
             ---提高了程序的扩展性
-            ---HandlerMethodArgumentResolver类似的体系
-
     *备注
-        ModelAndViewContainer中requestHandled字段表示：是否handler处理所有的事情了，
-        如果为true，就不走视图逻辑
-            ---返回JSON数据置为true；
-
+        ModelAndViewContainer属性：
+            requestHandled：是否处理完所有的事情
+                ---返回JSON数据置为true：不走视图渲染
 end note
 
 @enduml

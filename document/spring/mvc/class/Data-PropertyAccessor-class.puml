@@ -1,0 +1,50 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    PropertyAccessor：用于属性访问
+end note
+
+
+
+
+
+
+interface PropertyAccessor
+PropertyAccessor : +Object getPropertyValue(String propertyName)
+PropertyAccessor : +void setPropertyValue(PropertyValue pv)
+PropertyAccessor : +TypeDescriptor getPropertyTypeDescriptor(String propertyName)
+abstract class AbstractNestablePropertyAccessor
+abstract class AbstractPropertyAccessor
+interface BeanWrapper
+class BeanWrapperImpl #FF5000
+interface ConfigurablePropertyAccessor
+class DirectFieldAccessor
+
+
+
+
+AbstractNestablePropertyAccessor <|-- BeanWrapperImpl
+AbstractNestablePropertyAccessor <|-- DirectFieldAccessor
+
+
+AbstractPropertyAccessor <|-- AbstractNestablePropertyAccessor
+
+
+BeanWrapper <|.. BeanWrapperImpl
+
+
+ConfigurablePropertyAccessor <.. AbstractPropertyAccessor
+ConfigurablePropertyAccessor <.. BeanWrapper
+
+
+PropertyAccessor <|-- ConfigurablePropertyAccessor
+
+
+
+
+@enduml

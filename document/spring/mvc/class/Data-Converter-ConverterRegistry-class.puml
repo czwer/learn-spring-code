@@ -1,0 +1,32 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    ConverterRegistry：用于注册Converter。
+end note
+
+
+interface ConverterRegistry
+ConverterRegistry : +void addConverter(Converter<?, ?> converter)
+ConverterRegistry : +void addConverter(sourceType, targetType,converter)
+ConverterRegistry : +void addConverter(GenericConverter converter)
+ConverterRegistry : +void addConverterFactory(ConverterFactory<?, ?> factory)
+ConverterRegistry : +void removeConvertible(Class<?> sourceType, Class<?> targetType)
+interface ConfigurableConversionService
+class DefaultConversionService
+interface FormatterRegistry
+class GenericConversionService
+
+ConfigurableConversionService <.. GenericConversionService
+
+ConverterRegistry <|-- ConfigurableConversionService
+ConverterRegistry <|-- FormatterRegistry
+
+GenericConversionService <|-- DefaultConversionService
+
+
+@enduml

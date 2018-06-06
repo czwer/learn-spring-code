@@ -1,0 +1,38 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    ConversionService：数据转换顶层接口，封装了其它组件。
+end note
+
+
+interface ConversionService
+ConversionService : +boolean canConvert(@Nullable Class<?> sourceType, Class<?> targetType)
+ConversionService : +boolean boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType)
+ConversionService : +<T> T convert(@Nullable Object source, Class<T> targetType)
+ConversionService : +Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType)
+interface ConfigurableConversionService
+class DefaultConversionService
+class DefaultFormattingConversionService
+class FormattingConversionService
+class GenericConversionService
+GenericConversionService : +final Converters converters = new Converters()
+class WebConversionService #FF5000
+
+
+ConfigurableConversionService <.. GenericConversionService
+
+
+ConversionService <|-- ConfigurableConversionService
+
+DefaultFormattingConversionService <|-- WebConversionService
+
+FormattingConversionService <|-- DefaultFormattingConversionService
+
+GenericConversionService <|-- DefaultConversionService
+GenericConversionService <|-- FormattingConversionService
+@enduml

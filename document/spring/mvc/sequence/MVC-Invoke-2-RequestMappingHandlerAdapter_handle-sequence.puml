@@ -4,9 +4,8 @@ autonumber
 -> RequestMappingHandlerAdapter: handle()
 activate RequestMappingHandlerAdapter #DarkSalmon
 
-    note left of RequestMappingHandlerAdapter #FAEBD7
-        *介绍通过RequestMappingHandlerAdapter最终
-            调用HandlerMethod的过程。
+    note right of RequestMappingHandlerAdapter #FAEBD7
+        *介绍通过Handler处理业务请求的过程。
             ---这里只描述了主要步骤
     end note
 
@@ -16,7 +15,7 @@ activate RequestMappingHandlerAdapter #DarkSalmon
         AbstractHandlerMethodAdapter -> RequestMappingHandlerAdapter : handleInternal()
         activate RequestMappingHandlerAdapter #DarkSalmon
 
-            alt 需要基于session在synchronized块中执行
+            alt 如果需要基于session保证线程安全
                 alt 存在session,在synchronized块中执行
 
                     RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : invokeHandlerMethod(): ModelAndView
@@ -34,13 +33,14 @@ activate RequestMappingHandlerAdapter #DarkSalmon
                 RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : invokeHandlerMethod(): ModelAndView
                 activate RequestMappingHandlerAdapter #DarkSalmon
                     note right of RequestMappingHandlerAdapter #aqua
-                        1.包装request和response为ServletWebRequest，
-                        2.包装handlerMethod为ServletInvocableHandlerMethod并设置
-                            HandlerMethodArgumentResolver
-                            HandlerMethodReturnValueHandler
-                            WebDataBinderFactory
-                            ParameterNameDiscoverer
-
+                        1.组装ServletWebRequest，包含：request和response；
+                        2.组装ServletInvocableHandlerMethod
+                            a.拷贝HandlerMethod属性
+                            b.设置以下属性
+                                HandlerMethodArgumentResolver：HandlerMethodArgumentResolverComposite
+                                HandlerMethodReturnValueHandler：HandlerMethodReturnValueHandlerComposite
+                                WebDataBinderFactory：ServletRequestDataBinderFactory
+                                ParameterNameDiscoverer：DefaultParameterNameDiscoverer
                     end note
 
                     RequestMappingHandlerAdapter -> ServletInvocableHandlerMethod : invokeAndHandle()
@@ -49,7 +49,7 @@ activate RequestMappingHandlerAdapter #DarkSalmon
                         activate InvocableHandlerMethod #DarkSalmon
 
                             note right of InvocableHandlerMethod #FF5000
-                                里面涉及参数绑定
+                                参数绑定
                             end note
                             InvocableHandlerMethod -> InvocableHandlerMethod :getMethodArgumentValues()
                             activate InvocableHandlerMethod #DarkSalmon
@@ -57,7 +57,7 @@ activate RequestMappingHandlerAdapter #DarkSalmon
 
 
                             note right of InvocableHandlerMethod #FF5000
-                                最终通过反射调用方法：getBridgedMethod().invoke(getBean(), args)
+                                通过反射调用方法：getBridgedMethod().invoke(getBean(), args)
                             end note
                             InvocableHandlerMethod -> InvocableHandlerMethod :doInvoke(): returnValue
                             activate InvocableHandlerMethod #DarkSalmon
@@ -69,7 +69,7 @@ activate RequestMappingHandlerAdapter #DarkSalmon
                         ServletInvocableHandlerMethod -> HandlerMethodReturnValueHandlerComposite : handleReturnValue()
                         activate HandlerMethodReturnValueHandlerComposite #DarkSalmon
                             note right of HandlerMethodReturnValueHandlerComposite #FF5000
-                                Json数据会写入response
+                                如果返回Json数据，会写入response
                             end note
                         HandlerMethodReturnValueHandlerComposite --> ServletInvocableHandlerMethod
                         deactivate HandlerMethodReturnValueHandlerComposite
@@ -79,14 +79,22 @@ activate RequestMappingHandlerAdapter #DarkSalmon
 
                     note right of RequestMappingHandlerAdapter #aqua
                         数据包装成ModelAndView
+                        ---返回Json数据时为null
                     end note
 
                     RequestMappingHandlerAdapter -> RequestMappingHandlerAdapter : getModelAndView(): ModelAndView
                     activate RequestMappingHandlerAdapter #DarkSalmon
                     deactivate RequestMappingHandlerAdapter
 
-                    RequestMappingHandlerAdapter -> ServletWebRequest : requestCompleted()
+
+                    RequestMappingHandlerAdapter -> ServletWebRequest : requestCompleted()：
                     activate ServletWebRequest #DarkSalmon
+                        note right of ServletWebRequest #aqua
+                            主要逻辑：
+                                1.如果需要调用销毁回调；
+                                2.如果需要更新session信息
+                                3.标记请求已处理
+                        end note
                     ServletWebRequest --> RequestMappingHandlerAdapter
                     deactivate ServletWebRequest
                 deactivate RequestMappingHandlerAdapter
@@ -109,7 +117,6 @@ deactivate RequestMappingHandlerAdapter
 note right of RequestMappingHandlerAdapter #FAEBD7
     *总结
         主要是准备参数，反射调用web接口方法，输出数据。
-
 end note
 
 @enduml

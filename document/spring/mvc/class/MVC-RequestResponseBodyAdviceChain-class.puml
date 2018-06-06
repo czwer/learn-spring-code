@@ -6,8 +6,9 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    RequestBodyAdvice：可以理解为处理json输入数据的扩展点
-    ResponseBodyAdvice：可以理解为处理json输出数据的扩展点
+    RequestBodyAdvice：可以在传递给控制器方法之前，修改参数绑定对象
+    ResponseBodyAdvice：可以输出相应之前，修改返回结果
+        ---扩展点
 end note
 
 interface RequestBodyAdvice

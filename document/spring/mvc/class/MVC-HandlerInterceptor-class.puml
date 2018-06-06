@@ -18,11 +18,11 @@ HandlerInterceptor : +default void postHandle()
 HandlerInterceptor : +default void afterCompletion()
 
 interface AsyncHandlerInterceptor
-class ConversionServiceExposingInterceptor #FF5000
+class ConversionServiceExposingInterceptor #7FFFD4
 abstract class HandlerInterceptorAdapter
 class LocaleChangeInterceptor
 class MappedInterceptor
-class ResourceUrlProviderExposingInterceptor #FF5000
+class ResourceUrlProviderExposingInterceptor #7FFFD4
 class ThemeChangeInterceptor
 class UserRoleAuthorizationInterceptor
 class WebContentInterceptor

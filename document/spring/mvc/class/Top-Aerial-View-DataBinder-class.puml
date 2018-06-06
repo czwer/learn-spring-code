@@ -1,0 +1,116 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    顶层鸟瞰数据转换相关类之间关系
+end note
+
+interface BindingResult
+note top : 数据绑定结果
+
+interface ConversionService
+note top : Spring方式数据转换顶层接口：转换渠道之一
+
+class ConverterFactoryAdapter
+note top : ConverterFactory适配器
+
+
+interface ConverterRegistry
+note top : 用于注册Converter
+
+class ConverterAdapter
+note top : Converter适配器
+
+class ConvertiblePair
+note bottom : 包含了原类型和目标类型Class信息
+
+class DataBinder
+note top : 用于数据绑定
+
+
+interface GenericConverter
+note top : 根据源类型和目标类型上下文转换成目标类型值
+
+interface Converter<S, T>
+note bottom : 转换成目标类型值
+
+
+interface ConverterFactory<S, R>
+note bottom : 生成转换成特定目标类型的Converter
+
+interface PropertyAccessor
+note right : 用于属性访问
+class BeanWrapperImpl
+
+interface PropertyEditor
+note bottom : Java原生类型转换：转换渠道之一
+
+interface PropertyEditorRegistry
+note top : 用于注册PropertyEditor
+
+
+interface TypeConverter
+note top : 用于类型转换
+
+class TypeConverterDelegate
+note top : 数据转换的入口
+
+
+
+class TypeDescriptor
+note bottom : 类型描述信息
+
+interface Validator
+note bottom : 参数验证
+
+
+BeanWrapperImpl --> TypeConverterDelegate
+
+ConverterRegistry <.. ConversionService
+
+
+ConversionService ..> ConverterFactory
+ConversionService ..> GenericConverter
+ConversionService ..> TypeDescriptor
+
+
+ConverterAdapter ..> Converter
+ConverterAdapter --> ConvertiblePair
+
+ConverterFactory ..> Converter
+
+ConverterFactoryAdapter --> ConverterFactory
+ConverterFactoryAdapter --> ConvertiblePair
+
+
+ConverterRegistry ..> Converter
+
+DataBinder --> BindingResult
+DataBinder --> ConversionService
+DataBinder --> PropertyAccessor
+DataBinder --> Validator
+
+
+GenericConverter <.. ConverterAdapter
+GenericConverter <.. ConverterFactoryAdapter
+GenericConverter ..> ConverterFactoryAdapter
+
+
+PropertyAccessor <.. BeanWrapperImpl
+
+PropertyEditorRegistry <.. DataBinder
+PropertyEditorRegistry ..> PropertyEditor
+
+TypeConverter <.. DataBinder
+
+
+TypeConverterDelegate ..> ConversionService
+TypeConverterDelegate ..> PropertyEditor
+
+
+
+@enduml

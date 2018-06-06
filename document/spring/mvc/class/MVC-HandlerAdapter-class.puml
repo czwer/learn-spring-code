@@ -10,9 +10,17 @@ note  as N1 #FAEBD7
 end note
 
 interface HandlerAdapter
+HandlerAdapter : +boolean supports(Object handler)
+HandlerAdapter : +ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 abstract class AbstractHandlerMethodAdapter
+AbstractHandlerMethodAdapter : +boolean supports(Object handler)
+AbstractHandlerMethodAdapter : +ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
+AbstractHandlerMethodAdapter : #abstract boolean supportsInternal(HandlerMethod handlerMethod)
+AbstractHandlerMethodAdapter : #abstract ModelAndView handleInternal()
 class HttpRequestHandlerAdapter #7FFFD4
 class RequestMappingHandlerAdapter #FF5000
+RequestMappingHandlerAdapter : #abstract boolean supportsInternal(HandlerMethod handlerMethod)
+RequestMappingHandlerAdapter : #abstract ModelAndView handleInternal()
 class SimpleControllerHandlerAdapter #7FFFD4
 class SimpleServletHandlerAdapter
 

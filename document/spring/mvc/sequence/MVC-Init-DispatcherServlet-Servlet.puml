@@ -1,0 +1,87 @@
+@startuml
+autonumber
+
+-> DispatcherServlet: initStrategies()
+activate DispatcherServlet #DarkSalmon
+
+    note right of DispatcherServlet #FAEBD7
+        *DispatcherServlet作为Servlet初始化过程。
+            ---这里只描述了主要步骤
+    end note
+
+    note right of DispatcherServlet #aqua
+        注册：StandardServletMultipartResolver
+    end note
+    DispatcherServlet -> DispatcherServlet : initMultipartResolver()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：AcceptHeaderLocaleResolver(默认)
+    end note
+    DispatcherServlet -> DispatcherServlet : initLocaleResolver()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：FixedThemeResolver(默认)
+    end note
+    DispatcherServlet -> DispatcherServlet : initThemeResolver()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：RequestMappingHandlerMapping(常用，其他略去了)
+    end note
+    DispatcherServlet -> DispatcherServlet : initHandlerMappings()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：RequestMappingHandlerAdapter(常用，其他略去了)
+    end note
+    DispatcherServlet -> DispatcherServlet : initHandlerAdapters()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：
+            DefaultHandlerExceptionResolver
+            HandlerExceptionResolverComposite
+    end note
+    DispatcherServlet -> DispatcherServlet : initHandlerExceptionResolvers()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：DefaultRequestToViewNameTranslator(默认)
+    end note
+    DispatcherServlet -> DispatcherServlet : initRequestToViewNameTranslator()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：InternalResourceViewResolver(常用，其他略去了)
+    end note
+    DispatcherServlet -> DispatcherServlet : initViewResolvers()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+    note right of DispatcherServlet #aqua
+        注册：SessionFlashMapManager(默认)
+    end note
+    DispatcherServlet -> DispatcherServlet : initFlashMapManager()
+    activate DispatcherServlet #DarkSalmon
+    deactivate DispatcherServlet
+
+<-- DispatcherServlet
+deactivate DispatcherServlet
+
+note right of DispatcherServlet #FAEBD7
+    *总结
+        主要是实例化各个组件，为处理请求做准备。
+    *备注
+        1.DispatcherServlet是在收到第一次请求时，进行的初始化；
+end note
+
+@enduml

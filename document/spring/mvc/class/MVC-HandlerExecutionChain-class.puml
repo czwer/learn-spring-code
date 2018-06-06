@@ -1,0 +1,23 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+    HandlerExecutionChain：持有Handler和HandlerInterceptor，
+    实际查找Handler时，返回的是HandlerExecutionChain。
+end note
+
+class HandlerExecutionChain #7FFFD4
+HandlerExecutionChain : -final Object handler
+HandlerExecutionChain : -HandlerInterceptor[] interceptors
+HandlerExecutionChain : -List<HandlerInterceptor> interceptorList
+HandlerExecutionChain : ~boolean applyPreHandle()
+HandlerExecutionChain : ~void applyPostHandle()
+HandlerExecutionChain : ~void triggerAfterCompletion()
+HandlerExecutionChain : ~void applyAfterConcurrentHandlingStarted()
+
+
+@enduml

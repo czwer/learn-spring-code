@@ -52,6 +52,7 @@ BeanWrapper <|.. BeanWrapperImpl
 
 
 ConfigurablePropertyAccessor <.. AbstractPropertyAccessor
+ConfigurablePropertyAccessor <.. BeanWrapper
 
 
 PropertyAccessor <|-- ConfigurablePropertyAccessor

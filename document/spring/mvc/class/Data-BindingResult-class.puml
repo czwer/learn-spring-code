@@ -1,0 +1,39 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    BindingResult：绑定结果。
+end note
+
+
+interface BindingResult
+abstract class AbstractBindingResult
+abstract class AbstractPropertyBindingResult
+class BeanPropertyBindingResult #7FFFD4
+class BindException
+class DirectFieldBindingResult
+interface Errors
+class MapBindingResult
+class WebExchangeBindException
+
+AbstractBindingResult <|-- AbstractPropertyBindingResult
+AbstractBindingResult <|-- MapBindingResult
+
+AbstractPropertyBindingResult <|-- BeanPropertyBindingResult
+AbstractPropertyBindingResult <|-- DirectFieldBindingResult
+
+BindingResult <.. AbstractBindingResult
+BindingResult <.. BindException
+BindingResult <.. WebExchangeBindException
+
+Errors <|-- BindingResult
+
+
+
+
+@enduml

@@ -6,11 +6,11 @@ note  as N1 #FAEBD7
         绿色：重点关注 #7FFFD4
         黄色：可一般关注
         灰色：弃用 #C0C0C0
-    MVC全视角类图
+    顶层鸟瞰Spring MVC相关类之间关系
 end note
 
 interface BindingResult
-note top :代表数据绑定的结果
+note bottom :代表数据绑定的结果
 
 
 class DispatcherServlet
@@ -57,9 +57,9 @@ interface ParameterNameDiscoverer
 note bottom :发现方法和构造函数的参数名称
 
 interface RequestBodyAdvice
-note bottom :处理json输入数据的扩展点
+note bottom :处理输入数据的扩展点
 interface ResponseBodyAdvice
-note bottom :处理json输出数据的扩展点
+note bottom :处理输出数据的扩展点
 
 interface RequestToViewNameTranslator
 note bottom :转换逻辑视图名
@@ -84,7 +84,7 @@ interface WebDataBinderFactory
 note bottom : 创建WebDataBinder
 
 class WebDataBinder
-note bottom : 数据绑定
+note right : 数据绑定
 
 
 DispatcherServlet --> HandlerAdapter
@@ -114,13 +114,13 @@ HandlerMethod ..> HandlerMethodArgumentResolver
 HandlerMethod ..> HandlerMethodReturnValueHandler
 HandlerMethod --> ParameterNameDiscoverer
 
-HandlerMethodArgumentResolver ..> BindingResult
 HandlerMethodArgumentResolver ..> RequestBodyAdvice
-HandlerMethodArgumentResolver ..> Validator
 
 HandlerMethodReturnValueHandler ..> HttpMessageConverter
 HandlerMethodReturnValueHandler ..> ResponseBodyAdvice
 
+WebDataBinder ..> Validator
+WebDataBinder ..> BindingResult
 
 WebDataBinderFactory ..> WebDataBinder
 

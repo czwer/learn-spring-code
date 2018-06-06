@@ -1,0 +1,30 @@
+@startuml
+
+note  as N1 #FAEBD7
+    背景颜色介绍：
+        红色：非常重要 #FF5000
+        绿色：重点关注 #7FFFD4
+        黄色：可一般关注
+        灰色：弃用 #C0C0C0
+        ---简化版类图
+    Converter：转换成目标类型值。
+end note
+
+
+interface Converter<S, T>
+Converter : +T convert(S source)
+class CharacterToNumber<T extends Number>
+class IntegerToEnum<T extends Enum>
+class NumberToNumber<T extends Number>
+class StringToEnum<T extends Enum>
+class StringToNumber<T extends Number>
+
+
+
+Converter <.. CharacterToNumber
+Converter <.. IntegerToEnum
+Converter <.. NumberToNumber
+Converter <.. StringToEnum
+Converter <.. StringToNumber
+
+@enduml

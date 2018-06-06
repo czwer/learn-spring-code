@@ -1,0 +1,107 @@
+@startuml
+autonumber
+
+-> DispatcherServlet: processDispatchResult()
+activate DispatcherServlet #DarkSalmon
+
+    note right of DispatcherServlet #FAEBD7
+        *介绍视图处理的主要逻辑
+            ---这里只描述了主要步骤
+    end note
+
+    note right of DispatcherServlet #aqua
+        主要逻辑：
+            1.判断是否存在异常,如果存在异常获取异常的ModelAndView。
+                如果是ModelAndViewDefiningException类型异常，直接
+                获取，否则通过HandlerExceptionResolver解析。
+            2.如需要渲染，调用第三方渲染框架进行渲染；
+    end note
+
+    aLt 存在异常
+
+        alt 如果不是exception不是ModelAndViewDefiningException类型
+
+            DispatcherServlet -> DispatcherServlet : processHandlerException()
+            activate DispatcherServlet #DarkSalmon
+
+                loop handlerExceptionResolver : this.handlerExceptionResolvers
+
+                    DispatcherServlet -> HandlerExceptionResolver : resolveException()
+                    activate HandlerExceptionResolver #DarkSalmon
+                    HandlerExceptionResolver --> DispatcherServlet : modelAndView
+                    deactivate HandlerExceptionResolver
+
+                end
+
+            deactivate DispatcherServlet
+
+        end
+
+    end
+
+
+    alt 需要渲染视图
+
+        DispatcherServlet -> DispatcherServlet : render()
+        activate DispatcherServlet #DarkSalmon
+
+            DispatcherServlet -> LocaleResolver : resolveLocale()
+            activate LocaleResolver #DarkSalmon
+            LocaleResolver --> DispatcherServlet : locale
+            deactivate LocaleResolver
+
+            note right of DispatcherServlet #aqua
+                根据视图名返回View；
+            end note
+            DispatcherServlet -> DispatcherServlet : resolveViewName() :view
+            activate DispatcherServlet #DarkSalmon
+
+                loop viewResolver : this.viewResolvers
+
+                    DispatcherServlet -> ViewResolver : resolveViewName()
+                    activate ViewResolver #DarkSalmon
+                    ViewResolver --> DispatcherServlet : view
+                    deactivate ViewResolver
+
+                end
+
+            deactivate DispatcherServlet
+
+
+             DispatcherServlet -> View : render()
+             activate View #DarkSalmon
+                  note right of View #aqua
+                       调用第三方渲染框架进行渲染；
+                  end note
+             View --> DispatcherServlet
+             deactivate View
+
+        deactivate DispatcherServlet
+
+    end
+
+    note right of HandlerExecutionChain #aqua
+        视图渲染后，调用拦截器；
+    end note
+    DispatcherServlet -> HandlerExecutionChain : triggerAfterCompletion() :
+    activate HandlerExecutionChain #DarkSalmon
+
+        loop
+            HandlerExecutionChain -> HandlerInterceptor : afterCompletion()
+            activate HandlerInterceptor #DarkSalmon
+            HandlerInterceptor --> HandlerExecutionChain
+            deactivate HandlerInterceptor
+        end
+
+    HandlerExecutionChain --> DispatcherServlet
+    deactivate HandlerExecutionChain
+
+<-- DispatcherServlet
+deactivate DispatcherServlet
+
+note right of DispatcherServlet #FAEBD7
+    *总结
+        如果需要视图处理：根据视图名获取对应的View，然后通过委托第三方进行视图渲染。
+end note
+
+@enduml
